@@ -163,6 +163,8 @@ footer.ggg .in{max-width:980px;margin:0 auto;padding:18px 16px;font-size:12px;co
 CSS = CSS.replace("F400", fonts["400"]).replace("F600", fonts["600"]).replace("F800", fonts["800"])
 with open(os.path.join(OUT, "ggg.css"), "w", encoding="utf-8") as f:
     f.write(CSS)
+import hashlib
+css_v = hashlib.md5(CSS.encode()).hexdigest()[:8]
 
 NAV_LINKS = [("index.html", "Home"), ("history.html", "History"), ("records.html", "Records"),
              ("drafts.html", "Drafts"), ("trades.html", "Trades"),
@@ -250,6 +252,7 @@ for page, data in slices.items():
     with open(os.path.join(TPL, page), encoding="utf-8") as f:
         html = f.read()
     html = html.replace("__NAV__", nav(page)).replace("__FOOT__", FOOT)
+    html = html.replace('href="ggg.css"', f'href="ggg.css?v={css_v}"')
     html = html.replace("/*__DATA__*/{}", json.dumps(data, ensure_ascii=False))
     with open(os.path.join(OUT, page), "w", encoding="utf-8") as f:
         f.write(html)
