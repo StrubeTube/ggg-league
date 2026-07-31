@@ -43,6 +43,26 @@ for s in SEASONS:
     season_ctx[s] = {"rmap": rmap, "league": lg, "rosters": rosters,
                      "pws": lg["settings"].get("playoff_week_start", 15)}
 
+# ---------- owner merges (same human, different accounts) ----------
+def uid_by_alias(alias):
+    for uid, o in owners.items():
+        if alias in o["aliases"]:
+            return uid
+    return None
+
+MERGES = [("clenger97", "VEROVILLIANZ")]
+canon_map = {}
+for old_alias, new_alias in MERGES:
+    old_uid, new_uid = uid_by_alias(old_alias), uid_by_alias(new_alias)
+    if old_uid and new_uid and old_uid != new_uid:
+        canon_map[old_uid] = new_uid
+        owners[new_uid]["aliases"] |= owners[old_uid]["aliases"]
+        owners[new_uid]["seasons"] = sorted(set(owners[new_uid]["seasons"] + owners[old_uid]["seasons"]))
+        del owners[old_uid]
+canon = lambda uid: canon_map.get(uid, uid)
+for _s in SEASONS:
+    season_ctx[_s]["rmap"] = {rid: canon(u) for rid, u in season_ctx[_s]["rmap"].items()}
+
 oname = lambda uid: owners.get(uid, {}).get("name", "Former manager")
 
 # ---------- per-season processing ----------
@@ -154,8 +174,13 @@ def best_streak(log, kind):
 career_out = []
 for uid, c in career.items():
     g = c["w"] + c["l"]
-    if g == 0:
+    if g == 0 or oname(uid) == "Former manager" or str(uid).startswith("unknown_"):
         continue
+    mine = [e for e in high_weeks if e["uid"] == uid]
+    bw = max(mine, key=lambda e: e["pts"])
+    ww = min(mine, key=lambda e: e["pts"])
+    mybl = [e for e in blunders if e["uid"] == uid]
+    bl = max(mybl, key=lambda e: e["bench"]) if mybl else None
     ap_pct = c["ap_w"] / c["ap_g"] if c["ap_g"] else 0
     w_pct = c["w"] / g
     career_out.append({
@@ -170,6 +195,9 @@ for uid, c in career.items():
         "streak_w": best_streak(game_log[uid], "W"), "streak_l": best_streak(game_log[uid], "L"),
         "aliases": sorted(owners[uid]["aliases"]),
         "active": "2025" in owners[uid]["seasons"],
+        "best_week": {"pts": bw["pts"], "s": bw["s"], "wk": bw["wk"]},
+        "worst_week": {"pts": ww["pts"], "s": ww["s"], "wk": ww["wk"]},
+        "blunder": {"bench": bl["bench"], "s": bl["s"], "wk": bl["wk"]} if bl else None,
     })
 career_out.sort(key=lambda x: (-x["titles"], -x["pct"]))
 
@@ -232,6 +260,8 @@ for s in SEASONS:
         for t in items:
             if t["type"] != "trade" or t["status"] != "complete":
                 continue
+            if t.get("draft_picks"):
+                continue  # pick trades excluded from the archive
             wk = int(wk_s)
             adds = t.get("adds") or {}
             sides = []
@@ -247,18 +277,33 @@ for s in SEASONS:
                                 if s2 == s and r2 == rid and w2 > wk)
                     side_pts += after
                     got.append({"p": pname(pid), "pts": round(after, 1)})
-                picks = [f"{dp['season']} R{dp['round']}" for dp in t.get("draft_picks") or []
-                         if dp["owner_id"] == rid]
-                sides.append({"name": oname(uid), "got": got, "picks": picks,
-                              "pts": round(side_pts, 1)})
-            if len(sides) == 2:
-                diff = sides[0]["pts"] - sides[1]["pts"]
+                avg = side_pts / len(got) if got else 0.0
+                sides.append({"name": oname(uid), "got": got,
+                              "pts": round(side_pts, 1), "avg": round(avg, 1)})
+            if len(sides) == 2 and all(sd["got"] for sd in sides):
+                diff = sides[0]["avg"] - sides[1]["avg"]
                 loser = None
-                if abs(diff) >= 25:
+                if abs(diff) >= 20:
                     loser = sides[0]["name"] if diff < 0 else sides[1]["name"]
                 trades_out.append({"s": s, "wk": wk, "sides": sides,
                                    "diff": round(abs(diff), 1), "loser": loser})
 trades_out.sort(key=lambda x: (x["s"], x["wk"]))
+
+# fleece tallies + draft resume onto career rows
+fleece = defaultdict(lambda: {"fleeced": 0, "fleeces": 0})
+for t in trades_out:
+    if t["loser"]:
+        fleece[t["loser"]]["fleeced"] += 1
+        other = next(sd["name"] for sd in t["sides"] if sd["name"] != t["loser"])
+        fleece[other]["fleeces"] += 1
+for c in career_out:
+    c["fleeced"] = fleece[c["name"]]["fleeced"]
+    c["fleeces"] = fleece[c["name"]]["fleeces"]
+    rows_by = [r for r in all_rows if r["by"] == c["name"]]
+    late = [r for r in rows_by if r["round"] >= 6]
+    early = [r for r in rows_by if r["round"] <= 4 and not r["keeper"]]
+    c["steal"] = max(late, key=lambda r: r["voe"]) if late else None
+    c["bust"] = min(early, key=lambda r: r["voe"]) if early else None
 
 site = {
     "generated": "2026-07-26",

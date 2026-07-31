@@ -6,7 +6,7 @@ __NAV__
   <header class="hero">
     <div class="eyebrow">GGG League &middot; 2020&ndash;2025 &middot; full roast mode</div>
     <h1>The Trade Archive</h1>
-    <p class="lede">Every trade ever, scored by points each side actually got after the deal (that season, on that roster). Verdicts are math, not vibes. Picks ride along unscored — argue accordingly.</p>
+    <p class="lede">Every player-for-player trade ever (pick trades excluded), scored by the <b>average points per player</b> each side got for the rest of that season, on that roster. Verdicts are math, not vibes.</p>
   </header>
 
   <section>
@@ -43,7 +43,7 @@ function render(){
     const th = $('div','trade-head');
     th.appendChild($('span','chip wk', t.s + ' · WK ' + t.wk));
     if (t.loser) {
-      th.appendChild($('span','chip flag','FLEECED: ' + t.loser + ' (−' + t.diff.toFixed(0) + ' pts)'));
+      th.appendChild($('span','chip flag','FLEECED: ' + t.loser + ' (−' + t.diff.toFixed(0) + ' pts/player)'));
     } else {
       th.appendChild($('span','chip even','FAIR FIGHT'));
     }
@@ -53,7 +53,7 @@ function render(){
       const box = $('div','side' + (t.loser===sd.name?' losing':''));
       const sh = $('div','side-head');
       sh.appendChild($('span','side-team', sd.name));
-      sh.appendChild($('span','side-cap', sd.pts.toFixed(0) + ' pts gained'));
+      sh.appendChild($('span','side-cap', sd.avg.toFixed(0) + ' pts/player · ' + sd.pts.toFixed(0) + ' total'));
       box.appendChild(sh);
       const g = $('div','gets');
       sd.got.forEach(p=>{
@@ -62,8 +62,6 @@ function render(){
         pc.appendChild($('span','s', p.pts.toFixed(0) + ' pts'));
         g.appendChild(pc);
       });
-      sd.picks.forEach(pk=>g.appendChild($('span','pchip pick', pk + ' pick')));
-      if(!sd.got.length && !sd.picks.length) g.appendChild($('span','pchip none','nothing? bold strategy'));
       box.appendChild(g);
       sides.appendChild(box);
     });

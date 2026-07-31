@@ -126,6 +126,39 @@ nav.ggg a:hover{color:var(--ink)}
 nav.ggg a.on{background:var(--card);color:var(--mint)}
 footer.ggg{border-top:1px solid var(--line);margin-top:60px}
 footer.ggg .in{max-width:980px;margin:0 auto;padding:18px 16px;font-size:12px;color:var(--ink3)}
+.teambar{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.chiprow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.timeline{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px}
+.tcell{background:var(--card2);border:1px solid var(--line);border-radius:10px;text-align:center;padding:8px 4px}
+.tcell.gold{border-color:var(--gold)}.tcell.fire{border-color:var(--coral)}
+.tyear{font-size:10.5px;color:var(--ink3);font-weight:600;letter-spacing:.08em}
+.tplace{font-weight:800;font-size:15px;margin-top:3px}
+.cardh{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);margin-bottom:10px}
+.bignum{font-size:32px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.05}
+.bignum small{font-size:15px;font-weight:600;color:var(--ink3)}
+.bignum.over{color:var(--coral)}
+.subnum{font-size:12.5px;color:var(--ink2);margin-top:4px}
+.meter{height:12px;border-radius:6px;background:var(--card2);border:1px solid var(--line);margin-top:12px;position:relative;overflow:hidden}
+.meter .fillbar{position:absolute;inset:0 auto 0 0;background:var(--mark);border-radius:6px 0 0 6px;transition:width .18s}
+.meter .fillbar.over{background:var(--coral)}
+.rostercard{margin-top:12px}
+.roster{display:grid;gap:6px}
+.prow{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:10px;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 13px;cursor:pointer}
+.prow.on{border-color:var(--mint)}
+.prow.inel{cursor:default;opacity:.55}
+.prow:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+.tick{width:17px;height:17px;border-radius:5px;border:2px solid var(--line2);display:grid;place-items:center;font-size:11px;color:var(--mint-ink);flex:none}
+.prow.on .tick{background:var(--mint);border-color:var(--mint)}
+.pname{font-weight:600;font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pname .meta{font-weight:400;color:var(--ink3);font-size:11px;margin-left:6px}
+.rnd{font-size:11px;color:var(--ink3);font-variant-numeric:tabular-nums}
+.cost{font-weight:800;font-size:13.5px;text-align:right;min-width:34px;font-variant-numeric:tabular-nums}
+.next{font-size:11px;color:var(--ink3);text-align:right;min-width:48px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.grudges{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px}
+.gcell{background:var(--card2);border:1px solid var(--line);border-radius:10px;text-align:center;padding:9px 6px}
+.gname{font-size:11px;font-weight:600;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grec{font-weight:800;font-size:15px;margin-top:2px;font-variant-numeric:tabular-nums}
+.grec.winrec{color:var(--mint)}.grec.loserec{color:var(--coral)}
 """
 CSS = CSS.replace("F400", fonts["400"]).replace("F600", fonts["600"]).replace("F800", fonts["800"])
 with open(os.path.join(OUT, "ggg.css"), "w", encoding="utf-8") as f:
@@ -145,21 +178,67 @@ FOOT = ('<footer class="ggg"><div class="in">GGG League · data from the Sleeper
         f'stats computed {site["generated"]} · regular-season records unless noted · '
         'grudges update automatically</div></footer>')
 
-# ---------------- per-page data slices ----------------
+# ---------------- keeper-planner team data (same order/sort as cap-planner) ----------------
+CFG = {"cap": 220, "budget": 45, "maxKeep": 5, "waiver": 1,
+       "table": {1: 34, 2: 28, 3: 23, 4: 19, 5: 16, 6: 13, 7: 11, 8: 9,
+                 9: 7, 10: 5, 11: 4, 12: 3, 13: 2, 14: 2, 15: 1, 16: 1}}
+
+
+def escalate(round_2025, steps):
+    r = round_2025 - steps
+    return CFG["table"][r] if r >= 1 else CFG["table"][1] + 6 * (1 - r)
+
+
+def planner_teams():
+    players_db = load("players_nfl.json")
+    users = {u["user_id"]: u for u in load("users_2025.json")}
+    rosters = load("rosters_2025.json")
+    draft_round = {str(p["player_id"]): p["round"]
+                   for p in load("draftpicks_2025_1256797701333319680.json")}
+    name_of = {r["roster_id"]: (users.get(r["owner_id"]) or {}).get("display_name", "Former manager")
+               for r in rosters}
+    owner = {(rnd, rid): rid for rnd in range(1, 17) for rid in name_of}
+    for fname in ("tradedpicks_2024.json", "tradedpicks_2025.json"):
+        for tp in load(fname):
+            if tp["season"] == "2026" and (tp["round"], tp["roster_id"]) in owner:
+                owner[(tp["round"], tp["roster_id"])] = tp["owner_id"]
+    picks_of = {rid: [] for rid in name_of}
+    for (rnd, orig), cur in owner.items():
+        e = {"r": rnd}
+        if orig != cur:
+            e["from"] = name_of[orig]
+        picks_of[cur].append(e)
+    for rid in picks_of:
+        picks_of[rid].sort(key=lambda p: (p["r"], "from" in p))
+    teams = []
+    for r in sorted(rosters, key=lambda x: x["roster_id"]):
+        plist = []
+        for pid in (r.get("players") or []):
+            pdb = players_db.get(str(pid), {})
+            rnd = draft_round.get(str(pid))
+            e = {"n": pdb.get("name") or f"?{pid}", "pos": pdb.get("pos") or "?",
+                 "t": pdb.get("team") or ""}
+            if rnd is not None:
+                e.update({"el": True, "r": rnd, "k26": escalate(rnd, 1), "k27": escalate(rnd, 2)})
+            else:
+                e["el"] = False
+            plist.append(e)
+        plist.sort(key=lambda p: (not p["el"], p.get("k26", 999), p["n"]))
+        teams.append({"name": name_of[r["roster_id"]], "picks": picks_of[r["roster_id"]],
+                      "players": plist})
+    return teams
+
+
 career = site["career"]
-by = lambda k, rev=True: sorted(career, key=lambda c: c[k], reverse=rev)
-steal = site["drafts"]["steals"][0]
-fun = [
-    {"num": str(max(c["toilets"] for c in career)), "lbl": "toilet bowls for " + by("toilets")[0]["name"] + " — the only repeat offender", "bad": True},
-    {"num": str(by("high_weeks")[0]["high_weeks"]), "lbl": "career weekly high scores — " + by("high_weeks")[0]["name"] + ", the $10 bandit", "bad": False},
-    {"num": ("+" if by("luck")[0]["luck"] > 0 else "") + str(by("luck")[0]["luck"]), "lbl": "schedule luck (wins gifted) — " + by("luck")[0]["name"] + ", most blessed manager", "bad": False},
-    {"num": str(by("luck", False)[0]["luck"]), "lbl": "schedule luck — " + by("luck", False)[0]["name"] + ", most cursed manager", "bad": True},
-    {"num": "+" + str(int(steal["voe"])), "lbl": "best draft pick ever: " + steal["player"] + ", R" + str(steal["round"]) + " " + steal["s"] + " by " + steal["by"], "bad": False},
-    {"num": str(len(site["trades"])), "lbl": "trades all-time — and yes, they're all graded on the Trades page", "bad": False},
-]
-s2025 = next(s for s in site["seasons"] if s["season"] == "2025")
+finishes = {}
+for sn in site["seasons"]:
+    for i, t in enumerate(sn["standings"]):
+        finishes.setdefault(t["name"], []).append(
+            {"s": sn["season"], "place": i + 1,
+             "champ": t["name"] == sn["champ"], "toilet": t["name"] == sn["toilet"]})
 slices = {
-    "index.html": {"season2025": s2025, "funFacts": fun,
+    "index.html": {"cfg": CFG, "teams": planner_teams(), "career": career,
+                   "h2h": site["h2h"], "finishes": finishes,
                    "commishUserId": commish_uid, "leagueId2025": "1256797701320753152"},
     "history.html": {"seasons": site["seasons"], "career": career, "h2h": site["h2h"]},
     "records.html": {"records": site["records"], "career": career},

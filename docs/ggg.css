@@ -103,3 +103,36 @@ nav.ggg a:hover{color:var(--ink)}
 nav.ggg a.on{background:var(--card);color:var(--mint)}
 footer.ggg{border-top:1px solid var(--line);margin-top:60px}
 footer.ggg .in{max-width:980px;margin:0 auto;padding:18px 16px;font-size:12px;color:var(--ink3)}
+.teambar{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.chiprow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.timeline{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px}
+.tcell{background:var(--card2);border:1px solid var(--line);border-radius:10px;text-align:center;padding:8px 4px}
+.tcell.gold{border-color:var(--gold)}.tcell.fire{border-color:var(--coral)}
+.tyear{font-size:10.5px;color:var(--ink3);font-weight:600;letter-spacing:.08em}
+.tplace{font-weight:800;font-size:15px;margin-top:3px}
+.cardh{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);margin-bottom:10px}
+.bignum{font-size:32px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.05}
+.bignum small{font-size:15px;font-weight:600;color:var(--ink3)}
+.bignum.over{color:var(--coral)}
+.subnum{font-size:12.5px;color:var(--ink2);margin-top:4px}
+.meter{height:12px;border-radius:6px;background:var(--card2);border:1px solid var(--line);margin-top:12px;position:relative;overflow:hidden}
+.meter .fillbar{position:absolute;inset:0 auto 0 0;background:var(--mark);border-radius:6px 0 0 6px;transition:width .18s}
+.meter .fillbar.over{background:var(--coral)}
+.rostercard{margin-top:12px}
+.roster{display:grid;gap:6px}
+.prow{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:10px;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 13px;cursor:pointer}
+.prow.on{border-color:var(--mint)}
+.prow.inel{cursor:default;opacity:.55}
+.prow:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+.tick{width:17px;height:17px;border-radius:5px;border:2px solid var(--line2);display:grid;place-items:center;font-size:11px;color:var(--mint-ink);flex:none}
+.prow.on .tick{background:var(--mint);border-color:var(--mint)}
+.pname{font-weight:600;font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pname .meta{font-weight:400;color:var(--ink3);font-size:11px;margin-left:6px}
+.rnd{font-size:11px;color:var(--ink3);font-variant-numeric:tabular-nums}
+.cost{font-weight:800;font-size:13.5px;text-align:right;min-width:34px;font-variant-numeric:tabular-nums}
+.next{font-size:11px;color:var(--ink3);text-align:right;min-width:48px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.grudges{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px}
+.gcell{background:var(--card2);border:1px solid var(--line);border-radius:10px;text-align:center;padding:9px 6px}
+.gname{font-size:11px;font-weight:600;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grec{font-weight:800;font-size:15px;margin-top:2px;font-variant-numeric:tabular-nums}
+.grec.winrec{color:var(--mint)}.grec.loserec{color:var(--coral)}

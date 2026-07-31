@@ -5,110 +5,234 @@ __NAV__
 <div class="wrap">
   <header class="hero">
     <div class="eyebrow">GGG League &middot; Est. 2020 &middot; 10 teams &middot; 0.5 PPR</div>
-    <h1>The Situation Room</h1>
-    <p class="lede">Six seasons. Two dynasties denied. One toilet bowl nobody escapes clean. This is the home of the GGG League — history, receipts, and the 2026 salary-cap era.</p>
+    <h1 id="heroTitle">Whose team is this?</h1>
+    <p class="lede">Pick your team — this page becomes your franchise HQ: your keepers, your cap, your grudges, your legacy.</p>
+    <div class="teambar" id="teambar"></div>
   </header>
 
+  <div id="home"></div>
+
   <section>
-    <div class="sec-head">
-      <div class="eyebrow">2026 offseason</div>
-      <h2 id="liveTitle">Draft season is coming</h2>
-      <p class="sec-note" id="liveNote">The 2026 league hasn't renewed on Sleeper yet. When it does, this page tracks keeper deadlines, cap sheets, and live standings automatically.</p>
-    </div>
-    <div class="tiles" id="liveTiles"></div>
+    <div class="sec-head"><div class="eyebrow">League cap board</div><h2>Where everyone's opening cap stands</h2>
+    <p class="sec-note" id="capBoardNote">Projected 2026 opening cap. Keeper selections made on this device are included; once the league renews on Sleeper and keepers are set there, everyone's official picks show here automatically.</p></div>
+    <div class="card" id="capBoard"></div>
   </section>
 
   <section>
-    <div class="sec-head">
-      <div class="eyebrow">The proposal on the table</div>
-      <h2>The Cap Keeper era</h2>
-      <p class="sec-note">One number per player, one rule for trades. The full pitch — with our own fire sales replayed as evidence — and the interactive keeper planner:</p>
-    </div>
+    <div class="sec-head"><div class="eyebrow">The Cap Keeper era</div><h2>The proposal &amp; the toys</h2></div>
     <div class="duo-cards">
-      <a class="bigcard" href="cap-report.html">
-        <div class="eyebrow">Exhibit A</div>
-        <h3>The Fire-Sale Fix</h3>
-        <p>2024–2025 replayed under a $220 cap. Three mega-buys flagged. Every balanced trade untouched.</p>
-      </a>
-      <a class="bigcard" href="cap-planner.html">
-        <div class="eyebrow">The toy</div>
-        <h3>Keeper Planner 2026</h3>
-        <p>Toggle your keepers, watch your budget and opening cap react. Selections save in your browser.</p>
-      </a>
+      <a class="bigcard" href="cap-report.html"><div class="eyebrow">Exhibit A</div><h3>The Fire-Sale Fix</h3><p>2024&ndash;2025 replayed under the cap. Three mega-buys flagged; every fair trade untouched.</p></a>
+      <a class="bigcard" href="cap-planner.html"><div class="eyebrow">Full planner</div><h3>Keeper Planner 2026</h3><p>The deep version — all teams, all scenarios. Selections sync with this page.</p></a>
     </div>
-  </section>
-
-  <section>
-    <div class="sec-head">
-      <div class="eyebrow">Reigning champion</div>
-      <h2 id="champLine"></h2>
-    </div>
-    <div class="card" id="finalStandings"></div>
-  </section>
-
-  <section>
-    <div class="sec-head">
-      <div class="eyebrow">Quick hits from the archive</div>
-      <h2>Numbers that start arguments</h2>
-    </div>
-    <div class="tiles" id="funTiles"></div>
   </section>
 </div>
 __FOOT__
 <script>
 const DATA = /*__DATA__*/{};
+const CFG = DATA.cfg, TABLE = CFG.table;
 const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
 
-/* champion + 2025 standings */
-const s25 = DATA.season2025;
-document.getElementById('champLine').textContent = s25.champ + ' — 2025 champion';
-(function(){
-  const host = document.getElementById('finalStandings');
-  const tbl = $('table','tbl');
-  const hr = $('tr'); ['#','Team','W-L','PF','PA',''].forEach(h=>hr.appendChild($('th',null,h))); tbl.appendChild(hr);
-  s25.standings.forEach((t,i)=>{
-    const r = $('tr');
-    r.appendChild($('td','mut',String(i+1)));
-    r.appendChild($('td',null,t.name));
-    r.appendChild($('td',null,t.w+'-'+t.l));
-    r.appendChild($('td',null,String(t.pf)));
-    r.appendChild($('td','mut',String(t.pa)));
-    const tag = $('td');
-    if (t.name===s25.champ) tag.appendChild($('span','chip gold','CHAMP'));
-    else if (t.name===s25.toilet) tag.appendChild($('span','chip fire','TOILET BOWL'));
-    r.appendChild(tag);
-    tbl.appendChild(r);
-  });
-  const sc = $('div','scroll'); sc.appendChild(tbl); host.appendChild(sc);
-})();
+/* ---- shared keeper state (same key as the planner) ---- */
+const LSKEY = 'ggg-keeper-v1', MYKEY = 'ggg-my-team';
+let kstate = { team: 0, picks: {} };
+try { const s = JSON.parse(localStorage.getItem(LSKEY)); if (s && s.picks) kstate = s; } catch(e){}
+const saveK = () => { try { localStorage.setItem(LSKEY, JSON.stringify(kstate)); } catch(e){} };
+let myTeam = parseInt(localStorage.getItem(MYKEY) ?? '-1');
+const sel = ti => new Set(kstate.picks[ti] || []);
 
-/* fun tiles */
-(function(){
-  const host = document.getElementById('funTiles');
-  DATA.funFacts.forEach(f=>{
-    const d = $('div','tile');
-    d.appendChild($('div','num '+(f.bad?'bad':'good'), f.num));
-    d.appendChild($('div','lbl', f.lbl));
-    host.appendChild(d);
-  });
-})();
+function evalTeam(ti){
+  const tm = DATA.teams[ti], chosen = sel(ti);
+  let keepSpend = 0; chosen.forEach(pi => keepSpend += tm.players[pi].k26);
+  const k = chosen.size;
+  const picks = tm.picks.slice();
+  picks.splice(Math.max(0, picks.length - k), k);
+  const slots = 16 - k, used = picks.slice(0, slots);
+  let draftSpend = 0; used.forEach(p => draftSpend += TABLE[p.r]);
+  const fills = Math.max(0, slots - used.length);
+  return { keepSpend, k, opening: keepSpend + draftSpend + fills * CFG.waiver,
+           overBudget: keepSpend > CFG.budget, overCount: k > CFG.maxKeep };
+}
 
-/* live 2026 check (works on real hosting; fails silently otherwise) */
+/* ---- team picker ---- */
+const bar = document.getElementById('teambar');
+DATA.teams.forEach((tm, ti) => {
+  const b = $('button','tpill', tm.name); b.type='button';
+  b.addEventListener('click', () => { myTeam = ti; localStorage.setItem(MYKEY, String(ti)); render(); });
+  bar.appendChild(b);
+});
+
+function chipRow(host, items){
+  const row = $('div','chiprow');
+  items.forEach(([cls, txt]) => row.appendChild($('span','chip '+cls, txt)));
+  host.appendChild(row);
+}
+
+function render(){
+  [...bar.children].forEach((b,i)=>b.classList.toggle('active', i===myTeam));
+  const host = document.getElementById('home');
+  host.textContent = '';
+  renderCapBoard();
+  if (myTeam < 0 || !DATA.teams[myTeam]) return;
+  const tm = DATA.teams[myTeam];
+  const c = DATA.career.find(x => x.name === tm.name);
+  document.getElementById('heroTitle').textContent = tm.name + ' HQ';
+
+  /* franchise hero */
+  const sec1 = $('section');
+  sec1.appendChild(Object.assign($('div','sec-head'),{}));
+  sec1.lastChild.appendChild($('div','eyebrow','Franchise'));
+  sec1.lastChild.appendChild($('h2',null,'The ' + tm.name + ' story'));
+  const fc = $('div','card');
+  if (c) {
+    chipRow(fc, [
+      ['wk', c.w + '-' + c.l + ' all-time'],
+      ...(c.titles ? [['gold', '🏆 ×' + c.titles]] : []),
+      ...(c.toilets ? [['fire', '🚽 ×' + c.toilets]] : []),
+      ['even', 'luck ' + (c.luck>0?'+':'') + c.luck],
+      ['even', c.high_weeks + ' weekly highs'],
+      ['even', 'best streak W' + c.streak_w],
+    ]);
+    const tl = $('div','timeline');
+    DATA.finishes[tm.name].forEach(f => {
+      const cls = f.champ ? 'gold' : (f.toilet ? 'fire' : '');
+      const cell = $('div','tcell ' + cls);
+      cell.appendChild($('div','tyear', f.s));
+      cell.appendChild($('div','tplace', f.champ ? '🏆' : (f.toilet ? '🚽' : '#' + f.place)));
+      tl.appendChild(cell);
+    });
+    fc.appendChild(tl);
+  }
+  sec1.appendChild(fc);
+  host.appendChild(sec1);
+
+  /* keeper corner */
+  const sec2 = $('section');
+  const sh = $('div','sec-head');
+  sh.appendChild($('div','eyebrow','Keeper corner — synced with the full planner'));
+  sh.appendChild($('h2',null,'Set your 2026 keepers'));
+  sec2.appendChild(sh);
+  const ev = evalTeam(myTeam);
+  const duo = $('div','duo-cards');
+  const bud = $('div','card');
+  bud.appendChild($('h3','cardh','Keeper budget'));
+  const bn = $('div','bignum'+(ev.overBudget?' over':''));
+  bn.appendChild(document.createTextNode('$'+ev.keepSpend));
+  bn.appendChild($('small',null,' / $'+CFG.budget));
+  bud.appendChild(bn);
+  bud.appendChild($('div','subnum', ev.k + ' of ' + CFG.maxKeep + ' slots' + (ev.overCount ? ' — TOO MANY' : '')));
+  const met = $('div','meter'); const fb = $('div','fillbar'+(ev.overBudget?' over':''));
+  fb.style.width = Math.min(100, ev.keepSpend/CFG.budget*100)+'%'; met.appendChild(fb); bud.appendChild(met);
+  duo.appendChild(bud);
+  const opn = $('div','card');
+  opn.appendChild($('h3','cardh','Projected opening cap'));
+  const on = $('div','bignum'+(ev.opening>CFG.cap?' over':''));
+  on.appendChild(document.createTextNode('$'+ev.opening));
+  on.appendChild($('small',null,' / $'+CFG.cap));
+  opn.appendChild(on);
+  const d = CFG.cap - ev.opening;
+  opn.appendChild($('div','subnum', d>=0 ? ('headroom $'+d+' for in-season buys') : ('over by $'+(-d)+' — cap jail until you shed')));
+  duo.appendChild(opn);
+  sec2.appendChild(duo);
+
+  const rc = $('div','card rostercard');
+  const list = $('div','roster');
+  tm.players.forEach((p,pi)=>{
+    const on2 = sel(myTeam).has(pi);
+    const row = $('div','prow'+(on2?' on':'')+(p.el?'':' inel'));
+    row.appendChild($('span','tick', on2?'✓':''));
+    const nm = $('span','pname', p.n);
+    nm.appendChild($('span','meta', p.pos + (p.t?' · '+p.t:'')));
+    row.appendChild(nm);
+    row.appendChild($('span','rnd', p.el ? 'R'+p.r : '—'));
+    row.appendChild($('span','cost', p.el ? '$'+p.k26 : ''));
+    row.appendChild($('span','next', p.el ? '→ $'+p.k27 : 'rental only'));
+    if (p.el) {
+      row.tabIndex = 0;
+      const tog = ()=>{ const s2 = sel(myTeam); s2.has(pi)?s2.delete(pi):s2.add(pi);
+        kstate.picks[myTeam]=[...s2]; saveK(); render(); };
+      row.addEventListener('click', tog);
+      row.addEventListener('keydown', e=>{ if(e.key===' '||e.key==='Enter'){e.preventDefault();tog();} });
+    }
+    list.appendChild(row);
+  });
+  rc.appendChild(list);
+  sec2.appendChild(rc);
+  host.appendChild(sec2);
+
+  /* grudges */
+  const sec3 = $('section');
+  const sh3 = $('div','sec-head');
+  sh3.appendChild($('div','eyebrow','Career head-to-head'));
+  sh3.appendChild($('h2',null,'Your grudges'));
+  sec3.appendChild(sh3);
+  const gc = $('div','card');
+  const gr = $('div','grudges');
+  const mine = DATA.h2h[tm.name] || {};
+  Object.entries(mine).sort((a,b)=>(b[1].w-b[1].l)-(a[1].w-a[1].l)).forEach(([rival,rec])=>{
+    const cls = rec.w>rec.l?'winrec':(rec.w<rec.l?'loserec':'');
+    const cell = $('div','gcell');
+    cell.appendChild($('div','gname', rival));
+    cell.appendChild($('div','grec '+cls, rec.w+'-'+rec.l));
+    gr.appendChild(cell);
+  });
+  gc.appendChild(gr);
+  sec3.appendChild(gc);
+  host.appendChild(sec3);
+
+  /* legacy tiles */
+  if (c) {
+    const sec4 = $('section');
+    const sh4 = $('div','sec-head');
+    sh4.appendChild($('div','eyebrow','Legacy'));
+    sh4.appendChild($('h2',null,'Personal records'));
+    sec4.appendChild(sh4);
+    const tiles = $('div','tiles');
+    const mk = (num, lbl, bad) => { const t=$('div','tile');
+      t.appendChild($('div','num '+(bad?'bad':'good'), num));
+      t.appendChild($('div','lbl', lbl)); tiles.appendChild(t); };
+    mk(c.best_week.pts.toFixed(1), 'best week ever · ' + c.best_week.s + ' wk' + c.best_week.wk, false);
+    mk(c.worst_week.pts.toFixed(1), 'worst week ever · ' + c.worst_week.s + ' wk' + c.worst_week.wk, true);
+    if (c.blunder) mk(c.blunder.bench.toFixed(1), 'biggest bench blunder · ' + c.blunder.s + ' wk' + c.blunder.wk, true);
+    if (c.steal) mk('+'+c.steal.voe.toFixed(0), 'best pick: ' + c.steal.player + ' R' + c.steal.round + ' ' + c.steal.s, false);
+    if (c.bust) mk(c.bust.voe.toFixed(0), 'worst pick: ' + c.bust.player + ' R' + c.bust.round + ' ' + c.bust.s, true);
+    mk(c.fleeces + ' / ' + c.fleeced, 'trades won / times fleeced (player deals)', c.fleeced > c.fleeces);
+    sec4.appendChild(tiles);
+    host.appendChild(sec4);
+  }
+}
+
+function renderCapBoard(){
+  const host = document.getElementById('capBoard');
+  host.textContent='';
+  const rows = DATA.teams.map((tm,ti)=>({name:tm.name, ti, ev:evalTeam(ti)}))
+    .sort((a,b)=>b.ev.opening-a.ev.opening);
+  rows.forEach(r=>{
+    const row = $('div','luckrow');
+    const nm = $('span','lname'+(r.ti===myTeam?' good':''), r.name + (r.ev.k ? ' · '+r.ev.k+'K' : ''));
+    row.appendChild(nm);
+    const track = $('div','lucktrack');
+    const barEl = $('div','luckbar '+(r.ev.opening>CFG.cap?'neg':'pos'));
+    barEl.style.left='0'; barEl.style.right='auto';
+    barEl.style.width = Math.min(100, r.ev.opening/250*100)+'%';
+    track.appendChild(barEl);
+    const mid = $('div','luckmid'); mid.style.left = (CFG.cap/250*100)+'%'; track.appendChild(mid);
+    row.appendChild(track);
+    row.appendChild($('span','lval'+(r.ev.opening>CFG.cap?' bad':''), '$'+r.ev.opening));
+    host.appendChild(row);
+  });
+}
+
+render();
+
+/* live 2026 check */
 (async function(){
   try{
-    const uid = DATA.commishUserId;
-    const r = await fetch('https://api.sleeper.app/v1/user/'+uid+'/leagues/nfl/2026');
+    const r = await fetch('https://api.sleeper.app/v1/user/'+DATA.commishUserId+'/leagues/nfl/2026');
     const leagues = await r.json();
     const lg = (leagues||[]).find(l=>l.previous_league_id===DATA.leagueId2025);
     if(!lg) return;
-    document.getElementById('liveTitle').textContent = lg.name + ' is live — ' + lg.status.replace('_',' ');
-    document.getElementById('liveNote').textContent = 'Pulled live from Sleeper just now. ' + (lg.settings?.leg ? ('Week ' + lg.settings.leg + '.') : 'Set your keepers.');
-    const tiles = document.getElementById('liveTiles');
-    tiles.textContent='';
-    const mk=(n,l)=>{const d=$('div','tile');d.appendChild($('div','num good',n));d.appendChild($('div','lbl',l));tiles.appendChild(d);};
-    mk(String(lg.total_rosters),'teams renewed');
-    mk(lg.season,'season');
-    mk(lg.status.replace('_',' '),'league status');
-  }catch(e){/* offline/static mode */}
+    document.getElementById('capBoardNote').textContent =
+      lg.name + ' is renewed on Sleeper (' + lg.status.replace('_',' ') + '). Official keepers will appear here for everyone once set in Sleeper.';
+  }catch(e){}
 })();
 </script>
