@@ -136,3 +136,48 @@ footer.ggg .in{max-width:980px;margin:0 auto;padding:18px 16px;font-size:12px;co
 .gname{font-size:11px;font-weight:600;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .grec{font-weight:800;font-size:15px;margin-top:2px;font-variant-numeric:tabular-nums}
 .grec.winrec{color:var(--mint)}.grec.loserec{color:var(--coral)}
+.wrap.wide{max-width:1400px}
+.dashhero{display:flex;flex-direction:column;gap:14px}
+.idband{display:flex;gap:16px;align-items:stretch;margin-top:26px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px;flex-wrap:wrap}
+.archbadge{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--card2);border:1px solid var(--line2);border-radius:14px;padding:14px 22px}
+.archemoji{font-size:34px;line-height:1}
+.archname{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mint);white-space:nowrap}
+.idmid{flex:1;min-width:260px;display:flex;flex-direction:column;gap:12px;justify-content:center}
+.idmid .chiprow{margin-bottom:0}
+.dash{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-top:14px}
+.dcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.dcard.c3{grid-column:span 3}.dcard.c4{grid-column:span 4}.dcard.c5{grid-column:span 5}
+.dcard.c6{grid-column:span 6}.dcard.c12{grid-column:span 12}
+@media(max-width:1100px){.dcard.c3,.dcard.c4{grid-column:span 6}.dcard.c5,.dcard.c6{grid-column:span 12}}
+@media(max-width:680px){.dcard{grid-column:span 12 !important}.wrap{padding-left:12px;padding-right:12px}}
+.dcard-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.dcard-head .cardh{margin-bottom:0}
+.chip.soon{background:transparent;color:var(--gold);border:1px dashed var(--gold);letter-spacing:.08em;font-size:10px}
+.cardnote{font-size:11.5px;color:var(--ink3);line-height:1.5;margin-top:auto}
+.kmeters{display:grid;gap:12px}
+.mlabel{font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:5px}
+.kmeters .meter{margin-top:0}
+.tallroster{max-height:430px;overflow-y:auto;padding-right:4px}
+.skel{height:13px;border-radius:7px;background:var(--card2);border:1px solid var(--line)}
+@media(prefers-reduced-motion:no-preference){
+.skel{background:linear-gradient(90deg,var(--card2) 25%,var(--line) 50%,var(--card2) 75%);background-size:200% 100%;animation:shimmer 1.8s infinite}
+@keyframes shimmer{to{background-position:-200% 0}}}
+.gauge{width:120px;height:120px;border-radius:50%;margin:6px auto;display:grid;place-items:center;background:conic-gradient(var(--line2) 0deg,var(--card2) 0deg);border:1px solid var(--line);position:relative}
+.gauge::before{content:'';position:absolute;inset:12px;border-radius:50%;background:var(--card)}
+.gaugev{position:relative;font-weight:800;font-size:22px;color:var(--ink3);font-variant-numeric:tabular-nums}
+.vsrow{display:flex;align-items:center;gap:14px;justify-content:space-between}
+.vsteam{font-weight:800;font-size:16px}
+.vsmark{font-size:11px;font-weight:800;color:var(--ink3);letter-spacing:.14em}
+.vitals,.vrow{display:flex;flex-direction:column;gap:0}
+.vrow{flex-direction:row;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:12.5px;font-variant-numeric:tabular-nums}
+.vrow:last-of-type{border-bottom:none}
+.vrow .tn{text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%}
+.vrow.wire{font-size:12.5px;line-height:1.5}
+.nemduo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.nemcard{border-radius:12px;padding:12px 14px;background:var(--card2);border:1px solid var(--line)}
+.nemcard.good2{border-color:var(--mark)}.nemcard.bad2{border-color:var(--coral)}
+.nemname{font-weight:800;font-size:15px;margin-top:2px}
+.nemrec{font-weight:800;font-size:19px;font-variant-numeric:tabular-nums}
+.pickchips{display:flex;flex-wrap:wrap;gap:6px}
+.pk{background:var(--card2);border:1px solid var(--line2);border-radius:8px;padding:3px 10px;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.pk .frm{font-weight:400;color:var(--ink3);font-size:11px}

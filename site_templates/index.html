@@ -2,29 +2,18 @@
 <title>GGG League</title>
 <link rel="stylesheet" href="ggg.css">
 __NAV__
-<div class="wrap">
-  <header class="hero">
-    <div class="eyebrow">GGG League &middot; Est. 2020 &middot; 10 teams &middot; 0.5 PPR</div>
-    <h1 id="heroTitle">Whose team is this?</h1>
-    <p class="lede">Pick your team — this page becomes your franchise HQ: your keepers, your cap, your grudges, your legacy.</p>
+<div class="wrap wide">
+  <header class="hero dashhero">
+    <div>
+      <div class="eyebrow">GGG League &middot; Est. 2020 &middot; 10 teams &middot; 0.5 PPR</div>
+      <h1 id="heroTitle">Whose team is this?</h1>
+      <p class="lede" id="heroSub">Pick your team — this becomes your franchise dashboard.</p>
+    </div>
     <div class="teambar" id="teambar"></div>
   </header>
 
-  <div id="home"></div>
-
-  <section>
-    <div class="sec-head"><div class="eyebrow">League cap board</div><h2>Where everyone's opening cap stands</h2>
-    <p class="sec-note" id="capBoardNote">Projected 2026 opening cap. Keeper selections made on this device are included; once the league renews on Sleeper and keepers are set there, everyone's official picks show here automatically.</p></div>
-    <div class="card" id="capBoard"></div>
-  </section>
-
-  <section>
-    <div class="sec-head"><div class="eyebrow">The Cap Keeper era</div><h2>The proposal &amp; the toys</h2></div>
-    <div class="duo-cards">
-      <a class="bigcard" href="cap-report.html"><div class="eyebrow">Exhibit A</div><h3>The Fire-Sale Fix</h3><p>2024&ndash;2025 replayed under the cap. Three mega-buys flagged; every fair trade untouched.</p></a>
-      <a class="bigcard" href="cap-planner.html"><div class="eyebrow">Full planner</div><h3>Keeper Planner 2026</h3><p>The deep version — all teams, all scenarios. Selections sync with this page.</p></a>
-    </div>
-  </section>
+  <div id="identity"></div>
+  <div class="dash" id="dash"></div>
 </div>
 __FOOT__
 <script>
@@ -32,207 +21,325 @@ const DATA = /*__DATA__*/{};
 const CFG = DATA.cfg, TABLE = CFG.table;
 const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
 
-/* ---- shared keeper state (same key as the planner) ---- */
-const LSKEY = 'ggg-keeper-v1', MYKEY = 'ggg-my-team';
-let kstate = { team: 0, picks: {} };
-try { const s = JSON.parse(localStorage.getItem(LSKEY)); if (s && s.picks) kstate = s; } catch(e){}
-const saveK = () => { try { localStorage.setItem(LSKEY, JSON.stringify(kstate)); } catch(e){} };
-let myTeam = parseInt(localStorage.getItem(MYKEY) ?? '-1');
-const sel = ti => new Set(kstate.picks[ti] || []);
+/* ---------- state (keeper selections shared with the planner) ---------- */
+const LSKEY='ggg-keeper-v1', MYKEY='ggg-my-team';
+let kstate={team:0,picks:{}};
+try{const s=JSON.parse(localStorage.getItem(LSKEY));if(s&&s.picks)kstate=s;}catch(e){}
+const saveK=()=>{try{localStorage.setItem(LSKEY,JSON.stringify(kstate));}catch(e){}};
+let myTeam=parseInt(localStorage.getItem(MYKEY) ?? '-1');
+const sel=ti=>new Set(kstate.picks[ti]||[]);
 
 function evalTeam(ti){
-  const tm = DATA.teams[ti], chosen = sel(ti);
-  let keepSpend = 0; chosen.forEach(pi => keepSpend += tm.players[pi].k26);
-  const k = chosen.size;
-  const picks = tm.picks.slice();
-  picks.splice(Math.max(0, picks.length - k), k);
-  const slots = 16 - k, used = picks.slice(0, slots);
-  let draftSpend = 0; used.forEach(p => draftSpend += TABLE[p.r]);
-  const fills = Math.max(0, slots - used.length);
-  return { keepSpend, k, opening: keepSpend + draftSpend + fills * CFG.waiver,
-           overBudget: keepSpend > CFG.budget, overCount: k > CFG.maxKeep };
+  const tm=DATA.teams[ti],chosen=sel(ti);
+  let keepSpend=0;chosen.forEach(pi=>keepSpend+=tm.players[pi].k26);
+  let next27=0;chosen.forEach(pi=>next27+=tm.players[pi].k27);
+  const k=chosen.size,picks=tm.picks.slice();
+  picks.splice(Math.max(0,picks.length-k),k);
+  const slots=16-k,used=picks.slice(0,slots);
+  let draftSpend=0;used.forEach(p=>draftSpend+=TABLE[p.r]);
+  const fills=Math.max(0,slots-used.length);
+  return {keepSpend,next27,k,opening:keepSpend+draftSpend+fills*CFG.waiver,
+          overBudget:keepSpend>CFG.budget,overCount:k>CFG.maxKeep};
+}
+const capital=ti=>DATA.teams[ti].picks.reduce((a,p)=>a+TABLE[p.r],0);
+
+/* ---------- helpers ---------- */
+function card(span,title,chipTxt){
+  const c=$('div','dcard c'+span);
+  const h=$('div','dcard-head');
+  h.appendChild($('h3','cardh',title));
+  if(chipTxt)h.appendChild($('span','chip soon',chipTxt));
+  c.appendChild(h);
+  return c;
+}
+function skel(card,lines){
+  for(let i=0;i<lines;i++){const s=$('div','skel');s.style.width=(88-i*14)+'%';card.appendChild(s);}
+}
+function archetype(c){
+  if(c.titles>=2)return['👑','The Dynasty'];
+  if(c.toilets>=2)return['🧻','The Custodian'];
+  if(c.fleeces-c.fleeced>=2)return['🦈','The Shark'];
+  if(c.luck<=-4)return['🕯️','The Cursed'];
+  if(c.luck>=3)return['🍀','The Charmed'];
+  const maxAdds=Math.max(...DATA.career.map(x=>x.adds_n));
+  if(c.adds_n===maxAdds)return['🪝','The Waiver Warlord'];
+  const maxTr=Math.max(...DATA.career.map(x=>x.trades_n));
+  if(c.trades_n===maxTr)return['🤝','The Dealmaker'];
+  return['⚙️','The Grinder'];
 }
 
-/* ---- team picker ---- */
-const bar = document.getElementById('teambar');
-DATA.teams.forEach((tm, ti) => {
-  const b = $('button','tpill', tm.name); b.type='button';
-  b.addEventListener('click', () => { myTeam = ti; localStorage.setItem(MYKEY, String(ti)); render(); });
+/* ---------- team picker ---------- */
+const bar=document.getElementById('teambar');
+DATA.teams.forEach((tm,ti)=>{
+  const b=$('button','tpill',tm.name);b.type='button';
+  b.addEventListener('click',()=>{myTeam=ti;localStorage.setItem(MYKEY,String(ti));render();});
   bar.appendChild(b);
 });
 
-function chipRow(host, items){
-  const row = $('div','chiprow');
-  items.forEach(([cls, txt]) => row.appendChild($('span','chip '+cls, txt)));
-  host.appendChild(row);
+/* ---------- render ---------- */
+function render(){
+  [...bar.children].forEach((b,i)=>b.classList.toggle('active',i===myTeam));
+  renderIdentity();
+  renderDash();
 }
 
-function render(){
-  [...bar.children].forEach((b,i)=>b.classList.toggle('active', i===myTeam));
-  const host = document.getElementById('home');
-  host.textContent = '';
-  renderCapBoard();
-  if (myTeam < 0 || !DATA.teams[myTeam]) return;
-  const tm = DATA.teams[myTeam];
-  const c = DATA.career.find(x => x.name === tm.name);
-  document.getElementById('heroTitle').textContent = tm.name + ' HQ';
+function renderIdentity(){
+  const host=document.getElementById('identity');host.textContent='';
+  if(myTeam<0)return;
+  const tm=DATA.teams[myTeam],c=DATA.career.find(x=>x.name===tm.name);
+  document.getElementById('heroTitle').textContent=tm.name+' HQ';
+  const nowName=(c&&c.names.length)?c.names[c.names.length-1].tn:tm.name;
+  document.getElementById('heroSub').textContent='Currently competing as “'+nowName+'”';
+  if(!c)return;
+  const band=$('div','idband');
+  const arch=archetype(c);
+  const badge=$('div','archbadge');
+  badge.appendChild($('div','archemoji',arch[0]));
+  badge.appendChild($('div','archname',arch[1]));
+  band.appendChild(badge);
+  const mid=$('div','idmid');
+  const chips=$('div','chiprow');
+  [['wk',c.w+'-'+c.l+' all-time'],
+   ...(c.titles?[['gold','🏆 ×'+c.titles]]:[]),
+   ...(c.toilets?[['fire','🚽 ×'+c.toilets]]:[]),
+   ['even','luck '+(c.luck>0?'+':'')+c.luck],
+   ['even',(c.pf/(c.w+c.l)).toFixed(1)+' PPG'],
+   ['even',c.high_weeks+' weekly highs']].forEach(([cls,txt])=>chips.appendChild($('span','chip '+cls,txt)));
+  mid.appendChild(chips);
+  const tl=$('div','timeline');
+  DATA.finishes[tm.name].forEach(f=>{
+    const cell=$('div','tcell '+(f.champ?'gold':(f.toilet?'fire':'')));
+    cell.appendChild($('div','tyear',f.s));
+    cell.appendChild($('div','tplace',f.champ?'🏆':(f.toilet?'🚽':'#'+f.place)));
+    tl.appendChild(cell);
+  });
+  mid.appendChild(tl);
+  band.appendChild(mid);
+  host.appendChild(band);
+}
 
-  /* franchise hero */
-  const sec1 = $('section');
-  sec1.appendChild(Object.assign($('div','sec-head'),{}));
-  sec1.lastChild.appendChild($('div','eyebrow','Franchise'));
-  sec1.lastChild.appendChild($('h2',null,'The ' + tm.name + ' story'));
-  const fc = $('div','card');
-  if (c) {
-    chipRow(fc, [
-      ['wk', c.w + '-' + c.l + ' all-time'],
-      ...(c.titles ? [['gold', '🏆 ×' + c.titles]] : []),
-      ...(c.toilets ? [['fire', '🚽 ×' + c.toilets]] : []),
-      ['even', 'luck ' + (c.luck>0?'+':'') + c.luck],
-      ['even', c.high_weeks + ' weekly highs'],
-      ['even', 'best streak W' + c.streak_w],
-    ]);
-    const tl = $('div','timeline');
-    DATA.finishes[tm.name].forEach(f => {
-      const cls = f.champ ? 'gold' : (f.toilet ? 'fire' : '');
-      const cell = $('div','tcell ' + cls);
-      cell.appendChild($('div','tyear', f.s));
-      cell.appendChild($('div','tplace', f.champ ? '🏆' : (f.toilet ? '🚽' : '#' + f.place)));
-      tl.appendChild(cell);
-    });
-    fc.appendChild(tl);
+function renderDash(){
+  const dash=document.getElementById('dash');dash.textContent='';
+  if(myTeam<0){
+    const c=card(12,'Pick your team above');
+    c.appendChild($('p','mut','The dashboard builds itself around your franchise — keepers, cap, grudges, draft capital, and your whole history.'));
+    dash.appendChild(c);
+    dash.appendChild(capBoardCard(6));
+    dash.appendChild(wireCard(6));
+    return;
   }
-  sec1.appendChild(fc);
-  host.appendChild(sec1);
+  const tm=DATA.teams[myTeam],c=DATA.career.find(x=>x.name===tm.name),ev=evalTeam(myTeam);
 
-  /* keeper corner */
-  const sec2 = $('section');
-  const sh = $('div','sec-head');
-  sh.appendChild($('div','eyebrow','Keeper corner — synced with the full planner'));
-  sh.appendChild($('h2',null,'Set your 2026 keepers'));
-  sec2.appendChild(sh);
-  const ev = evalTeam(myTeam);
-  const duo = $('div','duo-cards');
-  const bud = $('div','card');
-  bud.appendChild($('h3','cardh','Keeper budget'));
-  const bn = $('div','bignum'+(ev.overBudget?' over':''));
-  bn.appendChild(document.createTextNode('$'+ev.keepSpend));
-  bn.appendChild($('small',null,' / $'+CFG.budget));
-  bud.appendChild(bn);
-  bud.appendChild($('div','subnum', ev.k + ' of ' + CFG.maxKeep + ' slots' + (ev.overCount ? ' — TOO MANY' : '')));
-  const met = $('div','meter'); const fb = $('div','fillbar'+(ev.overBudget?' over':''));
-  fb.style.width = Math.min(100, ev.keepSpend/CFG.budget*100)+'%'; met.appendChild(fb); bud.appendChild(met);
-  duo.appendChild(bud);
-  const opn = $('div','card');
-  opn.appendChild($('h3','cardh','Projected opening cap'));
-  const on = $('div','bignum'+(ev.opening>CFG.cap?' over':''));
-  on.appendChild(document.createTextNode('$'+ev.opening));
-  on.appendChild($('small',null,' / $'+CFG.cap));
-  opn.appendChild(on);
-  const d = CFG.cap - ev.opening;
-  opn.appendChild($('div','subnum', d>=0 ? ('headroom $'+d+' for in-season buys') : ('over by $'+(-d)+' — cap jail until you shed')));
-  duo.appendChild(opn);
-  sec2.appendChild(duo);
-
-  const rc = $('div','card rostercard');
-  const list = $('div','roster');
+  /* --- keeper corner (span 5) --- */
+  const kc=card(5,'Keeper corner');
+  kc.appendChild($('p','cardnote','Synced with the full planner. Tap to keep.'));
+  const meters=$('div','kmeters');
+  const m1=$('div');
+  m1.appendChild($('div','mlabel','Budget $'+ev.keepSpend+' / $'+CFG.budget+' · '+ev.k+'/'+CFG.maxKeep+' slots'+(ev.overCount?' — TOO MANY':'')));
+  const met=$('div','meter');const fb=$('div','fillbar'+(ev.overBudget?' over':''));
+  fb.style.width=Math.min(100,ev.keepSpend/CFG.budget*100)+'%';met.appendChild(fb);m1.appendChild(met);
+  meters.appendChild(m1);
+  const m2=$('div');
+  const d=CFG.cap-ev.opening;
+  m2.appendChild($('div','mlabel','Opening cap $'+ev.opening+' / $'+CFG.cap+' · '+(d>=0?('$'+d+' headroom'):('$'+(-d)+' over — cap jail'))));
+  const met2=$('div','meter');const fb2=$('div','fillbar'+(ev.opening>CFG.cap?' over':''));
+  fb2.style.width=Math.min(100,ev.opening/CFG.cap*100)+'%';met2.appendChild(fb2);m2.appendChild(met2);
+  meters.appendChild(m2);
+  kc.appendChild(meters);
+  const list=$('div','roster tallroster');
   tm.players.forEach((p,pi)=>{
-    const on2 = sel(myTeam).has(pi);
-    const row = $('div','prow'+(on2?' on':'')+(p.el?'':' inel'));
-    row.appendChild($('span','tick', on2?'✓':''));
-    const nm = $('span','pname', p.n);
-    nm.appendChild($('span','meta', p.pos + (p.t?' · '+p.t:'')));
+    const on=sel(myTeam).has(pi);
+    const row=$('div','prow'+(on?' on':'')+(p.el?'':' inel'));
+    row.appendChild($('span','tick',on?'✓':''));
+    const nm=$('span','pname',p.n);nm.appendChild($('span','meta',p.pos+(p.t?' · '+p.t:'')));
     row.appendChild(nm);
-    row.appendChild($('span','rnd', p.el ? 'R'+p.r : '—'));
-    row.appendChild($('span','cost', p.el ? '$'+p.k26 : ''));
-    row.appendChild($('span','next', p.el ? '→ $'+p.k27 : 'rental only'));
-    if (p.el) {
-      row.tabIndex = 0;
-      const tog = ()=>{ const s2 = sel(myTeam); s2.has(pi)?s2.delete(pi):s2.add(pi);
-        kstate.picks[myTeam]=[...s2]; saveK(); render(); };
-      row.addEventListener('click', tog);
-      row.addEventListener('keydown', e=>{ if(e.key===' '||e.key==='Enter'){e.preventDefault();tog();} });
-    }
+    row.appendChild($('span','rnd',p.el?'R'+p.r:'—'));
+    row.appendChild($('span','cost',p.el?'$'+p.k26:''));
+    row.appendChild($('span','next',p.el?'→ $'+p.k27:'rental only'));
+    if(p.el){row.tabIndex=0;
+      const tog=()=>{const s2=sel(myTeam);s2.has(pi)?s2.delete(pi):s2.add(pi);
+        kstate.picks[myTeam]=[...s2];saveK();render();};
+      row.addEventListener('click',tog);
+      row.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();tog();}});}
     list.appendChild(row);
   });
-  rc.appendChild(list);
-  sec2.appendChild(rc);
-  host.appendChild(sec2);
+  kc.appendChild(list);
+  dash.appendChild(kc);
 
-  /* grudges */
-  const sec3 = $('section');
-  const sh3 = $('div','sec-head');
-  sh3.appendChild($('div','eyebrow','Career head-to-head'));
-  sh3.appendChild($('h2',null,'Your grudges'));
-  sec3.appendChild(sh3);
-  const gc = $('div','card');
-  const gr = $('div','grudges');
-  const mine = DATA.h2h[tm.name] || {};
-  Object.entries(mine).sort((a,b)=>(b[1].w-b[1].l)-(a[1].w-a[1].l)).forEach(([rival,rec])=>{
-    const cls = rec.w>rec.l?'winrec':(rec.w<rec.l?'loserec':'');
-    const cell = $('div','gcell');
-    cell.appendChild($('div','gname', rival));
-    cell.appendChild($('div','grec '+cls, rec.w+'-'+rec.l));
+  /* --- cap board (span 4) --- */
+  dash.appendChild(capBoardCard(4));
+
+  /* --- countdown + vitals (span 3) --- */
+  const cd=card(3,'Season countdown');
+  const kick=new Date('2026-09-10T20:20:00-04:00');
+  const days=Math.max(0,Math.ceil((kick-Date.now())/86400000));
+  const bn=$('div','bignum good');bn.appendChild(document.createTextNode(String(days)));
+  bn.appendChild($('small',null,' days'));
+  cd.appendChild(bn);
+  cd.appendChild($('div','subnum','until NFL kickoff · Sep 10, 2026'));
+  cd.appendChild($('div','vitals'));
+  [['Keeper deadline','2 wks before draft'],['League renewal','waiting on Sleeper'],['Record','— starts wk 1'],['Rank','—']]
+    .forEach(([k2,v])=>{const r=$('div','vrow');r.appendChild($('span','mut',k2));r.appendChild($('span',null,v));cd.lastChild.appendChild(r);});
+  dash.appendChild(cd);
+
+  /* --- playoff odds placeholder (span 3) --- */
+  const po=card(3,'Playoff odds','LIVE WK 1');
+  const gauge=$('div','gauge');gauge.appendChild($('div','gaugev','—%'));
+  po.appendChild(gauge);
+  po.appendChild($('p','cardnote','Monte Carlo sim of your remaining schedule, re-run after every game. Arguing with it is mandatory.'));
+  dash.appendChild(po);
+
+  /* --- draft capital (span 3) --- */
+  const dc=card(3,'2026 draft capital');
+  const cap$=capital(myTeam);
+  const ranks=DATA.teams.map((_,i)=>capital(i)).sort((a,b)=>b-a);
+  const myRank=ranks.indexOf(cap$)+1;
+  const bn2=$('div','bignum');bn2.appendChild(document.createTextNode('$'+cap$));
+  bn2.appendChild($('small',null,' · #'+myRank+' in league'));
+  dc.appendChild(bn2);
+  const pcs=$('div','pickchips');
+  tm.picks.forEach(p=>{const ch=$('span','pk','R'+p.r);if(p.from)ch.appendChild($('span','frm',' · '+p.from));pcs.appendChild(ch);});
+  dc.appendChild(pcs);
+  dash.appendChild(dc);
+
+  /* --- matchup center placeholder (span 6) --- */
+  const mc=card(6,'Matchup center','LIVE WK 1');
+  const vs=$('div','vsrow');
+  vs.appendChild($('div','vsteam',tm.name));
+  vs.appendChild($('div','vsmark','VS'));
+  vs.appendChild($('div','vsteam mut','Week 1 opponent'));
+  mc.appendChild(vs);
+  skel(mc,3);
+  mc.appendChild($('p','cardnote','Live scores, win probability, your all-time record vs this opponent, and their cap sheet — so you know if they can afford to trade for the player who just injured your season.'));
+  dash.appendChild(mc);
+
+  /* --- manager DNA (span 3) --- */
+  const dna=card(3,'Manager DNA');
+  [['Trades (career)',c.trades_n],['Waiver/FA adds',c.adds_n],
+   ['Trades won / fleeced',c.fleeces+' / '+c.fleeced],
+   ['Avg bench pts left',c.avg_bench],
+   ['Best win streak','W'+c.streak_w],['Worst skid','L'+c.streak_l]]
+    .forEach(([k2,v])=>{const r=$('div','vrow');r.appendChild($('span','mut',k2));r.appendChild($('span',null,String(v)));dna.appendChild(r);});
+  dash.appendChild(dna);
+
+  /* --- names history (span 3) --- */
+  const nh=card(3,'Names you’ve gone by');
+  const seen=new Set();
+  [...c.names].reverse().forEach(n=>{
+    if(seen.has(n.tn))return;seen.add(n.tn);
+    const r=$('div','vrow');r.appendChild($('span','mut',n.s));r.appendChild($('span','tn',n.tn));nh.appendChild(r);
+  });
+  dash.appendChild(nh);
+
+  /* --- grudges (span 6) --- */
+  const g=card(6,'Career grudges');
+  const mine=DATA.h2h[tm.name]||{};
+  const ent=Object.entries(mine);
+  if(ent.length){
+    const best=ent.reduce((a,b)=>(b[1].w-b[1].l)>(a[1].w-a[1].l)?b:a);
+    const worst=ent.reduce((a,b)=>(b[1].w-b[1].l)<(a[1].w-a[1].l)?b:a);
+    const duo=$('div','nemduo');
+    const v1=$('div','nemcard good2');
+    v1.appendChild($('div','cardh','Your victim'));
+    v1.appendChild($('div','nemname',best[0]));
+    v1.appendChild($('div','nemrec good',best[1].w+'-'+best[1].l));
+    const v2=$('div','nemcard bad2');
+    v2.appendChild($('div','cardh','Your nemesis'));
+    v2.appendChild($('div','nemname',worst[0]));
+    v2.appendChild($('div','nemrec bad',worst[1].w+'-'+worst[1].l));
+    duo.appendChild(v1);duo.appendChild(v2);
+    g.appendChild(duo);
+  }
+  const gr=$('div','grudges');
+  ent.sort((a,b)=>(b[1].w-b[1].l)-(a[1].w-a[1].l)).forEach(([rival,rec])=>{
+    const cls=rec.w>rec.l?'winrec':(rec.w<rec.l?'loserec':'');
+    const cell=$('div','gcell');
+    cell.appendChild($('div','gname',rival));
+    cell.appendChild($('div','grec '+cls,rec.w+'-'+rec.l));
     gr.appendChild(cell);
   });
-  gc.appendChild(gr);
-  sec3.appendChild(gc);
-  host.appendChild(sec3);
+  g.appendChild(gr);
+  dash.appendChild(g);
 
-  /* legacy tiles */
-  if (c) {
-    const sec4 = $('section');
-    const sh4 = $('div','sec-head');
-    sh4.appendChild($('div','eyebrow','Legacy'));
-    sh4.appendChild($('h2',null,'Personal records'));
-    sec4.appendChild(sh4);
-    const tiles = $('div','tiles');
-    const mk = (num, lbl, bad) => { const t=$('div','tile');
-      t.appendChild($('div','num '+(bad?'bad':'good'), num));
-      t.appendChild($('div','lbl', lbl)); tiles.appendChild(t); };
-    mk(c.best_week.pts.toFixed(1), 'best week ever · ' + c.best_week.s + ' wk' + c.best_week.wk, false);
-    mk(c.worst_week.pts.toFixed(1), 'worst week ever · ' + c.worst_week.s + ' wk' + c.worst_week.wk, true);
-    if (c.blunder) mk(c.blunder.bench.toFixed(1), 'biggest bench blunder · ' + c.blunder.s + ' wk' + c.blunder.wk, true);
-    if (c.steal) mk('+'+c.steal.voe.toFixed(0), 'best pick: ' + c.steal.player + ' R' + c.steal.round + ' ' + c.steal.s, false);
-    if (c.bust) mk(c.bust.voe.toFixed(0), 'worst pick: ' + c.bust.player + ' R' + c.bust.round + ' ' + c.bust.s, true);
-    mk(c.fleeces + ' / ' + c.fleeced, 'trades won / times fleeced (player deals)', c.fleeced > c.fleeces);
-    sec4.appendChild(tiles);
-    host.appendChild(sec4);
-  }
+  /* --- personal records (span 6) --- */
+  const pr=card(6,'Personal records');
+  const tiles=$('div','tiles');
+  const mk=(num,lbl,bad)=>{const t=$('div','tile');t.appendChild($('div','num '+(bad?'bad':'good'),num));
+    t.appendChild($('div','lbl',lbl));tiles.appendChild(t);};
+  mk(c.best_week.pts.toFixed(1),'best week · '+c.best_week.s+' wk'+c.best_week.wk,false);
+  mk(c.worst_week.pts.toFixed(1),'worst week · '+c.worst_week.s+' wk'+c.worst_week.wk,true);
+  if(c.blunder)mk(c.blunder.bench.toFixed(1),'benched pts record · '+c.blunder.s+' wk'+c.blunder.wk,true);
+  if(c.steal)mk('+'+c.steal.voe.toFixed(0),'best pick: '+c.steal.player+' R'+c.steal.round+' '+c.steal.s,false);
+  if(c.bust)mk(c.bust.voe.toFixed(0),'worst pick: '+c.bust.player+' R'+c.bust.round+' '+c.bust.s,true);
+  pr.appendChild(tiles);
+  dash.appendChild(pr);
+
+  /* --- 2027 outlook (span 3) --- */
+  const ok=card(3,'2027 outlook');
+  const bn3=$('div','bignum');bn3.appendChild(document.createTextNode('$'+ev.next27));
+  bn3.appendChild($('small',null,' if kept again'));
+  ok.appendChild(bn3);
+  ok.appendChild($('p','cardnote',ev.k?('Your selected '+ev.k+'-keeper class costs $'+ev.keepSpend+' now and $'+ev.next27+' in 2027. Escalation always wins in the end.'):'Select keepers to see what this class costs you in 2027.'));
+  dash.appendChild(ok);
+
+  /* --- awards shelf (span 3) --- */
+  const aw=card(3,'2026 awards shelf','LIVE WK 1');
+  [['🎯 Weekly high scores','$10 each — career: '+c.high_weeks],
+   ['🚽 Toilet seat weeks','lowest score of the week'],
+   ['🪑 Bench blunders','most points left at home']]
+    .forEach(([k2,v])=>{const r=$('div','vrow');r.appendChild($('span',null,k2));r.appendChild($('span','mut',v));aw.appendChild(r);});
+  aw.appendChild($('p','cardnote','Auto-awarded every week of the 2026 season.'));
+  dash.appendChild(aw);
+
+  /* --- league wire (span 6) --- */
+  dash.appendChild(wireCard(6));
 }
 
-function renderCapBoard(){
-  const host = document.getElementById('capBoard');
-  host.textContent='';
-  const rows = DATA.teams.map((tm,ti)=>({name:tm.name, ti, ev:evalTeam(ti)}))
-    .sort((a,b)=>b.ev.opening-a.ev.opening);
+function capBoardCard(span){
+  const cb=card(span,'League cap board');
+  const rows=DATA.teams.map((tm,ti)=>({name:tm.name,ti,ev:evalTeam(ti)})).sort((a,b)=>b.ev.opening-a.ev.opening);
   rows.forEach(r=>{
-    const row = $('div','luckrow');
-    const nm = $('span','lname'+(r.ti===myTeam?' good':''), r.name + (r.ev.k ? ' · '+r.ev.k+'K' : ''));
-    row.appendChild(nm);
-    const track = $('div','lucktrack');
-    const barEl = $('div','luckbar '+(r.ev.opening>CFG.cap?'neg':'pos'));
-    barEl.style.left='0'; barEl.style.right='auto';
-    barEl.style.width = Math.min(100, r.ev.opening/250*100)+'%';
+    const row=$('div','luckrow');
+    row.appendChild($('span','lname'+(r.ti===myTeam?' good':''),r.name+(r.ev.k?' · '+r.ev.k+'K':'')));
+    const track=$('div','lucktrack');
+    const barEl=$('div','luckbar '+(r.ev.opening>CFG.cap?'neg':'pos'));
+    barEl.style.left='0';barEl.style.right='auto';
+    barEl.style.width=Math.min(100,r.ev.opening/250*100)+'%';
     track.appendChild(barEl);
-    const mid = $('div','luckmid'); mid.style.left = (CFG.cap/250*100)+'%'; track.appendChild(mid);
+    const mid=$('div','luckmid');mid.style.left=(CFG.cap/250*100)+'%';track.appendChild(mid);
     row.appendChild(track);
-    row.appendChild($('span','lval'+(r.ev.opening>CFG.cap?' bad':''), '$'+r.ev.opening));
-    host.appendChild(row);
+    row.appendChild($('span','lval'+(r.ev.opening>CFG.cap?' bad':''),'$'+r.ev.opening));
+    cb.appendChild(row);
   });
+  cb.appendChild($('p','cardnote','Your device’s keeper picks included. Official league-wide keepers appear automatically once set in Sleeper.'));
+  return cb;
+}
+
+function wireCard(span){
+  const w=card(span,'This date in GGG history');
+  const pool=[];
+  DATA.records.high_weeks.slice(0,5).forEach(e=>pool.push('🔥 '+e.name+' hung '+e.pts.toFixed(1)+' in '+e.s+' wk'+e.wk+' — still top-5 all-time.'));
+  DATA.records.blowouts.slice(0,3).forEach(e=>pool.push('💥 '+e.s+' wk'+e.wk+': '+e.w+' beat '+e.l+' by '+e.margin.toFixed(1)+'.'));
+  DATA.records.closest.slice(0,3).forEach(e=>pool.push('😱 '+e.s+' wk'+e.wk+': '+e.w+' survived '+e.l+' by '+e.margin.toFixed(2)+'.'));
+  DATA.records.blunders.slice(0,3).forEach(e=>pool.push('🪑 '+e.s+' wk'+e.wk+': '+e.name+' left '+e.bench.toFixed(1)+' points on the bench.'));
+  const day=Math.floor(Date.now()/86400000);
+  for(let i=0;i<4;i++){
+    const r=$('div','vrow wire');r.appendChild($('span',null,pool[(day+i*3)%pool.length]));w.appendChild(r);
+  }
+  w.appendChild($('p','cardnote','Rotates daily. Becomes the live transaction wire once the 2026 season starts.'));
+  return w;
 }
 
 render();
 
-/* live 2026 check */
+/* live 2026 renewal check */
 (async function(){
   try{
-    const r = await fetch('https://api.sleeper.app/v1/user/'+DATA.commishUserId+'/leagues/nfl/2026');
-    const leagues = await r.json();
-    const lg = (leagues||[]).find(l=>l.previous_league_id===DATA.leagueId2025);
-    if(!lg) return;
-    document.getElementById('capBoardNote').textContent =
-      lg.name + ' is renewed on Sleeper (' + lg.status.replace('_',' ') + '). Official keepers will appear here for everyone once set in Sleeper.';
+    const r=await fetch('https://api.sleeper.app/v1/user/'+DATA.commishUserId+'/leagues/nfl/2026');
+    const leagues=await r.json();
+    const lg=(leagues||[]).find(l=>l.previous_league_id===DATA.leagueId2025);
+    if(!lg)return;
+    document.getElementById('heroSub').textContent=lg.name+' is renewed on Sleeper ('+lg.status.replace('_',' ')+') — official keepers sync here once set.';
   }catch(e){}
 })();
 </script>

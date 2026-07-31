@@ -24,11 +24,15 @@ ppos = lambda pid: (players_db.get(str(pid)) or {}).get("pos") or "?"
 # ---------- owner registry ----------
 owners = {}          # user_id -> {name, aliases:set, seasons:[]}
 season_ctx = {}      # season -> {rmap: roster_id->user_id, users, league, pws}
+team_names = {}   # uid -> [{s, tn}]
 for s in SEASONS:
     users = load(f"users_{s}.json")
     rosters = load(f"rosters_{s}.json")
     lg = load(f"league_{s}.json")
     umap = {u["user_id"]: u["display_name"] for u in users}
+    for u in users:
+        tn = (u.get("metadata") or {}).get("team_name") or u["display_name"]
+        team_names.setdefault(u["user_id"], []).append({"s": s, "tn": tn})
     rmap = {}
     for r in rosters:
         uid = r["owner_id"] or f"unknown_{s}_{r['roster_id']}"
@@ -62,6 +66,10 @@ for old_alias, new_alias in MERGES:
 canon = lambda uid: canon_map.get(uid, uid)
 for _s in SEASONS:
     season_ctx[_s]["rmap"] = {rid: canon(u) for rid, u in season_ctx[_s]["rmap"].items()}
+merged_names = {}
+for uid, hist in team_names.items():
+    merged_names.setdefault(canon(uid), []).extend(hist)
+team_names = {uid: sorted(v, key=lambda x: x["s"]) for uid, v in merged_names.items()}
 
 oname = lambda uid: owners.get(uid, {}).get("name", "Former manager")
 
@@ -181,6 +189,7 @@ for uid, c in career.items():
     ww = min(mine, key=lambda e: e["pts"])
     mybl = [e for e in blunders if e["uid"] == uid]
     bl = max(mybl, key=lambda e: e["bench"]) if mybl else None
+    avg_bench = round(sum(e["bench"] for e in mybl) / len(mybl), 1) if mybl else 0
     ap_pct = c["ap_w"] / c["ap_g"] if c["ap_g"] else 0
     w_pct = c["w"] / g
     career_out.append({
@@ -198,6 +207,8 @@ for uid, c in career.items():
         "best_week": {"pts": bw["pts"], "s": bw["s"], "wk": bw["wk"]},
         "worst_week": {"pts": ww["pts"], "s": ww["s"], "wk": ww["wk"]},
         "blunder": {"bench": bl["bench"], "s": bl["s"], "wk": bl["wk"]} if bl else None,
+        "avg_bench": avg_bench,
+        "names": team_names.get(uid, []),
     })
 career_out.sort(key=lambda x: (-x["titles"], -x["pct"]))
 
@@ -251,15 +262,26 @@ for r in all_rows:
 steals = sorted([r for r in all_rows if r["round"] >= 6], key=lambda x: -x["voe"])[:12]
 busts = sorted([r for r in all_rows if r["round"] <= 2 and not r["keeper"]], key=lambda x: x["voe"])[:12]
 
-# ---------- trades archive with verdicts ----------
+# ---------- trades archive with verdicts (+ activity counts) ----------
 trades_out = []
+activity = defaultdict(lambda: {"trades_n": 0, "adds_n": 0})
 for s in SEASONS:
     ctx = season_ctx[s]
     tx = load(f"transactions_{s}.json")
     for wk_s, items in tx.items():
         for t in items:
-            if t["type"] != "trade" or t["status"] != "complete":
+            if t["status"] != "complete":
                 continue
+            if t["type"] in ("waiver", "free_agent"):
+                for pid, rid in (t.get("adds") or {}).items():
+                    if rid in ctx["rmap"]:
+                        activity[oname(ctx["rmap"][rid])]["adds_n"] += 1
+                continue
+            if t["type"] != "trade":
+                continue
+            for rid in t["roster_ids"]:
+                if rid in ctx["rmap"]:
+                    activity[oname(ctx["rmap"][rid])]["trades_n"] += 1
             if t.get("draft_picks"):
                 continue  # pick trades excluded from the archive
             wk = int(wk_s)
@@ -299,6 +321,8 @@ for t in trades_out:
 for c in career_out:
     c["fleeced"] = fleece[c["name"]]["fleeced"]
     c["fleeces"] = fleece[c["name"]]["fleeces"]
+    c["trades_n"] = activity[c["name"]]["trades_n"]
+    c["adds_n"] = activity[c["name"]]["adds_n"]
     rows_by = [r for r in all_rows if r["by"] == c["name"]]
     late = [r for r in rows_by if r["round"] >= 6]
     early = [r for r in rows_by if r["round"] <= 4 and not r["keeper"]]
