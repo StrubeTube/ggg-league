@@ -1,0 +1,188 @@
+"""Assemble the league site: site_templates/*.html + site_data.json -> docs/."""
+import json
+import os
+import shutil
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.join(HERE, "data")
+TPL = os.path.join(HERE, "site_templates")
+OUT = os.path.join(HERE, "docs")
+os.makedirs(OUT, exist_ok=True)
+
+
+def load(n):
+    with open(os.path.join(DATA, n), encoding="utf-8") as f:
+        return json.load(f)
+
+
+site = load("site_data.json")
+fonts = json.load(open(os.path.join(HERE, "poppins_b64.json"), encoding="utf-8"))
+users25 = load("users_2025.json")
+commish_uid = next(u["user_id"] for u in users25 if u["display_name"] == "Strubes")
+
+# ---------------- shared CSS ----------------
+CSS = """
+@font-face{font-family:'Poppins';font-style:normal;font-weight:400;font-display:swap;src:url(data:font/woff2;base64,F400) format('woff2');}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:600;font-display:swap;src:url(data:font/woff2;base64,F600) format('woff2');}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:800;font-display:swap;src:url(data:font/woff2;base64,F800) format('woff2');}
+:root{--bg:#0B2B26;--surface:#0E332E;--card:#103A34;--card2:#0D3630;--line:#1D4A42;--line2:#2A5A50;
+--ink:#EDF7F2;--ink2:#9DC3B7;--ink3:#6E958A;--mint:#2FE6A6;--mint-ink:#062019;--mark:#17AD7A;
+--coral:#E84B3F;--coral-soft:rgba(232,75,63,.14);--gold:#D9A93C;--navy:#131C4D;--navy-line:#2FE6A6;}
+@media (prefers-color-scheme: light){:root{--bg:#F1F7F4;--surface:#F8FCFA;--card:#FFFFFF;--card2:#F4FAF7;
+--line:#D8E7E0;--line2:#C2D8CF;--ink:#0F2F29;--ink2:#48685F;--ink3:#7A968D;--mint:#0A9B6C;--mint-ink:#FFFFFF;
+--mark:#0A9B6C;--coral:#CC3D2F;--coral-soft:rgba(204,61,47,.10);--gold:#8C6A10;--navy:#1A2560;--navy-line:#0A9B6C;}}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:'Poppins',system-ui,sans-serif;line-height:1.55;margin:0}
+.wrap{max-width:980px;margin:0 auto;padding:28px 16px 80px}
+h1,h2,h3{text-wrap:balance;margin:0}p{margin:0}a{color:var(--mint)}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--mint)}
+.hero{margin:18px 0 6px}
+h1{font-size:clamp(30px,5.5vw,46px);font-weight:800;line-height:1.08;margin:8px 0 12px}
+.lede{color:var(--ink2);font-size:15.5px;max-width:64ch}
+section{margin-top:52px}
+.sec-head{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+h2{font-size:22px;font-weight:800}
+.sec-note{color:var(--ink2);font-size:14px;max-width:65ch}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.scroll{overflow-x:auto}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 16px 13px}
+.tile .num{font-size:30px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile .num.bad{color:var(--coral)}.tile .num.good{color:var(--mint)}
+.tile .lbl{font-size:12.5px;color:var(--ink2);margin-top:6px;line-height:1.45}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px;font-size:11.5px;font-weight:600;white-space:nowrap}
+.chip.gold{color:var(--gold);border:1px solid var(--gold)}
+.chip.fire{color:var(--coral);border:1px solid var(--coral)}
+.chip.flag{background:var(--coral);color:#fff;letter-spacing:.04em}
+.chip.even{color:var(--ink3);border:1px solid var(--line2)}
+.chip.wk{background:var(--navy);color:#EDF7F2;border:1px solid var(--navy-line);letter-spacing:.06em}
+.chip.mini{color:var(--mint);border:1px solid var(--mint);padding:0 7px}
+.tbl{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+.tbl th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);font-weight:600;text-align:left;padding:6px 10px 6px 0;border-bottom:1px solid var(--line2)}
+.tbl td{padding:6px 10px 6px 0;border-bottom:1px solid var(--line)}
+.tbl tr:last-child td{border-bottom:none}
+.mut{color:var(--ink3)}.small{font-size:11px}
+.good{color:var(--mint)}.bad{color:var(--coral)}
+.departed td{opacity:.55}
+.duo-cards{display:grid;gap:12px}
+@media(min-width:640px){.duo-cards{grid-template-columns:1fr 1fr}}
+.bigcard{display:block;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;text-decoration:none;color:var(--ink);transition:border-color .12s}
+.bigcard:hover{border-color:var(--mint)}
+.bigcard h3{font-size:18px;font-weight:800;margin:6px 0 8px}
+.bigcard p{color:var(--ink2);font-size:13.5px}
+.hof,.shame{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.banner{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--gold);border-radius:12px 12px 4px 4px;padding:16px 14px;text-align:center}
+.banner .byear{font-size:12px;font-weight:600;letter-spacing:.12em;color:var(--gold)}
+.banner .bname{font-weight:800;font-size:15px;margin-top:6px}
+.banner .bsub{font-size:11px;color:var(--ink3);margin-top:4px}
+.shamecard{background:var(--card2);border:1px dashed var(--coral);border-radius:12px;padding:14px;text-align:center}
+.shamecard .byear{font-size:12px;font-weight:600;letter-spacing:.12em;color:var(--coral)}
+.shamecard .bname{font-weight:800;font-size:14px;margin-top:5px}
+.matrix th.rot{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;padding:4px 2px;font-size:10px}
+.matrix td{text-align:center;padding:5px 6px}
+.matrix td.winrec{color:var(--mint);font-weight:600}
+.matrix td.loserec{color:var(--coral)}
+.matrix td.self{color:var(--ink3)}
+.matrix th{padding-right:8px}
+.seasonbox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:10px}
+.seasonbox summary{cursor:pointer;font-size:14px}
+.seasonbox summary b{font-weight:800}
+.seasonbox .tbl{margin-top:10px}
+.reclist{margin:0;padding-left:22px;font-size:13.5px;display:grid;gap:7px;font-variant-numeric:tabular-nums}
+.reclist b{font-weight:800}
+.recgrid{display:grid;gap:0}
+@media(min-width:760px){.recgrid{grid-template-columns:1fr 1fr;gap:0 16px}}
+.luckrow{display:grid;grid-template-columns:130px 1fr 52px;align-items:center;gap:10px;min-height:30px}
+.lname{font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lucktrack{position:relative;height:14px;background:var(--card2);border:1px solid var(--line);border-radius:7px}
+.luckbar{position:absolute;top:2px;bottom:2px}
+.luckbar.pos{background:var(--mark);border-radius:0 5px 5px 0}
+.luckbar.neg{background:var(--coral);border-radius:5px 0 0 5px}
+.luckmid{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--line2)}
+.lval{font-size:12px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.filterrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.tpill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;font-family:inherit}
+.tpill.active{background:var(--mint);color:var(--mint-ink);border-color:var(--mint)}
+.trades{display:grid;gap:12px}
+.trade{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 16px 15px}
+.trade-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.trade-sides{display:grid;gap:10px}
+@media(min-width:640px){.trade-sides{grid-template-columns:1fr 1fr}}
+.side{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+.side.losing{border-color:var(--coral)}
+.side-head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:7px}
+.side-team{font-weight:600;font-size:13.5px}
+.side-cap{font-size:12px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.gets{display:flex;flex-wrap:wrap;gap:6px}
+.pchip{display:inline-flex;align-items:baseline;gap:6px;background:var(--surface);border:1px solid var(--line2);border-radius:8px;padding:3px 9px;font-size:12px;font-weight:600}
+.pchip .s{font-weight:400;color:var(--ink2);font-size:11px;font-variant-numeric:tabular-nums}
+.pchip.pick{border-style:dashed;font-weight:400;color:var(--ink2)}
+.pchip.none{border:none;background:transparent;color:var(--ink3);font-weight:400}
+nav.ggg{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav.ggg .in{max-width:980px;margin:0 auto;display:flex;align-items:center;gap:4px;padding:10px 16px;flex-wrap:wrap}
+nav.ggg .logo{width:34px;height:34px;background:var(--mint);color:var(--mint-ink);border-radius:8px;display:grid;place-items:center;font-weight:800;font-size:13px;margin-right:10px}
+nav.ggg a{color:var(--ink2);text-decoration:none;font-size:13px;font-weight:600;padding:6px 11px;border-radius:8px}
+nav.ggg a:hover{color:var(--ink)}
+nav.ggg a.on{background:var(--card);color:var(--mint)}
+footer.ggg{border-top:1px solid var(--line);margin-top:60px}
+footer.ggg .in{max-width:980px;margin:0 auto;padding:18px 16px;font-size:12px;color:var(--ink3)}
+"""
+CSS = CSS.replace("F400", fonts["400"]).replace("F600", fonts["600"]).replace("F800", fonts["800"])
+with open(os.path.join(OUT, "ggg.css"), "w", encoding="utf-8") as f:
+    f.write(CSS)
+
+NAV_LINKS = [("index.html", "Home"), ("history.html", "History"), ("records.html", "Records"),
+             ("drafts.html", "Drafts"), ("trades.html", "Trades"),
+             ("cap-planner.html", "Planner"), ("cap-report.html", "The Case")]
+
+
+def nav(active):
+    links = "".join(f'<a href="{h}" class="{"on" if h == active else ""}">{t}</a>' for h, t in NAV_LINKS)
+    return f'<nav class="ggg"><div class="in"><span class="logo">GGG</span>{links}</div></nav>'
+
+
+FOOT = ('<footer class="ggg"><div class="in">GGG League · data from the Sleeper API · '
+        f'stats computed {site["generated"]} · regular-season records unless noted · '
+        'grudges update automatically</div></footer>')
+
+# ---------------- per-page data slices ----------------
+career = site["career"]
+by = lambda k, rev=True: sorted(career, key=lambda c: c[k], reverse=rev)
+steal = site["drafts"]["steals"][0]
+fun = [
+    {"num": str(max(c["toilets"] for c in career)), "lbl": "toilet bowls for " + by("toilets")[0]["name"] + " — the only repeat offender", "bad": True},
+    {"num": str(by("high_weeks")[0]["high_weeks"]), "lbl": "career weekly high scores — " + by("high_weeks")[0]["name"] + ", the $10 bandit", "bad": False},
+    {"num": ("+" if by("luck")[0]["luck"] > 0 else "") + str(by("luck")[0]["luck"]), "lbl": "schedule luck (wins gifted) — " + by("luck")[0]["name"] + ", most blessed manager", "bad": False},
+    {"num": str(by("luck", False)[0]["luck"]), "lbl": "schedule luck — " + by("luck", False)[0]["name"] + ", most cursed manager", "bad": True},
+    {"num": "+" + str(int(steal["voe"])), "lbl": "best draft pick ever: " + steal["player"] + ", R" + str(steal["round"]) + " " + steal["s"] + " by " + steal["by"], "bad": False},
+    {"num": str(len(site["trades"])), "lbl": "trades all-time — and yes, they're all graded on the Trades page", "bad": False},
+]
+s2025 = next(s for s in site["seasons"] if s["season"] == "2025")
+slices = {
+    "index.html": {"season2025": s2025, "funFacts": fun,
+                   "commishUserId": commish_uid, "leagueId2025": "1256797701320753152"},
+    "history.html": {"seasons": site["seasons"], "career": career, "h2h": site["h2h"]},
+    "records.html": {"records": site["records"], "career": career},
+    "drafts.html": {"drafts": site["drafts"]},
+    "trades.html": {"trades": site["trades"]},
+}
+
+for page, data in slices.items():
+    with open(os.path.join(TPL, page), encoding="utf-8") as f:
+        html = f.read()
+    html = html.replace("__NAV__", nav(page)).replace("__FOOT__", FOOT)
+    html = html.replace("/*__DATA__*/{}", json.dumps(data, ensure_ascii=False))
+    with open(os.path.join(OUT, page), "w", encoding="utf-8") as f:
+        f.write(html)
+    print(f"built {page} ({os.path.getsize(os.path.join(OUT, page))//1024} KB)")
+
+# cap tools: copy the built artifacts in
+SCRATCH = r"C:\Users\Strubes\AppData\Local\Temp\claude\C--Users-Strubes--claude\5652e97f-048a-4002-a583-3fb28db3a0b2\scratchpad"
+for src, dst in (("planner.html", "cap-planner.html"), ("report.html", "cap-report.html")):
+    sp = os.path.join(SCRATCH, src)
+    if os.path.exists(sp):
+        shutil.copy(sp, os.path.join(OUT, dst))
+        print(f"copied {dst}")
+
+open(os.path.join(OUT, ".nojekyll"), "w").close()
+print("site assembled ->", OUT)

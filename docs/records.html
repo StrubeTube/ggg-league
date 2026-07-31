@@ -1,0 +1,72 @@
+<meta charset="utf-8">
+<title>GGG League — Record Book</title>
+<link rel="stylesheet" href="ggg.css">
+<nav class="ggg"><div class="in"><span class="logo">GGG</span><a href="index.html" class="">Home</a><a href="history.html" class="">History</a><a href="records.html" class="on">Records</a><a href="drafts.html" class="">Drafts</a><a href="trades.html" class="">Trades</a><a href="cap-planner.html" class="">Planner</a><a href="cap-report.html" class="">The Case</a></div></nav>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">GGG League &middot; All-time</div>
+    <h1>The Record Book</h1>
+    <p class="lede">Every regular-season week since 2020, ranked, sorted, and weaponized for the group chat.</p>
+  </header>
+
+  <section>
+    <div class="sec-head"><div class="eyebrow">Luck, quantified</div><h2>Who the schedule loves</h2>
+    <p class="sec-note">All-play: your record if you'd played all nine teams every single week. Luck = actual wins minus deserved wins. Positive means the schedule carried you.</p></div>
+    <div class="card" id="luck"></div>
+  </section>
+
+  <div class="recgrid">
+    <section><div class="sec-head"><h2>🔥 Highest weeks ever</h2></div><div class="card" id="high"></div></section>
+    <section><div class="sec-head"><h2>🥶 Lowest weeks ever</h2></div><div class="card" id="low"></div></section>
+    <section><div class="sec-head"><h2>💥 Biggest blowouts</h2></div><div class="card" id="blow"></div></section>
+    <section><div class="sec-head"><h2>😱 Closest finishes</h2></div><div class="card" id="close"></div></section>
+    <section><div class="sec-head"><h2>💔 Most points in a loss</h2></div><div class="card" id="bigloss"></div></section>
+    <section><div class="sec-head"><h2>🍀 Cheapest wins ever</h2></div><div class="card" id="cheapwin"></div></section>
+  </div>
+
+  <section>
+    <div class="sec-head"><div class="eyebrow">Lineup malpractice</div><h2>🪑 The bench blunder hall</h2>
+    <p class="sec-note">Most points left sitting on the bench in a single week. The bench doesn't forget.</p></div>
+    <div class="card" id="blunders"></div>
+  </section>
+</div>
+<footer class="ggg"><div class="in">GGG League · data from the Sleeper API · stats computed 2026-07-26 · regular-season records unless noted · grudges update automatically</div></footer>
+<script>
+const DATA = {"records": {"high_weeks": [{"s": "2021", "wk": 2, "pts": 179.66, "name": "BJohnson5"}, {"s": "2022", "wk": 8, "pts": 176.06, "name": "TommyHolland"}, {"s": "2023", "wk": 13, "pts": 170.46, "name": "EvanDeFilippis"}, {"s": "2024", "wk": 14, "pts": 169.58, "name": "EvanDeFilippis"}, {"s": "2021", "wk": 6, "pts": 168.52, "name": "BJohnson5"}, {"s": "2022", "wk": 5, "pts": 168.46, "name": "Strubes"}, {"s": "2024", "wk": 4, "pts": 167.34, "name": "BJohnson5"}, {"s": "2025", "wk": 7, "pts": 166.78, "name": "EvanDeFilippis"}, {"s": "2021", "wk": 1, "pts": 165.7, "name": "clenger97"}, {"s": "2022", "wk": 7, "pts": 164.34, "name": "Philly000"}], "low_weeks": [{"s": "2022", "wk": 6, "pts": 45.26, "name": "swinglejt"}, {"s": "2025", "wk": 13, "pts": 53.44, "name": "HartManStan"}, {"s": "2020", "wk": 12, "pts": 56.1, "name": "srice33"}, {"s": "2021", "wk": 14, "pts": 57.82, "name": "lynnkm23"}, {"s": "2022", "wk": 9, "pts": 58.4, "name": "swinglejt"}, {"s": "2020", "wk": 10, "pts": 59.02, "name": "Philly000"}, {"s": "2025", "wk": 10, "pts": 59.52, "name": "lynnkm23"}, {"s": "2025", "wk": 6, "pts": 61.4, "name": "lynnkm23"}, {"s": "2025", "wk": 13, "pts": 63.14, "name": "BJohnson5"}, {"s": "2022", "wk": 13, "pts": 63.84, "name": "lynnkm23"}], "blowouts": [{"s": "2025", "wk": 13, "w_pts": 147.44, "l_pts": 53.44, "margin": 94.0, "w": "PrezNix", "l": "HartManStan"}, {"s": "2023", "wk": 1, "w_pts": 157.64, "l_pts": 67.0, "margin": 90.64, "w": "Philly000", "l": "TommyHolland"}, {"s": "2025", "wk": 10, "w_pts": 139.84, "l_pts": 59.52, "margin": 80.32, "w": "EvanDeFilippis", "l": "lynnkm23"}, {"s": "2021", "wk": 6, "w_pts": 168.52, "l_pts": 91.18, "margin": 77.34, "w": "BJohnson5", "l": "clenger97"}, {"s": "2023", "wk": 2, "w_pts": 146.68, "l_pts": 72.9, "margin": 73.78, "w": "DaBlondest", "l": "EvanDeFilippis"}, {"s": "2025", "wk": 9, "w_pts": 151.92, "l_pts": 78.42, "margin": 73.5, "w": "EvanDeFilippis", "l": "Strubes"}, {"s": "2022", "wk": 5, "w_pts": 168.46, "l_pts": 95.38, "margin": 73.08, "w": "Strubes", "l": "Philly000"}, {"s": "2020", "wk": 13, "w_pts": 150.06, "l_pts": 77.32, "margin": 72.74, "w": "swinglejt", "l": "srice33"}, {"s": "2020", "wk": 3, "w_pts": 156.1, "l_pts": 86.98, "margin": 69.12, "w": "Philly000", "l": "lynnkm23"}, {"s": "2024", "wk": 4, "w_pts": 143.62, "l_pts": 76.9, "margin": 66.72, "w": "TommyHolland", "l": "Former manager"}], "closest": [{"s": "2023", "wk": 10, "w_pts": 82.02, "l_pts": 81.94, "margin": 0.08, "w": "HartManStan", "l": "VEROVILLIANZ"}, {"s": "2021", "wk": 3, "w_pts": 119.82, "l_pts": 119.7, "margin": 0.12, "w": "EvanDeFilippis", "l": "DaBlondest"}, {"s": "2025", "wk": 9, "w_pts": 104.6, "l_pts": 104.34, "margin": 0.26, "w": "DaBlondest", "l": "VEROVILLIANZ"}, {"s": "2024", "wk": 10, "w_pts": 102.3, "l_pts": 101.98, "margin": 0.32, "w": "BJohnson5", "l": "TommyHolland"}, {"s": "2024", "wk": 11, "w_pts": 95.58, "l_pts": 95.2, "margin": 0.38, "w": "DaBlondest", "l": "Former manager"}, {"s": "2024", "wk": 10, "w_pts": 99.42, "l_pts": 99.0, "margin": 0.42, "w": "VEROVILLIANZ", "l": "EvanDeFilippis"}, {"s": "2025", "wk": 7, "w_pts": 110.02, "l_pts": 109.44, "margin": 0.58, "w": "Philly000", "l": "Strubes"}, {"s": "2022", "wk": 3, "w_pts": 92.28, "l_pts": 91.48, "margin": 0.8, "w": "lynnkm23", "l": "swinglejt"}, {"s": "2022", "wk": 14, "w_pts": 90.16, "l_pts": 89.28, "margin": 0.88, "w": "EvanDeFilippis", "l": "swinglejt"}, {"s": "2024", "wk": 5, "w_pts": 110.6, "l_pts": 109.7, "margin": 0.9, "w": "Philly000", "l": "TommyHolland"}], "big_loss": [{"s": "2023", "wk": 3, "pts": 147.48, "vs": 155.7, "name": "TommyHolland"}, {"s": "2022", "wk": 8, "pts": 146.34, "vs": 176.06, "name": "Philly000"}, {"s": "2020", "wk": 5, "pts": 141.9, "vs": 150.36, "name": "TommyHolland"}, {"s": "2020", "wk": 2, "pts": 141.2, "vs": 156.08, "name": "DaBlondest"}, {"s": "2021", "wk": 14, "pts": 140.1, "vs": 161.02, "name": "TommyHolland"}], "cheap_win": [{"s": "2022", "wk": 13, "pts": 75.2, "vs": 63.84, "name": "HartManStan"}, {"s": "2021", "wk": 9, "pts": 78.08, "vs": 71.36, "name": "EvanDeFilippis"}, {"s": "2020", "wk": 5, "pts": 81.88, "vs": 78.54, "name": "lynnkm23"}, {"s": "2023", "wk": 10, "pts": 82.02, "vs": 81.94, "name": "HartManStan"}, {"s": "2025", "wk": 12, "pts": 85.96, "vs": 68.94, "name": "HartManStan"}], "blunders": [{"s": "2021", "wk": 5, "bench": 126.8, "pts": 114.78, "name": "lynnkm23"}, {"s": "2024", "wk": 3, "bench": 111.2, "pts": 101.68, "name": "HartManStan"}, {"s": "2023", "wk": 8, "bench": 106.6, "pts": 150.36, "name": "EvanDeFilippis"}, {"s": "2021", "wk": 6, "bench": 103.6, "pts": 97.76, "name": "HartManStan"}, {"s": "2024", "wk": 8, "bench": 102.9, "pts": 113.7, "name": "lynnkm23"}, {"s": "2024", "wk": 4, "bench": 95.8, "pts": 76.9, "name": "Former manager"}, {"s": "2025", "wk": 4, "bench": 90.9, "pts": 101.8, "name": "lynnkm23"}, {"s": "2020", "wk": 1, "bench": 90.7, "pts": 98.7, "name": "lynnkm23"}, {"s": "2024", "wk": 9, "bench": 88.2, "pts": 159.26, "name": "lynnkm23"}, {"s": "2024", "wk": 3, "bench": 87.3, "pts": 88.78, "name": "VEROVILLIANZ"}]}, "career": [{"name": "TommyHolland", "seasons": 6, "w": 47, "l": 36, "pct": 0.566, "pf": 9494.0, "pa": 9335.3, "titles": 2, "runnerups": 1, "thirds": 2, "toilets": 0, "po_apps": 5, "high_weeks": 11, "luck": 0.2, "ap_pct": 0.564, "streak_w": 6, "streak_l": 4, "aliases": ["TommyHolland"], "active": true}, {"name": "EvanDeFilippis", "seasons": 6, "w": 53, "l": 30, "pct": 0.639, "pf": 9715.4, "pa": 9025.5, "titles": 1, "runnerups": 1, "thirds": 1, "toilets": 0, "po_apps": 5, "high_weeks": 11, "luck": 1.8, "ap_pct": 0.617, "streak_w": 7, "streak_l": 4, "aliases": ["EVANDEFILIPPIS", "EvanDeFilippis"], "active": true}, {"name": "Strubes", "seasons": 6, "w": 49, "l": 34, "pct": 0.59, "pf": 9683.1, "pa": 9261.4, "titles": 1, "runnerups": 1, "thirds": 1, "toilets": 0, "po_apps": 5, "high_weeks": 13, "luck": -0.1, "ap_pct": 0.592, "streak_w": 7, "streak_l": 4, "aliases": ["Strubes"], "active": true}, {"name": "clenger97", "seasons": 3, "w": 24, "l": 17, "pct": 0.585, "pf": 4675.9, "pa": 4535.6, "titles": 1, "runnerups": 0, "thirds": 0, "toilets": 0, "po_apps": 3, "high_weeks": 3, "luck": 1.9, "ap_pct": 0.539, "streak_w": 4, "streak_l": 2, "aliases": ["clenger97"], "active": false}, {"name": "BJohnson5", "seasons": 6, "w": 48, "l": 35, "pct": 0.578, "pf": 9518.6, "pa": 8845.6, "titles": 1, "runnerups": 1, "thirds": 0, "toilets": 0, "po_apps": 5, "high_weeks": 16, "luck": 2.6, "ap_pct": 0.548, "streak_w": 8, "streak_l": 4, "aliases": ["BJohnson5", "Bjohnson2532", "Going4the2peat"], "active": true}, {"name": "PrezNix", "seasons": 1, "w": 7, "l": 7, "pct": 0.5, "pf": 1621.7, "pa": 1502.8, "titles": 0, "runnerups": 0, "thirds": 0, "toilets": 0, "po_apps": 1, "high_weeks": 3, "luck": -0.8, "ap_pct": 0.556, "streak_w": 3, "streak_l": 3, "aliases": ["PrezNix"], "active": true}, {"name": "Philly000", "seasons": 6, "w": 40, "l": 43, "pct": 0.482, "pf": 9160.4, "pa": 9166.7, "titles": 0, "runnerups": 1, "thirds": 1, "toilets": 1, "po_apps": 3, "high_weeks": 10, "luck": 0.3, "ap_pct": 0.478, "streak_w": 6, "streak_l": 7, "aliases": ["Philly000", "nickphillipa"], "active": true}, {"name": "lynnkm23", "seasons": 6, "w": 39, "l": 44, "pct": 0.47, "pf": 8747.8, "pa": 9167.9, "titles": 0, "runnerups": 1, "thirds": 0, "toilets": 0, "po_apps": 3, "high_weeks": 4, "luck": 3.7, "ap_pct": 0.426, "streak_w": 6, "streak_l": 6, "aliases": ["lynnkm23"], "active": true}, {"name": "HartManStan", "seasons": 5, "w": 31, "l": 39, "pct": 0.443, "pf": 7337.7, "pa": 7563.4, "titles": 0, "runnerups": 0, "thirds": 0, "toilets": 1, "po_apps": 1, "high_weeks": 2, "luck": 1.6, "ap_pct": 0.421, "streak_w": 6, "streak_l": 9, "aliases": ["HartManStan"], "active": true}, {"name": "VEROVILLIANZ", "seasons": 3, "w": 17, "l": 25, "pct": 0.405, "pf": 4285.3, "pa": 4410.1, "titles": 0, "runnerups": 0, "thirds": 0, "toilets": 0, "po_apps": 1, "high_weeks": 1, "luck": 1.1, "ap_pct": 0.378, "streak_w": 3, "streak_l": 4, "aliases": ["VEROVILLIANZ"], "active": true}, {"name": "srice33", "seasons": 1, "w": 5, "l": 8, "pct": 0.385, "pf": 1342.1, "pa": 1440.8, "titles": 0, "runnerups": 0, "thirds": 0, "toilets": 1, "po_apps": 0, "high_weeks": 0, "luck": 0.2, "ap_pct": 0.368, "streak_w": 2, "streak_l": 3, "aliases": ["srice33"], "active": false}, {"name": "DaBlondest", "seasons": 6, "w": 31, "l": 52, "pct": 0.373, "pf": 9037.5, "pa": 9601.5, "titles": 0, "runnerups": 0, "thirds": 1, "toilets": 2, "po_apps": 3, "high_weeks": 6, "luck": -7.8, "ap_pct": 0.467, "streak_w": 3, "streak_l": 6, "aliases": ["DaBlondest"], "active": true}, {"name": "swinglejt", "seasons": 4, "w": 20, "l": 35, "pct": 0.364, "pf": 5844.4, "pa": 6361.9, "titles": 0, "runnerups": 0, "thirds": 0, "toilets": 1, "po_apps": 1, "high_weeks": 3, "luck": -4.6, "ap_pct": 0.446, "streak_w": 4, "streak_l": 8, "aliases": ["swinglejt"], "active": false}, {"name": "Former manager", "seasons": 1, "w": 4, "l": 10, "pct": 0.286, "pf": 1326.1, "pa": 1571.6, "titles": 0, "runnerups": 0, "thirds": 0, "toilets": 0, "po_apps": 0, "high_weeks": 0, "luck": 0.0, "ap_pct": 0.286, "streak_w": 2, "streak_l": 5, "aliases": [], "active": false}]};
+const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
+const ctx = e => e.s + ' wk' + e.wk;
+
+/* luck bars */
+(function(){
+  const host = document.getElementById('luck');
+  const rows = [...DATA.career].filter(c=>c.seasons>=2||c.active).sort((a,b)=>b.luck-a.luck);
+  const max = Math.max(...rows.map(r=>Math.abs(r.luck)), 1);
+  rows.forEach(c=>{
+    const row = $('div','luckrow');
+    row.appendChild($('span','lname', c.name));
+    const track = $('div','lucktrack');
+    const bar = $('div','luckbar ' + (c.luck>=0?'pos':'neg'));
+    bar.style.width = (Math.abs(c.luck)/max*50) + '%';
+    if(c.luck>=0) bar.style.left='50%'; else bar.style.right='50%';
+    track.appendChild(bar);
+    const mid = $('div','luckmid'); track.appendChild(mid);
+    row.appendChild(track);
+    row.appendChild($('span','lval ' + (c.luck>1?'good':(c.luck<-1?'bad':'')), (c.luck>0?'+':'')+c.luck.toFixed(1)));
+    host.appendChild(row);
+  });
+})();
+
+function list(id, items, fmt){
+  const host = document.getElementById(id);
+  const ol = $('ol','reclist');
+  items.forEach(e=>{ const li=$('li'); fmt(li,e); ol.appendChild(li); });
+  host.appendChild(ol);
+}
+list('high', DATA.records.high_weeks, (li,e)=>{ li.appendChild($('b',null,e.pts.toFixed(1))); li.appendChild(document.createTextNode(' — '+e.name+' · '+ctx(e))); });
+list('low', DATA.records.low_weeks, (li,e)=>{ li.appendChild($('b','bad',e.pts.toFixed(1))); li.appendChild(document.createTextNode(' — '+e.name+' · '+ctx(e))); });
+list('blow', DATA.records.blowouts, (li,e)=>{ li.appendChild($('b',null,'+'+e.margin.toFixed(1))); li.appendChild(document.createTextNode(' — '+e.w+' ('+e.w_pts.toFixed(1)+') over '+e.l+' ('+e.l_pts.toFixed(1)+') · '+ctx(e))); });
+list('close', DATA.records.closest, (li,e)=>{ li.appendChild($('b',null,e.margin.toFixed(2))); li.appendChild(document.createTextNode(' — '+e.w+' edges '+e.l+' '+e.w_pts.toFixed(1)+'–'+e.l_pts.toFixed(1)+' · '+ctx(e))); });
+list('bigloss', DATA.records.big_loss, (li,e)=>{ li.appendChild($('b','bad',e.pts.toFixed(1))); li.appendChild(document.createTextNode(' — '+e.name+' lost to '+e.vs.toFixed(1)+' · '+ctx(e))); });
+list('cheapwin', DATA.records.cheap_win, (li,e)=>{ li.appendChild($('b','good',e.pts.toFixed(1))); li.appendChild(document.createTextNode(' — '+e.name+' beat '+e.vs.toFixed(1)+' · '+ctx(e))); });
+list('blunders', DATA.records.blunders, (li,e)=>{ li.appendChild($('b','bad',e.bench.toFixed(1))); li.appendChild(document.createTextNode(' on the bench — '+e.name+' (scored '+e.pts.toFixed(1)+') · '+ctx(e))); });
+</script>

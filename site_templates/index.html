@@ -1,0 +1,114 @@
+<meta charset="utf-8">
+<title>GGG League</title>
+<link rel="stylesheet" href="ggg.css">
+__NAV__
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">GGG League &middot; Est. 2020 &middot; 10 teams &middot; 0.5 PPR</div>
+    <h1>The Situation Room</h1>
+    <p class="lede">Six seasons. Two dynasties denied. One toilet bowl nobody escapes clean. This is the home of the GGG League — history, receipts, and the 2026 salary-cap era.</p>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <div class="eyebrow">2026 offseason</div>
+      <h2 id="liveTitle">Draft season is coming</h2>
+      <p class="sec-note" id="liveNote">The 2026 league hasn't renewed on Sleeper yet. When it does, this page tracks keeper deadlines, cap sheets, and live standings automatically.</p>
+    </div>
+    <div class="tiles" id="liveTiles"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div class="eyebrow">The proposal on the table</div>
+      <h2>The Cap Keeper era</h2>
+      <p class="sec-note">One number per player, one rule for trades. The full pitch — with our own fire sales replayed as evidence — and the interactive keeper planner:</p>
+    </div>
+    <div class="duo-cards">
+      <a class="bigcard" href="cap-report.html">
+        <div class="eyebrow">Exhibit A</div>
+        <h3>The Fire-Sale Fix</h3>
+        <p>2024–2025 replayed under a $220 cap. Three mega-buys flagged. Every balanced trade untouched.</p>
+      </a>
+      <a class="bigcard" href="cap-planner.html">
+        <div class="eyebrow">The toy</div>
+        <h3>Keeper Planner 2026</h3>
+        <p>Toggle your keepers, watch your budget and opening cap react. Selections save in your browser.</p>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div class="eyebrow">Reigning champion</div>
+      <h2 id="champLine"></h2>
+    </div>
+    <div class="card" id="finalStandings"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div class="eyebrow">Quick hits from the archive</div>
+      <h2>Numbers that start arguments</h2>
+    </div>
+    <div class="tiles" id="funTiles"></div>
+  </section>
+</div>
+__FOOT__
+<script>
+const DATA = /*__DATA__*/{};
+const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
+
+/* champion + 2025 standings */
+const s25 = DATA.season2025;
+document.getElementById('champLine').textContent = s25.champ + ' — 2025 champion';
+(function(){
+  const host = document.getElementById('finalStandings');
+  const tbl = $('table','tbl');
+  const hr = $('tr'); ['#','Team','W-L','PF','PA',''].forEach(h=>hr.appendChild($('th',null,h))); tbl.appendChild(hr);
+  s25.standings.forEach((t,i)=>{
+    const r = $('tr');
+    r.appendChild($('td','mut',String(i+1)));
+    r.appendChild($('td',null,t.name));
+    r.appendChild($('td',null,t.w+'-'+t.l));
+    r.appendChild($('td',null,String(t.pf)));
+    r.appendChild($('td','mut',String(t.pa)));
+    const tag = $('td');
+    if (t.name===s25.champ) tag.appendChild($('span','chip gold','CHAMP'));
+    else if (t.name===s25.toilet) tag.appendChild($('span','chip fire','TOILET BOWL'));
+    r.appendChild(tag);
+    tbl.appendChild(r);
+  });
+  const sc = $('div','scroll'); sc.appendChild(tbl); host.appendChild(sc);
+})();
+
+/* fun tiles */
+(function(){
+  const host = document.getElementById('funTiles');
+  DATA.funFacts.forEach(f=>{
+    const d = $('div','tile');
+    d.appendChild($('div','num '+(f.bad?'bad':'good'), f.num));
+    d.appendChild($('div','lbl', f.lbl));
+    host.appendChild(d);
+  });
+})();
+
+/* live 2026 check (works on real hosting; fails silently otherwise) */
+(async function(){
+  try{
+    const uid = DATA.commishUserId;
+    const r = await fetch('https://api.sleeper.app/v1/user/'+uid+'/leagues/nfl/2026');
+    const leagues = await r.json();
+    const lg = (leagues||[]).find(l=>l.previous_league_id===DATA.leagueId2025);
+    if(!lg) return;
+    document.getElementById('liveTitle').textContent = lg.name + ' is live — ' + lg.status.replace('_',' ');
+    document.getElementById('liveNote').textContent = 'Pulled live from Sleeper just now. ' + (lg.settings?.leg ? ('Week ' + lg.settings.leg + '.') : 'Set your keepers.');
+    const tiles = document.getElementById('liveTiles');
+    tiles.textContent='';
+    const mk=(n,l)=>{const d=$('div','tile');d.appendChild($('div','num good',n));d.appendChild($('div','lbl',l));tiles.appendChild(d);};
+    mk(String(lg.total_rosters),'teams renewed');
+    mk(lg.season,'season');
+    mk(lg.status.replace('_',' '),'league status');
+  }catch(e){/* offline/static mode */}
+})();
+</script>

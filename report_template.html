@@ -1,0 +1,379 @@
+<meta charset="utf-8">
+<title>GGG Cap Keeper — Retro-Analysis</title>
+<style>
+@font-face{font-family:'Poppins';font-style:normal;font-weight:400;font-display:swap;src:url(data:font/woff2;base64,__FONT400__) format('woff2');unicode-range:U+0000-00FF,U+2013,U+2014,U+2019,U+2192;}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:600;font-display:swap;src:url(data:font/woff2;base64,__FONT600__) format('woff2');unicode-range:U+0000-00FF,U+2013,U+2014,U+2019,U+2192;}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:800;font-display:swap;src:url(data:font/woff2;base64,__FONT800__) format('woff2');unicode-range:U+0000-00FF,U+2013,U+2014,U+2019,U+2192;}
+
+:root{
+  --bg:#0B2B26; --surface:#0E332E; --card:#103A34; --card2:#0D3630;
+  --line:#1D4A42; --line2:#2A5A50;
+  --ink:#EDF7F2; --ink2:#9DC3B7; --ink3:#6E958A;
+  --mint:#2FE6A6; --mint-ink:#062019;
+  --mark:#17AD7A; --coral:#E84B3F; --coral-soft:rgba(232,75,63,.14); --gold:#D9A93C;
+  --navy:#131C4D; --navy-line:#2FE6A6;
+}
+@media (prefers-color-scheme: light){
+  :root{
+    --bg:#F1F7F4; --surface:#F8FCFA; --card:#FFFFFF; --card2:#F4FAF7;
+    --line:#D8E7E0; --line2:#C2D8CF;
+    --ink:#0F2F29; --ink2:#48685F; --ink3:#7A968D;
+    --mint:#0A9B6C; --mint-ink:#FFFFFF;
+    --mark:#0A9B6C; --coral:#CC3D2F; --coral-soft:rgba(204,61,47,.10); --gold:#8C6A10;
+    --navy:#1A2560; --navy-line:#0A9B6C;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B2B26; --surface:#0E332E; --card:#103A34; --card2:#0D3630;
+  --line:#1D4A42; --line2:#2A5A50;
+  --ink:#EDF7F2; --ink2:#9DC3B7; --ink3:#6E958A;
+  --mint:#2FE6A6; --mint-ink:#062019;
+  --mark:#17AD7A; --coral:#E84B3F; --coral-soft:rgba(232,75,63,.14); --gold:#D9A93C;
+  --navy:#131C4D; --navy-line:#2FE6A6;
+}
+:root[data-theme="light"]{
+  --bg:#F1F7F4; --surface:#F8FCFA; --card:#FFFFFF; --card2:#F4FAF7;
+  --line:#D8E7E0; --line2:#C2D8CF;
+  --ink:#0F2F29; --ink2:#48685F; --ink3:#7A968D;
+  --mint:#0A9B6C; --mint-ink:#FFFFFF;
+  --mark:#0A9B6C; --coral:#CC3D2F; --coral-soft:rgba(204,61,47,.10); --gold:#8C6A10;
+  --navy:#1A2560; --navy-line:#0A9B6C;
+}
+
+*{box-sizing:border-box;}
+body{background:var(--bg);color:var(--ink);font-family:'Poppins',system-ui,sans-serif;font-weight:400;line-height:1.6;margin:0;}
+.wrap{max-width:880px;margin:0 auto;padding:48px 20px 80px;}
+h1,h2,h3{text-wrap:balance;margin:0;}
+p{margin:0;}
+a{color:var(--mint);}
+
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--mint);}
+.masthead{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:14px;}
+.monogram{flex:none;width:64px;height:64px;background:var(--mint);color:var(--mint-ink);border-radius:10px;display:grid;place-items:center;font-weight:800;font-size:20px;letter-spacing:.02em;}
+h1{font-size:clamp(34px,6vw,52px);font-weight:800;line-height:1.08;letter-spacing:-.01em;margin:10px 0 14px;}
+.lede{font-size:17px;color:var(--ink2);max-width:62ch;}
+
+section{margin-top:64px;}
+.sec-head{display:flex;flex-direction:column;gap:6px;margin-bottom:20px;}
+h2{font-size:24px;font-weight:800;}
+.sec-note{color:var(--ink2);max-width:65ch;}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:22px;}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 18px 15px;}
+.tile .num{font-size:34px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums;}
+.tile .num.bad{color:var(--coral);}
+.tile .num.good{color:var(--mint);}
+.tile .lbl{font-size:13px;color:var(--ink2);margin-top:6px;line-height:1.45;}
+
+.rules{display:grid;gap:10px;margin-top:18px;}
+.rule{display:flex;gap:14px;align-items:baseline;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 18px;}
+.rule b{font-weight:600;}
+.rule .k{flex:none;font-weight:800;color:var(--mint);font-size:13px;letter-spacing:.08em;}
+
+.salary-strip{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:16px;}
+.scell{background:var(--card);border:1px solid var(--line);border-radius:8px;text-align:center;padding:8px 2px 7px;position:relative;overflow:hidden;}
+.scell .fill{position:absolute;inset:auto 0 0 0;background:var(--mark);opacity:.22;}
+.scell .r{position:relative;font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--ink3);}
+.scell .v{position:relative;font-weight:800;font-size:16px;font-variant-numeric:tabular-nums;}
+@media (max-width:640px){.salary-strip{grid-template-columns:repeat(4,1fr);}}
+
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600;white-space:nowrap;}
+.chip.rec{background:var(--navy);color:#EDF7F2;border:1px solid var(--navy-line);}
+.chip.champ{background:transparent;color:var(--gold);border:1px solid var(--gold);}
+.chip.flag{background:var(--coral);color:#fff;letter-spacing:.06em;}
+.chip.fire{background:transparent;color:var(--coral);border:1px solid var(--coral);letter-spacing:.06em;}
+.chip.wk{background:var(--navy);color:#EDF7F2;border:1px solid var(--navy-line);letter-spacing:.06em;}
+
+/* dumbbell chart */
+.chart{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 16px;margin-top:18px;}
+.chart-title{font-weight:600;font-size:14px;margin-bottom:4px;}
+.chart-legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin-bottom:14px;}
+.chart-legend .sw{display:inline-block;vertical-align:-1px;width:10px;height:10px;border-radius:50%;margin-right:6px;}
+.sw.open{border:2px solid var(--mark);background:var(--card);}
+.sw.peak{background:var(--mark);}
+.sw.overd{background:var(--coral);}
+.db-axis{position:relative;height:18px;margin-left:175px;margin-right:96px;font-size:10px;color:var(--ink3);}
+.db-axis span{position:absolute;transform:translateX(-50%);}
+.db-axis .capL{color:var(--coral);font-weight:600;}
+.db-row{display:grid;grid-template-columns:175px 1fr 96px;align-items:center;min-height:34px;position:relative;padding:2px 0;}
+.db-name{font-size:13px;font-weight:600;padding-right:10px;display:flex;align-items:center;gap:6px;row-gap:2px;min-width:0;flex-wrap:wrap;}
+.db-name .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
+.db-track{position:relative;height:34px;}
+.db-grid{position:absolute;top:0;bottom:0;width:1px;background:var(--line);}
+.db-red{position:absolute;top:3px;bottom:3px;background:var(--coral-soft);border-radius:0 6px 6px 0;}
+.db-cap{position:absolute;top:0;bottom:0;width:0;border-left:2px dashed var(--coral);opacity:.75;}
+.db-line{position:absolute;top:50%;height:2px;transform:translateY(-50%);background:var(--mark);}
+.db-dot{position:absolute;top:50%;width:10px;height:10px;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 2px var(--card);}
+.db-dot.open{border:2px solid var(--mark);background:var(--card);width:9px;height:9px;}
+.db-dot.peak{background:var(--mark);}
+.db-dot.peak.over{background:var(--coral);}
+.db-vals{font-size:12px;font-variant-numeric:tabular-nums;text-align:right;color:var(--ink2);white-space:nowrap;}
+.db-vals b{font-weight:600;color:var(--ink);}
+.db-vals b.over{color:var(--coral);}
+.db-row:hover .db-track{background:color-mix(in srgb,var(--line) 30%,transparent);border-radius:6px;}
+details.tbl{margin-top:12px;font-size:13px;color:var(--ink2);}
+details.tbl summary{cursor:pointer;font-weight:600;}
+details.tbl table{border-collapse:collapse;margin-top:10px;width:100%;}
+details.tbl th,details.tbl td{text-align:left;padding:5px 10px 5px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
+details.tbl th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);font-weight:600;}
+
+/* trade cards */
+.trades{display:grid;gap:12px;margin-top:18px;}
+.trade{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 18px 16px;}
+.trade.violation{border-left:4px solid var(--coral);padding-left:15px;}
+.trade-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.trade-sides{display:grid;gap:12px;}
+@media (min-width:640px){.trade-sides{grid-template-columns:1fr 1fr;}}
+.side{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;}
+.side-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+.side-team{font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px;min-width:0;}
+.side-cap{font-size:13px;font-variant-numeric:tabular-nums;color:var(--ink2);}
+.side-cap b{font-weight:800;color:var(--ink);}
+.side-cap b.over{color:var(--coral);}
+.gets{display:flex;flex-wrap:wrap;gap:6px;}
+.pchip{display:inline-flex;align-items:baseline;gap:6px;background:var(--surface);border:1px solid var(--line2);border-radius:8px;padding:3px 9px;font-size:12.5px;font-weight:600;}
+.pchip .s{font-weight:400;color:var(--ink2);font-variant-numeric:tabular-nums;font-size:11.5px;}
+.pchip.pick{border-style:dashed;font-weight:400;color:var(--ink2);}
+.pchip.none{border:none;background:transparent;color:var(--ink3);font-weight:400;}
+
+.amend{display:grid;gap:12px;margin-top:18px;}
+@media (min-width:640px){.amend{grid-template-columns:1fr 1fr;}}
+.amend .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;}
+.amend h3{font-size:16px;font-weight:800;margin:8px 0 8px;}
+.amend p{font-size:14px;color:var(--ink2);}
+
+.callout{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-top:18px;}
+.callout p{color:var(--ink2);font-size:14.5px;}
+.callout p+p{margin-top:10px;}
+.callout b{color:var(--ink);font-weight:600;}
+
+.fineprint{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink3);line-height:1.7;}
+
+@media (max-width:560px){
+  .db-row{grid-template-columns:112px 1fr 82px;}
+  .db-axis{margin-left:112px;margin-right:82px;}
+  .db-name{font-size:12px;}
+  .masthead{flex-direction:column-reverse;}
+}
+@media (prefers-reduced-motion: no-preference){
+  .db-line,.db-dot{transition:left .2s ease,width .2s ease;}
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="masthead">
+      <div>
+        <div class="eyebrow">GGG League &middot; Rule Proposal &middot; 2026 — 7th Annual</div>
+        <h1>The Fire-Sale Fix</h1>
+      </div>
+      <div class="monogram">GGG</div>
+    </div>
+    <p class="lede">Every year, teams that fall out of the race sell real players to contenders for future picks — players worth nothing to the seller, everything to the buyer. This proposal adds <b>one number per player and one rule</b>, then replays our actual 2024 and 2025 seasons to show exactly which trades it would have stopped. Nothing moves off Sleeper.</p>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <div class="eyebrow">The receipts</div>
+      <h2>We don't have a trading problem. We have a pricing problem.</h2>
+      <p class="sec-note">A rebuilding team's studs cost them nothing to give away — they're only keeping three players anyway. So contenders buy stars for picks alone. It's rational, it's legal, and it decides our playoffs. From our own transaction log:</p>
+    </div>
+    <div class="tiles" id="tiles"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div class="eyebrow">Amendment A &middot; The Cap Keeper Rule</div>
+      <h2>Every player gets a price. Every trade has to fit.</h2>
+      <p class="sec-note">No auction, no contracts, no spreadsheets. The draft we already run sets every salary automatically.</p>
+    </div>
+    <div class="rules">
+      <div class="rule"><span class="k">A1</span><span><b>Salary by draft round.</b> Every player's salary is fixed by the round they were drafted in (table below). Keepers count at their escalated round — exactly like today. Waiver and free-agent pickups cost <b>$1</b>. Draft picks carry <b>$0</b>.</span></div>
+      <div class="rule"><span class="k">A2</span><span><b>$200 team cap.</b> Your roster's total salary can never exceed $200 after a trade. A normal drafted roster starts around $170&ndash;$180, so the cap only bites when someone tries to stack stars.</span></div>
+      <div class="rule"><span class="k">A3</span><span><b>Trades must fit — both sides.</b> If a deal puts either roster over $200, it can't process as constructed. Send real salary back, or it doesn't happen. The commissioner reverses violations; the cap sheet is public to everyone.</span></div>
+      <div class="rule"><span class="k">A4</span><span><b>Nothing else changes.</b> Same keepers, same escalation, same waivers, same deadlines. Pre-draft keeper-rights trades stay exempt — the cap sheet is born on draft night.</span></div>
+    </div>
+    <div class="salary-strip" id="salaryStrip"></div>
+  </section>
+
+  <section id="seasons"></section>
+
+  <section>
+    <div class="sec-head">
+      <div class="eyebrow">Full disclosure</div>
+      <h2>What the cap alone doesn't catch</h2>
+      <p class="sec-note">The cap blocked the mega-buys, but two smaller fire sales stayed legal because the buyer had room (Kenneth Walker to a 4-0 team in 2025 for one bench back and a 5th). And today's rules still <i>reward</i> selling: draft order is the inverse of playoff finish, so gutting your roster improves your pick. Two companion amendments close the loop:</p>
+    </div>
+    <div class="amend">
+      <div class="card">
+        <div class="eyebrow">Amendment B</div>
+        <h3>Draft order by points-for</h3>
+        <p>Non-playoff teams draft in order of <b>total points scored</b>, not inverse finish. Sell your studs and your roster stops scoring — and your draft slot sinks with it. Tanking stops paying twice.</p>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Amendment C</div>
+        <h3>The rental tax</h3>
+        <p>A player acquired by in-season trade costs <b>one round higher</b> to keep. Buyers stop getting this year's production <i>and</i> a discounted keeper in the same deal — rentals become rentals.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div class="eyebrow">How it runs</div>
+      <h2>Zero admin. We stay on Sleeper.</h2>
+    </div>
+    <div class="callout">
+      <p><b>A companion site tracks everything automatically.</b> It reads our league straight from Sleeper's public data — draft results, rosters, waivers, trades — assigns salaries, and shows a live cap sheet for all ten teams. Everyone sees everyone's cap. Propose a trade, check the page, and you know instantly whether it fits.</p>
+      <p>This report was generated by that engine, replaying our real 2024&ndash;2025 transaction logs under the proposed rule. No spreadsheets, no manual entry, no honor system — the same code runs live during the 2026 season.</p>
+    </div>
+  </section>
+
+  <div class="fineprint" id="fineprint">
+    <b>Calibration notes.</b> The salary table sums to $178 for a balanced 16-round roster, leaving roughly $22 of headroom under the $200 cap — enough for one big in-season buy, never a hoard. Star players re-added from waivers after season-ending injuries cost $1, which is intended: damaged goods are cheap. Draft-day pick trading is unaffected, but your post-draft roster must fit the cap, which also prices early-pick hoarding (one 2025 roster opened at $223 under this table and would have drafted differently). Records shown are at the time of each trade. Data: Sleeper league history, seasons 2020&ndash;2025, pulled 2026-07-26.
+  </div>
+</div>
+
+<script>
+const DATA = /*__DATA__*/{};
+
+const $ = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt !== undefined) e.textContent = txt; return e; };
+const MAXX = 230, CAP = DATA.cap;
+const x = v => (v / MAXX * 100) + '%';
+
+/* stat tiles */
+(function(){
+  const t = document.getElementById('tiles');
+  const s = DATA.stats;
+  const mk = (num, cls, lbl) => { const d = $('div','tile'); d.appendChild($('div','num '+cls, num)); d.appendChild($('div','lbl', lbl)); t.appendChild(d); };
+  mk(String(s.violations), 'bad', 'mega-buys since 2024 that would have been over the cap — every one by a team 3-2 or better');
+  mk(String(s.fireSales), 'bad', 'fire sales by sub-.500 teams: real starters out, only picks and $1 players back');
+  mk('$' + s.dumped, 'bad', 'combined salary those sellers shipped to contenders in-season');
+  mk('$' + s.headroom, 'good', 'cap headroom on a normal roster — room for one splash move, not an arms race');
+})();
+
+/* salary strip */
+(function(){
+  const strip = document.getElementById('salaryStrip');
+  const vals = Object.values(DATA.salary);
+  const max = Math.max(...vals);
+  Object.entries(DATA.salary).forEach(([r, v]) => {
+    const c = $('div','scell');
+    const f = $('div','fill'); f.style.height = Math.round(v / max * 100) + '%';
+    c.appendChild(f);
+    c.appendChild($('div','r','R' + r));
+    c.appendChild($('div','v','$' + v));
+    strip.appendChild(c);
+  });
+})();
+
+/* seasons */
+(function(){
+  const host = document.getElementById('seasons');
+  DATA.seasons.forEach((season, idx) => {
+    const sec = $('div');
+    if (idx > 0) sec.style.marginTop = '48px';
+    const head = $('div','sec-head');
+    head.appendChild($('div','eyebrow', 'The replay · ' + season.season));
+    head.appendChild($('h2', null, season.title));
+    const note = $('p','sec-note', season.note);
+    head.appendChild(note);
+    sec.appendChild(head);
+
+    /* dumbbell chart */
+    const ch = $('div','chart');
+    ch.appendChild($('div','chart-title', season.season + ' cap sheets — draft night to season peak ($' + CAP + ' cap)'));
+    const lg = $('div','chart-legend');
+    [['open','draft night'],['peak','season peak'],['overd','peak over the cap']].forEach(([cls,lab]) => {
+      const s = $('span'); s.appendChild($('span','sw ' + cls)); s.appendChild(document.createTextNode(lab)); lg.appendChild(s);
+    });
+    ch.appendChild(lg);
+    const ax = $('div','db-axis');
+    [0,50,100,150].forEach(v => { const s = $('span', null, '$' + v); s.style.left = x(v); ax.appendChild(s); });
+    const capLab = $('span','capL','$200 CAP'); capLab.style.left = x(200); ax.appendChild(capLab);
+    ch.appendChild(ax);
+
+    const teams = [...season.teams].sort((a,b) => b.peak - a.peak);
+    teams.forEach(tm => {
+      const row = $('div','db-row');
+      const nameWrap = $('div','db-name');
+      nameWrap.appendChild($('span','nm', tm.team));
+      nameWrap.appendChild($('span','chip rec', tm.w + '-' + tm.l));
+      if (tm.champ) nameWrap.appendChild($('span','chip champ','CHAMP'));
+      row.appendChild(nameWrap);
+      const tr = $('div','db-track');
+      [50,100,150].forEach(v => { const g = $('div','db-grid'); g.style.left = x(v); tr.appendChild(g); });
+      const red = $('div','db-red'); red.style.left = x(CAP); red.style.right = '0'; tr.appendChild(red);
+      const cap = $('div','db-cap'); cap.style.left = x(CAP); tr.appendChild(cap);
+      const lo = Math.min(tm.opening, tm.peak), hi = Math.max(tm.opening, tm.peak);
+      const ln = $('div','db-line'); ln.style.left = x(lo); ln.style.width = ((hi - lo) / MAXX * 100) + '%'; tr.appendChild(ln);
+      const d1 = $('div','db-dot open'); d1.style.left = x(tm.opening); tr.appendChild(d1);
+      const d2 = $('div','db-dot peak' + (tm.peak > CAP ? ' over' : '')); d2.style.left = x(tm.peak); tr.appendChild(d2);
+      row.appendChild(tr);
+      const vals = $('div','db-vals');
+      vals.appendChild($('span', null, '$' + tm.opening + ' → '));
+      vals.appendChild($('b', tm.peak > CAP ? 'over' : '', '$' + tm.peak));
+      row.appendChild(vals);
+      row.title = tm.team + ' (' + tm.w + '-' + tm.l + '): drafted at $' + tm.opening + ', peaked at $' + tm.peak + (tm.peak > CAP ? ' — over the cap' : '');
+      ch.appendChild(row);
+    });
+
+    const det = $('details','tbl');
+    det.appendChild($('summary', null, 'View as table'));
+    const tbl = $('table');
+    const hr = $('tr'); ['Team','Record','Draft night','Season peak'].forEach(h => hr.appendChild($('th', null, h)));
+    tbl.appendChild(hr);
+    teams.forEach(tm => {
+      const r = $('tr');
+      r.appendChild($('td', null, tm.team + (tm.champ ? ' (champ)' : '')));
+      r.appendChild($('td', null, tm.w + '-' + tm.l));
+      r.appendChild($('td', null, '$' + tm.opening));
+      r.appendChild($('td', null, '$' + tm.peak + (tm.peak > CAP ? ' — over cap' : '')));
+      tbl.appendChild(r);
+    });
+    det.appendChild(tbl);
+    ch.appendChild(det);
+    sec.appendChild(ch);
+
+    /* trade cards */
+    const wrap = $('div','trades');
+    season.trades.forEach(t => {
+      const card = $('article','trade' + (t.violation ? ' violation' : ''));
+      const th = $('div','trade-head');
+      th.appendChild($('span','chip wk','WEEK ' + t.week));
+      if (t.violation) th.appendChild($('span','chip flag','OVER CAP'));
+      if (t.fireSale) th.appendChild($('span','chip fire','FIRE SALE'));
+      card.appendChild(th);
+      const sides = $('div','trade-sides');
+      t.sides.forEach(sd => {
+        const box = $('div','side');
+        const sh = $('div','side-head');
+        const tn = $('div','side-team');
+        tn.appendChild($('span','nm', sd.team));
+        tn.appendChild($('span','chip rec', sd.record));
+        sh.appendChild(tn);
+        const cp = $('div','side-cap');
+        cp.appendChild(document.createTextNode('cap $' + sd.before + ' → '));
+        cp.appendChild($('b', sd.over ? 'over' : '', '$' + sd.after));
+        sh.appendChild(cp);
+        box.appendChild(sh);
+        const g = $('div','gets');
+        if (!sd.in.length && !sd.picks.length) g.appendChild($('span','pchip none','nothing but picks — see other side'));
+        sd.in.forEach(p => {
+          const pc = $('span','pchip');
+          pc.appendChild(document.createTextNode(p.name));
+          pc.appendChild($('span','s','$' + p.sal));
+          g.appendChild(pc);
+        });
+        sd.picks.forEach(pk => g.appendChild($('span','pchip pick', pk + ' pick')));
+        box.appendChild(g);
+        sides.appendChild(box);
+      });
+      card.appendChild(sides);
+      wrap.appendChild(card);
+    });
+    sec.appendChild(wrap);
+    host.appendChild(sec);
+  });
+})();
+</script>

@@ -1,0 +1,74 @@
+<meta charset="utf-8">
+<title>GGG League — Draft Archive</title>
+<link rel="stylesheet" href="ggg.css">
+__NAV__
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">GGG League &middot; 2020&ndash;2025</div>
+    <h1>The Draft Archive</h1>
+    <p class="lede">Every pick ever made, graded against its round. VOE = season points versus the all-time median for that round — the steal-and-bust detector.</p>
+  </header>
+
+  <section>
+    <div class="sec-head"><div class="eyebrow">The pantheon</div><h2>💎 Greatest steals in league history</h2>
+    <p class="sec-note">Round 6 or later only — where legends are made.</p></div>
+    <div class="card" id="steals"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><div class="eyebrow">The graveyard</div><h2>🪦 Biggest busts in league history</h2>
+    <p class="sec-note">First two rounds only, keepers excluded. Someone said these names out loud with confidence.</p></div>
+    <div class="card" id="busts"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><div class="eyebrow">The boards</div><h2>Every draft, every pick</h2></div>
+    <div id="boards"></div>
+  </section>
+</div>
+__FOOT__
+<script>
+const DATA = /*__DATA__*/{};
+const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
+
+function bigList(id, rows, cls){
+  const host = document.getElementById(id);
+  const ol = $('ol','reclist');
+  rows.forEach(r=>{
+    const li = $('li');
+    li.appendChild($('b', cls, (r.voe>0?'+':'')+r.voe.toFixed(0)));
+    li.appendChild(document.createTextNode(' — ' + r.player + ' (' + r.pos + ') · R' + r.round + ' ' + r.s + ' by ' + r.by + ' · ' + r.pts.toFixed(0) + ' pts'));
+    ol.appendChild(li);
+  });
+  host.appendChild(ol);
+}
+bigList('steals', DATA.drafts.steals, 'good');
+bigList('busts', DATA.drafts.busts, 'bad');
+
+/* boards */
+(function(){
+  const host = document.getElementById('boards');
+  const seasons = Object.keys(DATA.drafts.boards).sort().reverse();
+  seasons.forEach(s=>{
+    const det = $('details','seasonbox');
+    const sum = $('summary'); sum.appendChild($('b',null,s + ' draft')); det.appendChild(sum);
+    const tbl = $('table','tbl');
+    const hr = $('tr'); ['Pick','Player','Pos','By','Pts','VOE',''].forEach(h=>hr.appendChild($('th',null,h))); tbl.appendChild(hr);
+    DATA.drafts.boards[s].forEach(p=>{
+      const r = $('tr');
+      r.appendChild($('td','mut', p.round + '.' + String(p.pick).padStart(3,'0').slice(-2)));
+      r.appendChild($('td',null,p.player));
+      r.appendChild($('td','mut',p.pos));
+      r.appendChild($('td',null,p.by));
+      r.appendChild($('td',null,p.pts.toFixed(0)));
+      r.appendChild($('td', p.voe>60?'good':(p.voe<-60?'bad':'mut'), (p.voe>0?'+':'')+p.voe.toFixed(0)));
+      const tag=$('td');
+      if(p.keeper) tag.appendChild($('span','chip mini','K'));
+      r.appendChild(tag);
+      tbl.appendChild(r);
+    });
+    const sc=$('div','scroll'); sc.appendChild(tbl); det.appendChild(sc);
+    host.appendChild(det);
+  });
+})();
+</script>

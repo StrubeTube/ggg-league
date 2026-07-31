@@ -1,0 +1,352 @@
+<meta charset="utf-8">
+<title>GGG Keeper Planner 2026</title>
+<style>
+@font-face{font-family:'Poppins';font-style:normal;font-weight:400;font-display:swap;src:url(data:font/woff2;base64,__FONT400__) format('woff2');unicode-range:U+0000-00FF,U+2013,U+2014,U+2019,U+2192;}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:600;font-display:swap;src:url(data:font/woff2;base64,__FONT600__) format('woff2');unicode-range:U+0000-00FF,U+2013,U+2014,U+2019,U+2192;}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:800;font-display:swap;src:url(data:font/woff2;base64,__FONT800__) format('woff2');unicode-range:U+0000-00FF,U+2013,U+2014,U+2019,U+2192;}
+
+:root{
+  --bg:#0B2B26; --surface:#0E332E; --card:#103A34; --card2:#0D3630;
+  --line:#1D4A42; --line2:#2A5A50;
+  --ink:#EDF7F2; --ink2:#9DC3B7; --ink3:#6E958A;
+  --mint:#2FE6A6; --mint-ink:#062019;
+  --mark:#17AD7A; --coral:#E84B3F; --coral-soft:rgba(232,75,63,.14); --gold:#D9A93C;
+  --navy:#131C4D; --navy-line:#2FE6A6;
+}
+@media (prefers-color-scheme: light){
+  :root{
+    --bg:#F1F7F4; --surface:#F8FCFA; --card:#FFFFFF; --card2:#F4FAF7;
+    --line:#D8E7E0; --line2:#C2D8CF;
+    --ink:#0F2F29; --ink2:#48685F; --ink3:#7A968D;
+    --mint:#0A9B6C; --mint-ink:#FFFFFF;
+    --mark:#0A9B6C; --coral:#CC3D2F; --coral-soft:rgba(204,61,47,.10); --gold:#8C6A10;
+    --navy:#1A2560; --navy-line:#0A9B6C;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B2B26; --surface:#0E332E; --card:#103A34; --card2:#0D3630;
+  --line:#1D4A42; --line2:#2A5A50;
+  --ink:#EDF7F2; --ink2:#9DC3B7; --ink3:#6E958A;
+  --mint:#2FE6A6; --mint-ink:#062019;
+  --mark:#17AD7A; --coral:#E84B3F; --coral-soft:rgba(232,75,63,.14); --gold:#D9A93C;
+  --navy:#131C4D; --navy-line:#2FE6A6;
+}
+:root[data-theme="light"]{
+  --bg:#F1F7F4; --surface:#F8FCFA; --card:#FFFFFF; --card2:#F4FAF7;
+  --line:#D8E7E0; --line2:#C2D8CF;
+  --ink:#0F2F29; --ink2:#48685F; --ink3:#7A968D;
+  --mint:#0A9B6C; --mint-ink:#FFFFFF;
+  --mark:#0A9B6C; --coral:#CC3D2F; --coral-soft:rgba(204,61,47,.10); --gold:#8C6A10;
+  --navy:#1A2560; --navy-line:#0A9B6C;
+}
+
+*{box-sizing:border-box;}
+body{background:var(--bg);color:var(--ink);font-family:'Poppins',system-ui,sans-serif;line-height:1.55;margin:0;}
+.wrap{max-width:940px;margin:0 auto;padding:36px 16px 80px;}
+h1,h2,h3{text-wrap:balance;margin:0;}
+p{margin:0;}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--mint);}
+h1{font-size:clamp(30px,5.5vw,44px);font-weight:800;line-height:1.1;margin:8px 0 10px;}
+.lede{color:var(--ink2);font-size:15px;max-width:64ch;}
+.rulechips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+.rulechip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:12.5px;font-weight:600;color:var(--ink2);}
+.rulechip b{color:var(--mint);font-weight:800;}
+
+.teambar{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px;}
+.tpill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 15px;font-size:13.5px;font-weight:600;color:var(--ink2);cursor:pointer;font-family:inherit;}
+.tpill:hover{border-color:var(--mint);color:var(--ink);}
+.tpill.active{background:var(--mint);color:var(--mint-ink);border-color:var(--mint);}
+.tpill:focus-visible{outline:2px solid var(--mint);outline-offset:2px;}
+
+.panel{margin-top:22px;display:grid;gap:12px;}
+.duo{display:grid;gap:12px;}
+@media (min-width:700px){.duo{grid-template-columns:1fr 1.4fr;}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;}
+.card h3{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);margin-bottom:12px;}
+
+.bignum{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.05;}
+.bignum small{font-size:16px;font-weight:600;color:var(--ink3);}
+.bignum.over{color:var(--coral);}
+.subnum{font-size:12.5px;color:var(--ink2);margin-top:4px;}
+.meter{height:12px;border-radius:6px;background:var(--card2);border:1px solid var(--line);margin-top:12px;position:relative;overflow:hidden;}
+.meter .fillbar{position:absolute;inset:0 auto 0 0;background:var(--mark);border-radius:6px 0 0 6px;transition:width .18s ease;}
+.meter .fillbar.over{background:var(--coral);}
+.flagline{margin-top:10px;font-size:12px;font-weight:600;color:var(--coral);min-height:18px;}
+
+.stackbar{height:26px;border-radius:8px;background:var(--card2);border:1px solid var(--line);position:relative;overflow:visible;margin-top:12px;}
+.seg{position:absolute;top:3px;bottom:3px;transition:left .18s ease,width .18s ease;}
+.seg.keep{background:var(--mark);border-radius:5px 0 0 5px;}
+.seg.draft{background:var(--mark);opacity:.45;}
+.seg.fill{background:var(--mark);opacity:.18;}
+.capline{position:absolute;top:-5px;bottom:-5px;width:0;border-left:2px dashed var(--coral);}
+.caplab{position:absolute;top:-22px;transform:translateX(-50%);font-size:10px;font-weight:600;color:var(--coral);white-space:nowrap;}
+.stackkey{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;font-size:12px;color:var(--ink2);}
+.stackkey .sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:var(--mark);}
+.stackkey .sw.d{opacity:.45;}
+.stackkey .sw.f{opacity:.18;}
+.headroom{font-size:12.5px;margin-top:8px;color:var(--ink2);}
+.headroom b{color:var(--mint);font-weight:800;}
+.headroom b.neg{color:var(--coral);}
+
+.pickchips{display:flex;flex-wrap:wrap;gap:6px;}
+.pk{background:var(--card2);border:1px solid var(--line2);border-radius:8px;padding:3px 10px;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;}
+.pk .frm{font-weight:400;color:var(--ink3);font-size:11px;}
+.pk.gone{opacity:.42;text-decoration:line-through;border-style:dashed;}
+.pk.extra{opacity:.42;border-style:dotted;}
+.picknote{font-size:11.5px;color:var(--ink3);margin-top:10px;}
+
+.roster{display:grid;gap:6px;}
+.prow{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:10px;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:9px 14px;cursor:pointer;transition:border-color .12s ease;}
+.prow:hover{border-color:var(--line2);}
+.prow.on{border-color:var(--mint);background:color-mix(in srgb,var(--mint) 8%,var(--card2));}
+.prow.inel{cursor:default;opacity:.55;}
+.prow:focus-visible{outline:2px solid var(--mint);outline-offset:2px;}
+.tick{width:18px;height:18px;border-radius:5px;border:2px solid var(--line2);display:grid;place-items:center;font-size:12px;color:var(--mint-ink);flex:none;}
+.prow.on .tick{background:var(--mint);border-color:var(--mint);}
+.pname{font-weight:600;font-size:13.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pname .meta{font-weight:400;color:var(--ink3);font-size:11.5px;margin-left:7px;}
+.rnd{font-size:11px;color:var(--ink3);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.cost{font-weight:800;font-size:14px;font-variant-numeric:tabular-nums;text-align:right;min-width:38px;}
+.next{font-size:11.5px;color:var(--ink3);font-variant-numeric:tabular-nums;text-align:right;min-width:52px;white-space:nowrap;}
+.rentonly{font-size:11px;color:var(--ink3);font-style:normal;}
+.colhead{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:10px;padding:0 14px 4px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);font-weight:600;}
+.colhead span:nth-child(4),.colhead span:nth-child(5){text-align:right;}
+.rowactions{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap;}
+.resetbtn{background:transparent;border:1px solid var(--line2);border-radius:8px;color:var(--ink2);font-family:inherit;font-size:12px;font-weight:600;padding:5px 12px;cursor:pointer;}
+.resetbtn:hover{border-color:var(--coral);color:var(--coral);}
+
+.overview{margin-top:34px;}
+.ovgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:10px;margin-top:14px;}
+.ovcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px;cursor:pointer;transition:border-color .12s ease;}
+.ovcard:hover{border-color:var(--mint);}
+.ovcard.active{border-color:var(--mint);box-shadow:0 0 0 1px var(--mint);}
+.ovcard .nm{font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ovcard .proj{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:4px;}
+.ovcard .proj.over{color:var(--coral);}
+.ovcard .det{font-size:11px;color:var(--ink3);margin-top:2px;}
+.fineprint{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--ink3);line-height:1.7;}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">GGG League &middot; Keeper Planner &middot; 2026 &mdash; 7th Annual</div>
+    <h1>Who are you keeping?</h1>
+    <p class="lede">Tap a team, toggle keepers, and watch the budget and opening cap react. Keepers come <b>off the draft board</b> &mdash; each keep removes your latest-round pick. Costs escalate one round-step every year kept.</p>
+    <div class="rulechips" id="rulechips"></div>
+  </header>
+
+  <div class="teambar" id="teambar" role="tablist" aria-label="Select team"></div>
+
+  <div class="panel" id="panel"></div>
+
+  <div class="overview">
+    <div class="eyebrow">League overview &mdash; projected opening caps under current selections</div>
+    <div class="ovgrid" id="ovgrid"></div>
+  </div>
+
+  <div class="fineprint">
+    <b>How the math works.</b> A player's keep cost is his 2025 draft round moved up one step on the salary table (immediate escalation); "if kept again" shows the following year's step. Round-1 players escalate past the table at +$6 per step. Only players drafted in 2025 are keeper-eligible &mdash; undrafted pickups are rental-only. Projected opening cap = keeper salaries + the salaries of the draft rounds you still hold (your latest-round picks are removed, one per keeper, and any acquired picks beyond your roster space are ignored) + $1 waiver fills for any empty slots. Rosters are final 2025; the planner refreshes when the 2026 league renews on Sleeper. Selections save in your browser only.
+  </div>
+</div>
+
+<script>
+const DATA = /*__DATA__*/{};
+const CFG = DATA.cfg, TABLE = CFG.table;
+const $ = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt !== undefined) e.textContent = txt; return e; };
+
+/* ---- state ---- */
+const LSKEY = 'ggg-keeper-v1';
+let state = { team: 0, picks: {} };  // picks: teamIdx -> array of player indices
+try { const s = JSON.parse(localStorage.getItem(LSKEY)); if (s && s.picks) state = s; } catch (e) {}
+const save = () => { try { localStorage.setItem(LSKEY, JSON.stringify(state)); } catch (e) {} };
+const sel = ti => new Set(state.picks[ti] || []);
+
+/* ---- math ---- */
+function evalTeam(ti) {
+  const tm = DATA.teams[ti], chosen = sel(ti);
+  let keepSpend = 0;
+  chosen.forEach(pi => { keepSpend += tm.players[pi].k26; });
+  const k = chosen.size;
+  const picks = tm.picks.slice();                 // sorted by round asc
+  const removed = picks.splice(Math.max(0, picks.length - k), k);
+  const slots = 16 - k;
+  const used = picks.slice(0, slots);
+  const extra = picks.slice(slots);
+  let draftSpend = 0;
+  used.forEach(p => { draftSpend += TABLE[p.r]; });
+  const fills = Math.max(0, slots - used.length);
+  const opening = keepSpend + draftSpend + fills * CFG.waiver;
+  return { keepSpend, k, removed, used, extra, draftSpend, fills, opening,
+           overBudget: keepSpend > CFG.budget, overCount: k > CFG.maxKeep };
+}
+
+/* ---- header chips ---- */
+(function(){
+  const host = document.getElementById('rulechips');
+  [['$' + CFG.cap, ' season cap'], ['$' + CFG.budget, ' keeper budget'], [CFG.maxKeep, ' keepers max'],
+   ['+1', ' round-step per year kept'], ['drafted', '-only keeps']].forEach(([b, rest]) => {
+    const c = $('span','rulechip'); c.appendChild($('b', null, String(b))); c.appendChild(document.createTextNode(rest)); host.appendChild(c);
+  });
+})();
+
+/* ---- team bar ---- */
+const bar = document.getElementById('teambar');
+DATA.teams.forEach((tm, ti) => {
+  const b = $('button','tpill', tm.name);
+  b.type = 'button'; b.setAttribute('role','tab');
+  b.addEventListener('click', () => { state.team = ti; save(); renderAll(); });
+  bar.appendChild(b);
+});
+
+/* ---- team panel ---- */
+function renderPanel() {
+  const ti = state.team, tm = DATA.teams[ti], chosen = sel(ti), ev = evalTeam(ti);
+  const host = document.getElementById('panel');
+  host.textContent = '';
+
+  const duo = $('div','duo');
+
+  /* budget card */
+  const bc = $('div','card');
+  bc.appendChild($('h3', null, 'Keeper budget — ' + tm.name));
+  const bn = $('div','bignum' + (ev.overBudget ? ' over' : ''));
+  bn.appendChild(document.createTextNode('$' + ev.keepSpend));
+  bn.appendChild($('small', null, ' / $' + CFG.budget));
+  bc.appendChild(bn);
+  bc.appendChild($('div','subnum', ev.k + ' of ' + CFG.maxKeep + ' keeper slots used'));
+  const meter = $('div','meter');
+  const fb = $('div','fillbar' + (ev.overBudget ? ' over' : ''));
+  fb.style.width = Math.min(100, ev.keepSpend / CFG.budget * 100) + '%';
+  meter.appendChild(fb); bc.appendChild(meter);
+  const flags = [];
+  if (ev.overBudget) flags.push('over budget by $' + (ev.keepSpend - CFG.budget));
+  if (ev.overCount) flags.push('too many keepers (max ' + CFG.maxKeep + ')');
+  bc.appendChild($('div','flagline', flags.join(' · ')));
+  duo.appendChild(bc);
+
+  /* opening cap card */
+  const oc = $('div','card');
+  oc.appendChild($('h3', null, 'Projected opening cap'));
+  const on = $('div','bignum' + (ev.opening > CFG.cap ? ' over' : ''));
+  on.appendChild(document.createTextNode('$' + ev.opening));
+  on.appendChild($('small', null, ' / $' + CFG.cap));
+  oc.appendChild(on);
+  const hr = $('div','headroom');
+  const diff = CFG.cap - ev.opening;
+  hr.appendChild(document.createTextNode(diff >= 0 ? 'headroom ' : 'over by '));
+  hr.appendChild($('b', diff >= 0 ? '' : 'neg', '$' + Math.abs(diff)));
+  hr.appendChild(document.createTextNode(diff >= 0 ? ' for in-season buys' : ' — starts in cap jail (trades must reduce salary)'));
+  oc.appendChild(hr);
+  const MAXX = 250;
+  const stack = $('div','stackbar');
+  let x0 = 0;
+  [['keep', ev.keepSpend], ['draft', ev.draftSpend], ['fill', ev.fills * CFG.waiver]].forEach(([cls, v]) => {
+    if (v <= 0) return;
+    const s = $('div','seg ' + cls);
+    s.style.left = (x0 / MAXX * 100) + '%';
+    s.style.width = (v / MAXX * 100) + '%';
+    stack.appendChild(s); x0 += v;
+  });
+  const cl = $('div','capline'); cl.style.left = (CFG.cap / MAXX * 100) + '%'; stack.appendChild(cl);
+  const clab = $('div','caplab','$' + CFG.cap + ' CAP'); clab.style.left = (CFG.cap / MAXX * 100) + '%'; stack.appendChild(clab);
+  oc.appendChild(stack);
+  const key = $('div','stackkey');
+  [['', 'keepers $' + ev.keepSpend], ['d', 'draft rounds $' + ev.draftSpend], ['f', 'waiver fills $' + ev.fills * CFG.waiver]].forEach(([m, lab]) => {
+    const s = $('span'); s.appendChild($('span','sw ' + m)); s.appendChild(document.createTextNode(lab)); key.appendChild(s);
+  });
+  oc.appendChild(key);
+  duo.appendChild(oc);
+  host.appendChild(duo);
+
+  /* picks card */
+  const pc = $('div','card');
+  pc.appendChild($('h3', null, 'Your 2026 draft — ' + (ev.used.length) + ' picks' + (ev.k ? ' (' + ev.k + ' removed by keepers)' : '')));
+  const chips = $('div','pickchips');
+  ev.used.forEach(p => {
+    const c = $('span','pk','R' + p.r);
+    if (p.from) c.appendChild($('span','frm',' · from ' + p.from));
+    chips.appendChild(c);
+  });
+  ev.removed.forEach(p => {
+    const c = $('span','pk gone','R' + p.r);
+    if (p.from) c.appendChild($('span','frm',' · from ' + p.from));
+    chips.appendChild(c);
+  });
+  ev.extra.forEach(p => {
+    const c = $('span','pk extra','R' + p.r + ' · no roster room');
+    chips.appendChild(c);
+  });
+  pc.appendChild(chips);
+  if (tm.picksNote) pc.appendChild($('div','picknote', tm.picksNote));
+  host.appendChild(pc);
+
+  /* roster card */
+  const rc = $('div','card');
+  const ra = $('div','rowactions');
+  ra.appendChild($('h3', null, 'Roster — tap to keep'));
+  const rb = $('button','resetbtn','Reset team');
+  rb.type = 'button';
+  rb.addEventListener('click', () => { state.picks[ti] = []; save(); renderAll(); });
+  ra.appendChild(rb);
+  rc.appendChild(ra);
+  const ch = $('div','colhead');
+  ['','Player','2025','Keep for','If kept again'].forEach(t => ch.appendChild($('span', null, t)));
+  rc.appendChild(ch);
+  const list = $('div','roster');
+  tm.players.forEach((p, pi) => {
+    const on = chosen.has(pi);
+    const row = $('div','prow' + (on ? ' on' : '') + (p.el ? '' : ' inel'));
+    if (p.el) { row.tabIndex = 0; row.setAttribute('role','checkbox'); row.setAttribute('aria-checked', String(on)); }
+    const tick = $('span','tick', on ? '✓' : '');
+    row.appendChild(tick);
+    const nm = $('span','pname', p.n);
+    nm.appendChild($('span','meta', p.pos + (p.t ? ' · ' + p.t : '')));
+    row.appendChild(nm);
+    row.appendChild($('span','rnd', p.el ? 'R' + p.r : '—'));
+    if (p.el) {
+      row.appendChild($('span','cost','$' + p.k26));
+      row.appendChild($('span','next','→ $' + p.k27));
+    } else {
+      row.appendChild($('span','rentonly','undrafted'));
+      row.appendChild($('span','rentonly','rental only'));
+    }
+    if (p.el) {
+      const toggle = () => {
+        const s = sel(ti);
+        if (s.has(pi)) s.delete(pi); else s.add(pi);
+        state.picks[ti] = [...s]; save(); renderAll();
+      };
+      row.addEventListener('click', toggle);
+      row.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(); } });
+    }
+    list.appendChild(row);
+  });
+  rc.appendChild(list);
+  host.appendChild(rc);
+}
+
+/* ---- overview ---- */
+function renderOverview() {
+  const host = document.getElementById('ovgrid');
+  host.textContent = '';
+  DATA.teams.forEach((tm, ti) => {
+    const ev = evalTeam(ti);
+    const c = $('div','ovcard' + (ti === state.team ? ' active' : ''));
+    c.tabIndex = 0;
+    c.appendChild($('div','nm', tm.name));
+    c.appendChild($('div','proj' + (ev.opening > CFG.cap ? ' over' : ''), '$' + ev.opening));
+    c.appendChild($('div','det', ev.k + ' keeper' + (ev.k === 1 ? '' : 's') + ' · $' + ev.keepSpend + ' spent'));
+    const go = () => { state.team = ti; save(); renderAll(); window.scrollTo({top: 0, behavior: 'smooth'}); };
+    c.addEventListener('click', go);
+    c.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+    host.appendChild(c);
+  });
+}
+
+function renderAll() {
+  [...bar.children].forEach((b, i) => b.classList.toggle('active', i === state.team));
+  renderPanel();
+  renderOverview();
+}
+renderAll();
+</script>

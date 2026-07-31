@@ -1,0 +1,75 @@
+<meta charset="utf-8">
+<title>GGG League — Trade Archive</title>
+<link rel="stylesheet" href="ggg.css">
+__NAV__
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">GGG League &middot; 2020&ndash;2025 &middot; full roast mode</div>
+    <h1>The Trade Archive</h1>
+    <p class="lede">Every trade ever, scored by points each side actually got after the deal (that season, on that roster). Verdicts are math, not vibes. Picks ride along unscored — argue accordingly.</p>
+  </header>
+
+  <section>
+    <div class="filterrow" id="filters"></div>
+    <div class="trades" id="trades"></div>
+  </section>
+</div>
+__FOOT__
+<script>
+const DATA = /*__DATA__*/{};
+const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
+
+let filter = 'all';
+const seasons = [...new Set(DATA.trades.map(t=>t.s))].sort().reverse();
+
+function renderFilters(){
+  const host = document.getElementById('filters');
+  host.textContent='';
+  ['all', ...seasons].forEach(s=>{
+    const b = $('button','tpill'+(filter===s?' active':''), s==='all'?'All ('+DATA.trades.length+')':s);
+    b.type='button';
+    b.addEventListener('click',()=>{filter=s;render();});
+    host.appendChild(b);
+  });
+}
+
+function render(){
+  renderFilters();
+  const host = document.getElementById('trades');
+  host.textContent='';
+  const rows = DATA.trades.filter(t=>filter==='all'||t.s===filter);
+  [...rows].reverse().forEach(t=>{
+    const card = $('article','trade');
+    const th = $('div','trade-head');
+    th.appendChild($('span','chip wk', t.s + ' · WK ' + t.wk));
+    if (t.loser) {
+      th.appendChild($('span','chip flag','FLEECED: ' + t.loser + ' (−' + t.diff.toFixed(0) + ' pts)'));
+    } else {
+      th.appendChild($('span','chip even','FAIR FIGHT'));
+    }
+    card.appendChild(th);
+    const sides = $('div','trade-sides');
+    t.sides.forEach(sd=>{
+      const box = $('div','side' + (t.loser===sd.name?' losing':''));
+      const sh = $('div','side-head');
+      sh.appendChild($('span','side-team', sd.name));
+      sh.appendChild($('span','side-cap', sd.pts.toFixed(0) + ' pts gained'));
+      box.appendChild(sh);
+      const g = $('div','gets');
+      sd.got.forEach(p=>{
+        const pc = $('span','pchip');
+        pc.appendChild(document.createTextNode(p.p));
+        pc.appendChild($('span','s', p.pts.toFixed(0) + ' pts'));
+        g.appendChild(pc);
+      });
+      sd.picks.forEach(pk=>g.appendChild($('span','pchip pick', pk + ' pick')));
+      if(!sd.got.length && !sd.picks.length) g.appendChild($('span','pchip none','nothing? bold strategy'));
+      box.appendChild(g);
+      sides.appendChild(box);
+    });
+    card.appendChild(sides);
+    host.appendChild(card);
+  });
+}
+render();
+</script>

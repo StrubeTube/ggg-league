@@ -1,0 +1,114 @@
+<meta charset="utf-8">
+<title>GGG League</title>
+<link rel="stylesheet" href="ggg.css">
+<nav class="ggg"><div class="in"><span class="logo">GGG</span><a href="index.html" class="on">Home</a><a href="history.html" class="">History</a><a href="records.html" class="">Records</a><a href="drafts.html" class="">Drafts</a><a href="trades.html" class="">Trades</a><a href="cap-planner.html" class="">Planner</a><a href="cap-report.html" class="">The Case</a></div></nav>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">GGG League &middot; Est. 2020 &middot; 10 teams &middot; 0.5 PPR</div>
+    <h1>The Situation Room</h1>
+    <p class="lede">Six seasons. Two dynasties denied. One toilet bowl nobody escapes clean. This is the home of the GGG League — history, receipts, and the 2026 salary-cap era.</p>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <div class="eyebrow">2026 offseason</div>
+      <h2 id="liveTitle">Draft season is coming</h2>
+      <p class="sec-note" id="liveNote">The 2026 league hasn't renewed on Sleeper yet. When it does, this page tracks keeper deadlines, cap sheets, and live standings automatically.</p>
+    </div>
+    <div class="tiles" id="liveTiles"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div class="eyebrow">The proposal on the table</div>
+      <h2>The Cap Keeper era</h2>
+      <p class="sec-note">One number per player, one rule for trades. The full pitch — with our own fire sales replayed as evidence — and the interactive keeper planner:</p>
+    </div>
+    <div class="duo-cards">
+      <a class="bigcard" href="cap-report.html">
+        <div class="eyebrow">Exhibit A</div>
+        <h3>The Fire-Sale Fix</h3>
+        <p>2024–2025 replayed under a $220 cap. Three mega-buys flagged. Every balanced trade untouched.</p>
+      </a>
+      <a class="bigcard" href="cap-planner.html">
+        <div class="eyebrow">The toy</div>
+        <h3>Keeper Planner 2026</h3>
+        <p>Toggle your keepers, watch your budget and opening cap react. Selections save in your browser.</p>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div class="eyebrow">Reigning champion</div>
+      <h2 id="champLine"></h2>
+    </div>
+    <div class="card" id="finalStandings"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div class="eyebrow">Quick hits from the archive</div>
+      <h2>Numbers that start arguments</h2>
+    </div>
+    <div class="tiles" id="funTiles"></div>
+  </section>
+</div>
+<footer class="ggg"><div class="in">GGG League · data from the Sleeper API · stats computed 2026-07-26 · regular-season records unless noted · grudges update automatically</div></footer>
+<script>
+const DATA = {"season2025": {"season": "2025", "champ": "TommyHolland", "runner": "EvanDeFilippis", "third": "DaBlondest", "toilet": "Philly000", "standings": [{"uid": "604495863124938752", "name": "EvanDeFilippis", "w": 10, "l": 4, "pf": 1765.0, "pa": 1452.4}, {"uid": "604489019388145664", "name": "BJohnson5", "w": 10, "l": 4, "pf": 1602.6, "pa": 1367.2}, {"uid": "604515710391111680", "name": "TommyHolland", "w": 10, "l": 4, "pf": 1564.3, "pa": 1447.3}, {"uid": "1256627708364849152", "name": "PrezNix", "w": 7, "l": 7, "pf": 1621.7, "pa": 1502.8}, {"uid": "601883039638818816", "name": "DaBlondest", "w": 7, "l": 7, "pf": 1564.6, "pa": 1569.1}, {"uid": "574670546338402304", "name": "Strubes", "w": 6, "l": 8, "pf": 1540.2, "pa": 1627.5}, {"uid": "599636148624613376", "name": "Philly000", "w": 6, "l": 8, "pf": 1377.5, "pa": 1509.2}, {"uid": "1000240914465390593", "name": "VEROVILLIANZ", "w": 6, "l": 8, "pf": 1368.9, "pa": 1435.2}, {"uid": "596856251250434048", "name": "lynnkm23", "w": 4, "l": 10, "pf": 1444.5, "pa": 1621.9}, {"uid": "710978757011271680", "name": "HartManStan", "w": 4, "l": 10, "pf": 1239.4, "pa": 1556.2}], "final_score": ""}, "funFacts": [{"num": "2", "lbl": "toilet bowls for DaBlondest — the only repeat offender", "bad": true}, {"num": "16", "lbl": "career weekly high scores — BJohnson5, the $10 bandit", "bad": false}, {"num": "+3.7", "lbl": "schedule luck (wins gifted) — lynnkm23, most blessed manager", "bad": false}, {"num": "-7.8", "lbl": "schedule luck — DaBlondest, most cursed manager", "bad": true}, {"num": "+300", "lbl": "best draft pick ever: Joe Burrow, R15 2022 by Philly000", "bad": false}, {"num": "76", "lbl": "trades all-time — and yes, they're all graded on the Trades page", "bad": false}], "commishUserId": "574670546338402304", "leagueId2025": "1256797701320753152"};
+const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
+
+/* champion + 2025 standings */
+const s25 = DATA.season2025;
+document.getElementById('champLine').textContent = s25.champ + ' — 2025 champion';
+(function(){
+  const host = document.getElementById('finalStandings');
+  const tbl = $('table','tbl');
+  const hr = $('tr'); ['#','Team','W-L','PF','PA',''].forEach(h=>hr.appendChild($('th',null,h))); tbl.appendChild(hr);
+  s25.standings.forEach((t,i)=>{
+    const r = $('tr');
+    r.appendChild($('td','mut',String(i+1)));
+    r.appendChild($('td',null,t.name));
+    r.appendChild($('td',null,t.w+'-'+t.l));
+    r.appendChild($('td',null,String(t.pf)));
+    r.appendChild($('td','mut',String(t.pa)));
+    const tag = $('td');
+    if (t.name===s25.champ) tag.appendChild($('span','chip gold','CHAMP'));
+    else if (t.name===s25.toilet) tag.appendChild($('span','chip fire','TOILET BOWL'));
+    r.appendChild(tag);
+    tbl.appendChild(r);
+  });
+  const sc = $('div','scroll'); sc.appendChild(tbl); host.appendChild(sc);
+})();
+
+/* fun tiles */
+(function(){
+  const host = document.getElementById('funTiles');
+  DATA.funFacts.forEach(f=>{
+    const d = $('div','tile');
+    d.appendChild($('div','num '+(f.bad?'bad':'good'), f.num));
+    d.appendChild($('div','lbl', f.lbl));
+    host.appendChild(d);
+  });
+})();
+
+/* live 2026 check (works on real hosting; fails silently otherwise) */
+(async function(){
+  try{
+    const uid = DATA.commishUserId;
+    const r = await fetch('https://api.sleeper.app/v1/user/'+uid+'/leagues/nfl/2026');
+    const leagues = await r.json();
+    const lg = (leagues||[]).find(l=>l.previous_league_id===DATA.leagueId2025);
+    if(!lg) return;
+    document.getElementById('liveTitle').textContent = lg.name + ' is live — ' + lg.status.replace('_',' ');
+    document.getElementById('liveNote').textContent = 'Pulled live from Sleeper just now. ' + (lg.settings?.leg ? ('Week ' + lg.settings.leg + '.') : 'Set your keepers.');
+    const tiles = document.getElementById('liveTiles');
+    tiles.textContent='';
+    const mk=(n,l)=>{const d=$('div','tile');d.appendChild($('div','num good',n));d.appendChild($('div','lbl',l));tiles.appendChild(d);};
+    mk(String(lg.total_rosters),'teams renewed');
+    mk(lg.season,'season');
+    mk(lg.status.replace('_',' '),'league status');
+  }catch(e){/* offline/static mode */}
+})();
+</script>

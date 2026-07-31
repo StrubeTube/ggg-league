@@ -1,0 +1,141 @@
+<meta charset="utf-8">
+<title>GGG League — History</title>
+<link rel="stylesheet" href="ggg.css">
+<nav class="ggg"><div class="in"><span class="logo">GGG</span><a href="index.html" class="">Home</a><a href="history.html" class="on">History</a><a href="records.html" class="">Records</a><a href="drafts.html" class="">Drafts</a><a href="trades.html" class="">Trades</a><a href="cap-planner.html" class="">Planner</a><a href="cap-report.html" class="">The Case</a></div></nav>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">GGG League &middot; 2020&ndash;2025</div>
+    <h1>Six seasons of receipts</h1>
+    <p class="lede">Every banner, every bagel, every head-to-head grudge — computed from the full Sleeper record, safe from revisionist history.</p>
+  </header>
+
+  <section>
+    <div class="sec-head"><div class="eyebrow">Hall of Fame</div><h2>The banners</h2></div>
+    <div class="hof" id="hof"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><div class="eyebrow">Hall of Shame</div><h2>The Toilet Bowl wall</h2>
+    <p class="sec-note">Last place, decided on the field. DaBlondest is the only two-time honoree. Since 2025 this costs $75.</p></div>
+    <div class="shame" id="shame"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><div class="eyebrow">Franchises</div><h2>Career ledgers</h2>
+    <p class="sec-note">Regular-season records, all-time. Luck = wins above what your weekly scores deserved (all-play). Departed managers preserved for the record.</p></div>
+    <div class="card scroll" id="franchises"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><div class="eyebrow">Head-to-head</div><h2>The grudge matrix</h2>
+    <p class="sec-note">Career regular-season records, row vs column. Green = winning record, red = losing.</p></div>
+    <div class="card scroll" id="h2h"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><div class="eyebrow">Season archive</div><h2>Year by year</h2></div>
+    <div id="archive"></div>
+  </section>
+</div>
+<footer class="ggg"><div class="in">GGG League · data from the Sleeper API · stats computed 2026-07-26 · regular-season records unless noted · grudges update automatically</div></footer>
+<script>
+const DATA = {"seasons": [{"season": "2020", "champ": "BJohnson5", "runner": "TommyHolland", "third": "EvanDeFilippis", "toilet": "srice33", "standings": [{"uid": "604489019388145664", "name": "BJohnson5", "w": 9, "l": 4, "pf": 1606.3, "pa": 1367.2}, {"uid": "604495863124938752", "name": "EvanDeFilippis", "w": 9, "l": 4, "pf": 1509.5, "pa": 1438.2}, {"uid": "604515710391111680", "name": "TommyHolland", "w": 7, "l": 6, "pf": 1483.0, "pa": 1416.7}, {"uid": "604496275102048256", "name": "clenger97", "w": 7, "l": 6, "pf": 1473.5, "pa": 1498.1}, {"uid": "596856251250434048", "name": "lynnkm23", "w": 7, "l": 6, "pf": 1395.8, "pa": 1458.1}, {"uid": "601883039638818816", "name": "DaBlondest", "w": 6, "l": 7, "pf": 1499.1, "pa": 1500.2}, {"uid": "599636148624613376", "name": "Philly000", "w": 6, "l": 7, "pf": 1359.2, "pa": 1437.7}, {"uid": "574670546338402304", "name": "Strubes", "w": 5, "l": 8, "pf": 1474.2, "pa": 1478.3}, {"uid": "604484492542935040", "name": "srice33", "w": 5, "l": 8, "pf": 1342.1, "pa": 1440.8}, {"uid": "597090835447734272", "name": "swinglejt", "w": 4, "l": 9, "pf": 1465.9, "pa": 1573.3}], "final_score": ""}, {"season": "2021", "champ": "TommyHolland", "runner": "BJohnson5", "third": "Strubes", "toilet": "swinglejt", "standings": [{"uid": "574670546338402304", "name": "Strubes", "w": 12, "l": 2, "pf": 1685.6, "pa": 1423.2}, {"uid": "604515710391111680", "name": "TommyHolland", "w": 9, "l": 5, "pf": 1652.5, "pa": 1580.2}, {"uid": "601883039638818816", "name": "DaBlondest", "w": 8, "l": 6, "pf": 1638.2, "pa": 1615.5}, {"uid": "604496275102048256", "name": "clenger97", "w": 8, "l": 6, "pf": 1623.2, "pa": 1661.8}, {"uid": "710978757011271680", "name": "HartManStan", "w": 7, "l": 7, "pf": 1676.9, "pa": 1614.4}, {"uid": "604489019388145664", "name": "BJohnson5", "w": 7, "l": 7, "pf": 1653.4, "pa": 1554.1}, {"uid": "597090835447734272", "name": "swinglejt", "w": 6, "l": 8, "pf": 1614.2, "pa": 1698.7}, {"uid": "599636148624613376", "name": "Philly000", "w": 5, "l": 9, "pf": 1514.2, "pa": 1541.7}, {"uid": "604495863124938752", "name": "EvanDeFilippis", "w": 5, "l": 9, "pf": 1493.2, "pa": 1600.5}, {"uid": "596856251250434048", "name": "lynnkm23", "w": 3, "l": 11, "pf": 1350.3, "pa": 1611.8}], "final_score": ""}, {"season": "2022", "champ": "clenger97", "runner": "Philly000", "third": "TommyHolland", "toilet": "DaBlondest", "standings": [{"uid": "604496275102048256", "name": "clenger97", "w": 10, "l": 4, "pf": 1608.9, "pa": 1375.7}, {"uid": "604495863124938752", "name": "EvanDeFilippis", "w": 9, "l": 5, "pf": 1583.5, "pa": 1532.5}, {"uid": "574670546338402304", "name": "Strubes", "w": 8, "l": 6, "pf": 1703.2, "pa": 1599.4}, {"uid": "599636148624613376", "name": "Philly000", "w": 8, "l": 6, "pf": 1689.2, "pa": 1588.1}, {"uid": "604489019388145664", "name": "BJohnson5", "w": 8, "l": 6, "pf": 1632.1, "pa": 1514.4}, {"uid": "604515710391111680", "name": "TommyHolland", "w": 8, "l": 6, "pf": 1611.8, "pa": 1598.1}, {"uid": "710978757011271680", "name": "HartManStan", "w": 8, "l": 6, "pf": 1467.7, "pa": 1422.7}, {"uid": "596856251250434048", "name": "lynnkm23", "w": 8, "l": 6, "pf": 1383.8, "pa": 1449.8}, {"uid": "601883039638818816", "name": "DaBlondest", "w": 2, "l": 12, "pf": 1493.1, "pa": 1774.1}, {"uid": "597090835447734272", "name": "swinglejt", "w": 1, "l": 13, "pf": 1234.3, "pa": 1552.7}], "final_score": ""}, {"season": "2023", "champ": "Strubes", "runner": "lynnkm23", "third": "Philly000", "toilet": "HartManStan", "standings": [{"uid": "574670546338402304", "name": "Strubes", "w": 10, "l": 4, "pf": 1642.1, "pa": 1528.1}, {"uid": "596856251250434048", "name": "lynnkm23", "w": 9, "l": 5, "pf": 1618.8, "pa": 1504.8}, {"uid": "597090835447734272", "name": "swinglejt", "w": 9, "l": 5, "pf": 1528.9, "pa": 1537.3}, {"uid": "604495863124938752", "name": "EvanDeFilippis", "w": 8, "l": 6, "pf": 1603.3, "pa": 1561.7}, {"uid": "599636148624613376", "name": "Philly000", "w": 7, "l": 7, "pf": 1679.6, "pa": 1548.1}, {"uid": "1000240914465390593", "name": "VEROVILLIANZ", "w": 7, "l": 7, "pf": 1558.9, "pa": 1458.6}, {"uid": "604489019388145664", "name": "BJohnson5", "w": 7, "l": 7, "pf": 1496.7, "pa": 1494.7}, {"uid": "710978757011271680", "name": "HartManStan", "w": 6, "l": 8, "pf": 1445.8, "pa": 1464.5}, {"uid": "604515710391111680", "name": "TommyHolland", "w": 5, "l": 9, "pf": 1465.8, "pa": 1726.9}, {"uid": "601883039638818816", "name": "DaBlondest", "w": 2, "l": 12, "pf": 1341.6, "pa": 1557.0}], "final_score": ""}, {"season": "2024", "champ": "EvanDeFilippis", "runner": "Strubes", "third": "TommyHolland", "toilet": "DaBlondest", "standings": [{"uid": "604495863124938752", "name": "EvanDeFilippis", "w": 11, "l": 3, "pf": 1760.9, "pa": 1471.9}, {"uid": "604515710391111680", "name": "TommyHolland", "w": 8, "l": 6, "pf": 1716.6, "pa": 1566.0}, {"uid": "574670546338402304", "name": "Strubes", "w": 8, "l": 6, "pf": 1637.7, "pa": 1600.9}, {"uid": "596856251250434048", "name": "lynnkm23", "w": 8, "l": 6, "pf": 1554.7, "pa": 1521.5}, {"uid": "599636148624613376", "name": "Philly000", "w": 8, "l": 6, "pf": 1540.6, "pa": 1541.9}, {"uid": "604489019388145664", "name": "BJohnson5", "w": 7, "l": 7, "pf": 1527.4, "pa": 1548.0}, {"uid": "710978757011271680", "name": "HartManStan", "w": 6, "l": 8, "pf": 1505.9, "pa": 1505.7}, {"uid": "601883039638818816", "name": "DaBlondest", "w": 6, "l": 8, "pf": 1500.8, "pa": 1584.7}, {"uid": "1000240914465390593", "name": "VEROVILLIANZ", "w": 4, "l": 10, "pf": 1357.5, "pa": 1516.3}, {"uid": "unknown_2024_3", "name": "Former manager", "w": 4, "l": 10, "pf": 1326.1, "pa": 1571.6}], "final_score": ""}, {"season": "2025", "champ": "TommyHolland", "runner": "EvanDeFilippis", "third": "DaBlondest", "toilet": "Philly000", "standings": [{"uid": "604495863124938752", "name": "EvanDeFilippis", "w": 10, "l": 4, "pf": 1765.0, "pa": 1452.4}, {"uid": "604489019388145664", "name": "BJohnson5", "w": 10, "l": 4, "pf": 1602.6, "pa": 1367.2}, {"uid": "604515710391111680", "name": "TommyHolland", "w": 10, "l": 4, "pf": 1564.3, "pa": 1447.3}, {"uid": "1256627708364849152", "name": "PrezNix", "w": 7, "l": 7, "pf": 1621.7, "pa": 1502.8}, {"uid": "601883039638818816", "name": "DaBlondest", "w": 7, "l": 7, "pf": 1564.6, "pa": 1569.1}, {"uid": "574670546338402304", "name": "Strubes", "w": 6, "l": 8, "pf": 1540.2, "pa": 1627.5}, {"uid": "599636148624613376", "name": "Philly000", "w": 6, "l": 8, "pf": 1377.5, "pa": 1509.2}, {"uid": "1000240914465390593", "name": "VEROVILLIANZ", "w": 6, "l": 8, "pf": 1368.9, "pa": 1435.2}, {"uid": "596856251250434048", "name": "lynnkm23", "w": 4, "l": 10, "pf": 1444.5, "pa": 1621.9}, {"uid": "710978757011271680", "name": "HartManStan", "w": 4, "l": 10, "pf": 1239.4, "pa": 1556.2}], "final_score": ""}], "career": [{"name": "TommyHolland", "seasons": 6, "w": 47, "l": 36, "pct": 0.566, "pf": 9494.0, "pa": 9335.3, "titles": 2, "runnerups": 1, "thirds": 2, "toilets": 0, "po_apps": 5, "high_weeks": 11, "luck": 0.2, "ap_pct": 0.564, "streak_w": 6, "streak_l": 4, "aliases": ["TommyHolland"], "active": true}, {"name": "EvanDeFilippis", "seasons": 6, "w": 53, "l": 30, "pct": 0.639, "pf": 9715.4, "pa": 9025.5, "titles": 1, "runnerups": 1, "thirds": 1, "toilets": 0, "po_apps": 5, "high_weeks": 11, "luck": 1.8, "ap_pct": 0.617, "streak_w": 7, "streak_l": 4, "aliases": ["EVANDEFILIPPIS", "EvanDeFilippis"], "active": true}, {"name": "Strubes", "seasons": 6, "w": 49, "l": 34, "pct": 0.59, "pf": 9683.1, "pa": 9261.4, "titles": 1, "runnerups": 1, "thirds": 1, "toilets": 0, "po_apps": 5, "high_weeks": 13, "luck": -0.1, "ap_pct": 0.592, "streak_w": 7, "streak_l": 4, "aliases": ["Strubes"], "active": true}, {"name": "clenger97", "seasons": 3, "w": 24, "l": 17, "pct": 0.585, "pf": 4675.9, "pa": 4535.6, "titles": 1, "runnerups": 0, "thirds": 0, "toilets": 0, "po_apps": 3, "high_weeks": 3, "luck": 1.9, "ap_pct": 0.539, "streak_w": 4, "streak_l": 2, "aliases": ["clenger97"], "active": false}, {"name": "BJohnson5", "seasons": 6, "w": 48, "l": 35, "pct": 0.578, "pf": 9518.6, "pa": 8845.6, "titles": 1, "runnerups": 1, "thirds": 0, "toilets": 0, "po_apps": 5, "high_weeks": 16, "luck": 2.6, "ap_pct": 0.548, "streak_w": 8, "streak_l": 4, "aliases": ["BJohnson5", "Bjohnson2532", "Going4the2peat"], "active": true}, {"name": "PrezNix", "seasons": 1, "w": 7, "l": 7, "pct": 0.5, "pf": 1621.7, "pa": 1502.8, "titles": 0, "runnerups": 0, "thirds": 0, "toilets": 0, "po_apps": 1, "high_weeks": 3, "luck": -0.8, "ap_pct": 0.556, "streak_w": 3, "streak_l": 3, "aliases": ["PrezNix"], "active": true}, {"name": "Philly000", "seasons": 6, "w": 40, "l": 43, "pct": 0.482, "pf": 9160.4, "pa": 9166.7, "titles": 0, "runnerups": 1, "thirds": 1, "toilets": 1, "po_apps": 3, "high_weeks": 10, "luck": 0.3, "ap_pct": 0.478, "streak_w": 6, "streak_l": 7, "aliases": ["Philly000", "nickphillipa"], "active": true}, {"name": "lynnkm23", "seasons": 6, "w": 39, "l": 44, "pct": 0.47, "pf": 8747.8, "pa": 9167.9, "titles": 0, "runnerups": 1, "thirds": 0, "toilets": 0, "po_apps": 3, "high_weeks": 4, "luck": 3.7, "ap_pct": 0.426, "streak_w": 6, "streak_l": 6, "aliases": ["lynnkm23"], "active": true}, {"name": "HartManStan", "seasons": 5, "w": 31, "l": 39, "pct": 0.443, "pf": 7337.7, "pa": 7563.4, "titles": 0, "runnerups": 0, "thirds": 0, "toilets": 1, "po_apps": 1, "high_weeks": 2, "luck": 1.6, "ap_pct": 0.421, "streak_w": 6, "streak_l": 9, "aliases": ["HartManStan"], "active": true}, {"name": "VEROVILLIANZ", "seasons": 3, "w": 17, "l": 25, "pct": 0.405, "pf": 4285.3, "pa": 4410.1, "titles": 0, "runnerups": 0, "thirds": 0, "toilets": 0, "po_apps": 1, "high_weeks": 1, "luck": 1.1, "ap_pct": 0.378, "streak_w": 3, "streak_l": 4, "aliases": ["VEROVILLIANZ"], "active": true}, {"name": "srice33", "seasons": 1, "w": 5, "l": 8, "pct": 0.385, "pf": 1342.1, "pa": 1440.8, "titles": 0, "runnerups": 0, "thirds": 0, "toilets": 1, "po_apps": 0, "high_weeks": 0, "luck": 0.2, "ap_pct": 0.368, "streak_w": 2, "streak_l": 3, "aliases": ["srice33"], "active": false}, {"name": "DaBlondest", "seasons": 6, "w": 31, "l": 52, "pct": 0.373, "pf": 9037.5, "pa": 9601.5, "titles": 0, "runnerups": 0, "thirds": 1, "toilets": 2, "po_apps": 3, "high_weeks": 6, "luck": -7.8, "ap_pct": 0.467, "streak_w": 3, "streak_l": 6, "aliases": ["DaBlondest"], "active": true}, {"name": "swinglejt", "seasons": 4, "w": 20, "l": 35, "pct": 0.364, "pf": 5844.4, "pa": 6361.9, "titles": 0, "runnerups": 0, "thirds": 0, "toilets": 1, "po_apps": 1, "high_weeks": 3, "luck": -4.6, "ap_pct": 0.446, "streak_w": 4, "streak_l": 8, "aliases": ["swinglejt"], "active": false}, {"name": "Former manager", "seasons": 1, "w": 4, "l": 10, "pct": 0.286, "pf": 1326.1, "pa": 1571.6, "titles": 0, "runnerups": 0, "thirds": 0, "toilets": 0, "po_apps": 0, "high_weeks": 0, "luck": 0.0, "ap_pct": 0.286, "streak_w": 2, "streak_l": 5, "aliases": [], "active": false}], "h2h": {"TommyHolland": {"EvanDeFilippis": {"w": 3, "l": 6}, "Strubes": {"w": 8, "l": 3}, "BJohnson5": {"w": 3, "l": 8}, "PrezNix": {"w": 1, "l": 1}, "Philly000": {"w": 7, "l": 3}, "lynnkm23": {"w": 3, "l": 5}, "HartManStan": {"w": 4, "l": 1}, "VEROVILLIANZ": {"w": 3, "l": 1}, "DaBlondest": {"w": 7, "l": 2}}, "EvanDeFilippis": {"TommyHolland": {"w": 6, "l": 3}, "Strubes": {"w": 5, "l": 4}, "BJohnson5": {"w": 6, "l": 4}, "PrezNix": {"w": 2, "l": 0}, "Philly000": {"w": 5, "l": 6}, "lynnkm23": {"w": 7, "l": 2}, "HartManStan": {"w": 4, "l": 3}, "VEROVILLIANZ": {"w": 2, "l": 2}, "DaBlondest": {"w": 7, "l": 3}}, "Strubes": {"TommyHolland": {"w": 3, "l": 8}, "EvanDeFilippis": {"w": 4, "l": 5}, "BJohnson5": {"w": 5, "l": 4}, "PrezNix": {"w": 1, "l": 1}, "Philly000": {"w": 3, "l": 6}, "lynnkm23": {"w": 9, "l": 1}, "HartManStan": {"w": 5, "l": 2}, "VEROVILLIANZ": {"w": 5, "l": 1}, "DaBlondest": {"w": 6, "l": 2}}, "BJohnson5": {"TommyHolland": {"w": 8, "l": 3}, "EvanDeFilippis": {"w": 4, "l": 6}, "Strubes": {"w": 4, "l": 5}, "PrezNix": {"w": 1, "l": 0}, "Philly000": {"w": 5, "l": 5}, "lynnkm23": {"w": 4, "l": 5}, "HartManStan": {"w": 5, "l": 3}, "VEROVILLIANZ": {"w": 4, "l": 0}, "DaBlondest": {"w": 6, "l": 2}}, "PrezNix": {"TommyHolland": {"w": 1, "l": 1}, "EvanDeFilippis": {"w": 0, "l": 2}, "Strubes": {"w": 1, "l": 1}, "BJohnson5": {"w": 0, "l": 1}, "Philly000": {"w": 1, "l": 0}, "lynnkm23": {"w": 1, "l": 0}, "HartManStan": {"w": 2, "l": 0}, "VEROVILLIANZ": {"w": 0, "l": 1}, "DaBlondest": {"w": 1, "l": 1}}, "Philly000": {"TommyHolland": {"w": 3, "l": 7}, "EvanDeFilippis": {"w": 6, "l": 5}, "Strubes": {"w": 6, "l": 3}, "BJohnson5": {"w": 5, "l": 5}, "PrezNix": {"w": 0, "l": 1}, "lynnkm23": {"w": 5, "l": 4}, "HartManStan": {"w": 5, "l": 3}, "VEROVILLIANZ": {"w": 4, "l": 1}, "DaBlondest": {"w": 2, "l": 5}}, "lynnkm23": {"TommyHolland": {"w": 5, "l": 3}, "EvanDeFilippis": {"w": 2, "l": 7}, "Strubes": {"w": 1, "l": 9}, "BJohnson5": {"w": 5, "l": 4}, "PrezNix": {"w": 0, "l": 1}, "Philly000": {"w": 4, "l": 5}, "HartManStan": {"w": 5, "l": 3}, "VEROVILLIANZ": {"w": 1, "l": 4}, "DaBlondest": {"w": 7, "l": 2}}, "HartManStan": {"TommyHolland": {"w": 1, "l": 4}, "EvanDeFilippis": {"w": 3, "l": 4}, "Strubes": {"w": 2, "l": 5}, "BJohnson5": {"w": 3, "l": 5}, "PrezNix": {"w": 0, "l": 2}, "Philly000": {"w": 3, "l": 5}, "lynnkm23": {"w": 3, "l": 5}, "VEROVILLIANZ": {"w": 2, "l": 3}, "DaBlondest": {"w": 6, "l": 3}}, "VEROVILLIANZ": {"TommyHolland": {"w": 1, "l": 3}, "EvanDeFilippis": {"w": 2, "l": 2}, "Strubes": {"w": 1, "l": 5}, "BJohnson5": {"w": 0, "l": 4}, "PrezNix": {"w": 1, "l": 0}, "Philly000": {"w": 1, "l": 4}, "lynnkm23": {"w": 4, "l": 1}, "HartManStan": {"w": 3, "l": 2}, "DaBlondest": {"w": 2, "l": 3}}, "DaBlondest": {"TommyHolland": {"w": 2, "l": 7}, "EvanDeFilippis": {"w": 3, "l": 7}, "Strubes": {"w": 2, "l": 6}, "BJohnson5": {"w": 2, "l": 6}, "PrezNix": {"w": 1, "l": 1}, "Philly000": {"w": 5, "l": 2}, "lynnkm23": {"w": 2, "l": 7}, "HartManStan": {"w": 3, "l": 6}, "VEROVILLIANZ": {"w": 3, "l": 2}}}};
+const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
+
+/* HOF banners */
+(function(){
+  const host = document.getElementById('hof');
+  [...DATA.seasons].reverse().forEach(s=>{
+    const b = $('div','banner');
+    b.appendChild($('div','byear', s.season));
+    b.appendChild($('div','bname', s.champ));
+    b.appendChild($('div','bsub', 'def. ' + s.runner));
+    host.appendChild(b);
+  });
+})();
+
+/* shame wall */
+(function(){
+  const host = document.getElementById('shame');
+  [...DATA.seasons].reverse().forEach(s=>{
+    if(!s.toilet) return;
+    const b = $('div','shamecard');
+    b.appendChild($('div','byear', s.season));
+    b.appendChild($('div','bname', s.toilet));
+    host.appendChild(b);
+  });
+})();
+
+/* franchise table */
+(function(){
+  const host = document.getElementById('franchises');
+  const tbl = $('table','tbl');
+  const hr = $('tr');
+  ['Manager','Seasons','W-L','Win%','PF','Titles','2nd','3rd','Playoffs','Hi-wks','🚽','Luck','Best W str','Worst L str'].forEach(h=>hr.appendChild($('th',null,h)));
+  tbl.appendChild(hr);
+  DATA.career.forEach(c=>{
+    const r = $('tr' , c.active ? '' : 'departed');
+    const nameTd = $('td',null,c.name);
+    if (c.aliases.length>1) { nameTd.appendChild($('span','mut small',' (' + c.aliases.filter(a=>a!==c.name).join(', ') + ')')); }
+    r.appendChild(nameTd);
+    [c.seasons, c.w+'-'+c.l, c.pct.toFixed(3), c.pf, c.titles||'—', c.runnerups||'—', c.thirds||'—', c.po_apps||'—', c.high_weeks||'—', c.toilets||'—'].forEach(v=>r.appendChild($('td',null,String(v))));
+    const luck = $('td', c.luck>1?'good':(c.luck<-1?'bad':''), (c.luck>0?'+':'')+c.luck);
+    r.appendChild(luck);
+    r.appendChild($('td',null,String(c.streak_w)));
+    r.appendChild($('td',null,String(c.streak_l)));
+    tbl.appendChild(r);
+  });
+  host.appendChild(tbl);
+})();
+
+/* h2h matrix */
+(function(){
+  const host = document.getElementById('h2h');
+  const names = Object.keys(DATA.h2h);
+  const tbl = $('table','tbl matrix');
+  const hr = $('tr'); hr.appendChild($('th',null,''));
+  names.forEach(n=>hr.appendChild($('th','rot',n)));
+  tbl.appendChild(hr);
+  names.forEach(a=>{
+    const r = $('tr');
+    r.appendChild($('th',null,a));
+    names.forEach(b=>{
+      if(a===b){ r.appendChild($('td','self','—')); return; }
+      const rec = DATA.h2h[a][b];
+      const cls = rec.w>rec.l?'winrec':(rec.w<rec.l?'loserec':'');
+      r.appendChild($('td',cls,rec.w+'-'+rec.l));
+    });
+    tbl.appendChild(r);
+  });
+  host.appendChild(tbl);
+})();
+
+/* season archive */
+(function(){
+  const host = document.getElementById('archive');
+  [...DATA.seasons].reverse().forEach(s=>{
+    const det = $('details','seasonbox');
+    const sum = $('summary');
+    sum.appendChild($('b',null,s.season));
+    sum.appendChild(document.createTextNode('  🏆 ' + s.champ + '   🚽 ' + (s.toilet||'—')));
+    det.appendChild(sum);
+    const tbl = $('table','tbl');
+    const hr = $('tr'); ['#','Team','W-L','PF','PA',''].forEach(h=>hr.appendChild($('th',null,h))); tbl.appendChild(hr);
+    s.standings.forEach((t,i)=>{
+      const r = $('tr');
+      r.appendChild($('td','mut',String(i+1)));
+      r.appendChild($('td',null,t.name));
+      r.appendChild($('td',null,t.w+'-'+t.l));
+      r.appendChild($('td',null,String(t.pf)));
+      r.appendChild($('td','mut',String(t.pa)));
+      const tag=$('td');
+      if(t.name===s.champ) tag.appendChild($('span','chip gold','CHAMP'));
+      else if(t.name===s.toilet) tag.appendChild($('span','chip fire','TOILET'));
+      r.appendChild(tag);
+      tbl.appendChild(r);
+    });
+    const sc=$('div','scroll'); sc.appendChild(tbl); det.appendChild(sc);
+    host.appendChild(det);
+  });
+})();
+</script>
