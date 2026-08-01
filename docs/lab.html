@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <title>GGG Commissioner's Lab</title>
-<link rel="stylesheet" href="ggg.css?v=c9f54d47">
-<nav class="ggg"><div class="in"><span class="logo">GGG</span><a href="index.html" class="">Home</a><a href="history.html" class="">History</a><a href="records.html" class="">Records</a><a href="drafts.html" class="">Drafts</a><a href="trades.html" class="">Trades</a><a href="cap-planner.html" class="">Planner</a><a href="cap-report.html" class="">The Case</a></div></nav>
+<link rel="stylesheet" href="ggg.css?v=13e04c11">
+<nav class="ggg"><div class="in"><span class="logo">GGG</span><a href="index.html" class="">Home</a><a href="history.html" class="">History</a><a href="records.html" class="">Records</a><a href="drafts.html" class="">Drafts</a><a href="trades.html" class="">Trades</a><a href="cap-planner.html" class="">Planner</a><a href="cap-report.html" class="">The Case</a><a href="lab.html" class="on">Lab</a></div></nav>
 <div class="wrap wide">
   <header class="hero">
     <div class="eyebrow">GGG League &middot; Commissioner's Lab &middot; not league policy</div>
@@ -19,28 +19,36 @@
           <input type="range" id="flat" min="0" max="100" step="5">
           <span class="ctlval" id="flatV"></span></div>
         <div class="salary-mini" id="tableStrip"></div>
+        <div class="ctlnote">Flatter → stars get cheaper to keep and trade for, late-round gems less special. Steeper → all keeper value lives in the late rounds and stars price out fast.</div>
       </div>
 
       <div class="ctl"><div class="ctlrow"><span class="ctlname">Team cap</span>
-        <input type="range" id="cap" min="180" max="260" step="5"><span class="ctlval" id="capV"></span></div></div>
+        <input type="range" id="cap" min="180" max="260" step="5"><span class="ctlval" id="capV"></span></div>
+        <div class="ctlnote">How big an in-season buy can be. Lower → tighter trading, more cap jail, fire sales impossible to absorb. Higher → looser market, easier star-stacking.</div></div>
 
       <div class="ctl"><div class="ctlrow"><span class="ctlname">Keeper budget</span>
-        <input type="range" id="budget" min="20" max="80" step="5"><span class="ctlval" id="budgetV"></span></div></div>
+        <input type="range" id="budget" min="20" max="80" step="5"><span class="ctlval" id="budgetV"></span></div>
+        <div class="ctlnote">The redraft↔dynasty dial. Higher → more and better players kept, thinner draft, less turnover. Lower → harsh keep-or-release choices, richer draft.</div></div>
 
       <div class="ctl"><div class="ctlrow"><span class="ctlname">Max keepers</span>
-        <input type="range" id="maxk" min="3" max="8" step="1"><span class="ctlval" id="maxkV"></span></div></div>
+        <input type="range" id="maxk" min="3" max="8" step="1"><span class="ctlval" id="maxkV"></span></div>
+        <div class="ctlnote">Mostly caps how many cheap fliers a rebuilder can hoard — the budget governs real value.</div></div>
 
       <div class="ctl"><div class="mlabel">Keeper slotting</div>
-        <div class="filterrow tight" id="slotMode"></div></div>
+        <div class="filterrow tight" id="slotMode"></div>
+        <div class="ctlnote">Off the board → clean draft, keeping priced in dollars, tail picks consumed. Round-slot (the old way) → keeping a stud costs your actual early pick; self-balancing but brutal at the top.</div></div>
 
       <div class="ctl"><div class="mlabel">Budget mode</div>
-        <div class="filterrow tight" id="budgetMode"></div></div>
+        <div class="filterrow tight" id="budgetMode"></div>
+        <div class="ctlnote">Guaranteed-3 lets any team keep three studs at any price — stud cores never re-enter the draft, and loaded teams sit in cap jail without caring. Familiar, but superteam-friendly.</div></div>
 
       <div class="ctl"><div class="mlabel">Franchise keep (budget-exempt star)</div>
-        <div class="filterrow tight" id="franchiseMode"></div></div>
+        <div class="filterrow tight" id="franchiseMode"></div>
+        <div class="ctlnote">Everyone can always keep their one guy, so the headline fire-sale piece stays put — bounded to a single player so cores can't be hoarded.</div></div>
 
       <div class="ctl"><div class="mlabel">Keeper salaries count against the team cap <span class="mut small">(if off, try cap ≈ $200)</span></div>
-        <div class="filterrow tight" id="kcapMode"></div></div>
+        <div class="filterrow tight" id="kcapMode"></div>
+        <div class="ctlnote">Count → heavy keeper classes pay in season flexibility (less deadline ammo). Exempt → keeping is never punished and the cap polices only the draft + trade market; needs the re-attach rule (acquired players count at full salary) to stay fire-sale-proof.</div></div>
     </div>
 
     <div class="dcard c7">

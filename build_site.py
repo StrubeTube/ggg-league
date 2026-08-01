@@ -245,6 +245,7 @@ input[type=range]:disabled{opacity:.35}
 .tmini{display:flex;flex-direction:column;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:6px;padding:3px 6px;min-width:34px}
 .tmini b{font-size:11.5px;font-weight:800;font-variant-numeric:tabular-nums}
 .tmini i{font-style:normal;font-size:9px;color:var(--ink3);letter-spacing:.04em}
+.ctlnote{font-size:11px;color:var(--ink3);line-height:1.5;margin-top:6px}
 """
 CSS = CSS.replace("F400", fonts["400"]).replace("F600", fonts["600"]).replace("F800", fonts["800"])
 with open(os.path.join(OUT, "ggg.css"), "w", encoding="utf-8") as f:
@@ -254,7 +255,8 @@ css_v = hashlib.md5(CSS.encode()).hexdigest()[:8]
 
 NAV_LINKS = [("index.html", "Home"), ("history.html", "History"), ("records.html", "Records"),
              ("drafts.html", "Drafts"), ("trades.html", "Trades"),
-             ("cap-planner.html", "Planner"), ("cap-report.html", "The Case")]
+             ("cap-planner.html", "Planner"), ("cap-report.html", "The Case"),
+             ("lab.html", "Lab")]
 
 
 def nav(active):
