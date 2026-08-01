@@ -292,9 +292,46 @@ function renderDash(){
   dash.appendChild(det);
 }
 
-let cbFilter='all';
+let cbFilter='all', cbYear='2026';
 function capBoardCard(span){
   const cb=card(span,'League cap board');
+  const yr=$('div','filterrow tight');
+  [['2026','2026'],['2027','2027 outlook']].forEach(([key,lab])=>{
+    const b=$('button','tpill sm'+(cbYear===key?' active':''),lab);b.type='button';
+    b.addEventListener('click',()=>{cbYear=key;render();});
+    yr.appendChild(b);
+  });
+  cb.appendChild(yr);
+
+  if(cbYear!=='2026'){
+    cb.appendChild($('p','cardnote2','2027 draft capital only — each team’s held 2027 picks priced by the salary table. Keeper costs can’t exist yet; this is the floor each roster starts from.'));
+    const rows=DATA.teams.map(tm=>{
+      const picks=tm.p27.slice(0,16);
+      return {name:tm.name,held:tm.p27.length,val:picks.reduce((a,p)=>a+TABLE[p.r],0),
+              acquired:tm.p27.filter(p=>p.from).length};
+    }).sort((a,b)=>b.val-a.val);
+    rows.forEach(r=>{
+      const row=$('div','cbrow');
+      const nm=$('div','cbname');
+      nm.appendChild($('span','cbteam',r.name));
+      nm.appendChild($('span','chip mini',r.held+' picks'));
+      row.appendChild(nm);
+      const track=$('div','cbtrack');
+      const seg=$('div','cbseg d');
+      seg.style.left='0';seg.style.width=(Math.min(r.val,250)/250*100)+'%';
+      track.appendChild(seg);
+      const cap=$('div','cbcap');cap.style.left=(CFG.cap/250*100)+'%';track.appendChild(cap);
+      row.appendChild(track);
+      const val=$('div','cbval');
+      val.appendChild($('b',r.val>CFG.cap?'bad':'','$'+r.val));
+      val.appendChild($('span','mut small',r.acquired?(r.acquired+' acquired'):'own picks'));
+      row.appendChild(val);
+      cb.appendChild(row);
+    });
+    cb.appendChild($('p','cardnote','Updates automatically as 2027 picks get traded.'));
+    return cb;
+  }
+
   const fr=$('div','filterrow tight');
   [['all','Total'],['k','Keepers only'],['d','Draft picks only']].forEach(([key,lab])=>{
     const b=$('button','tpill sm'+(cbFilter===key?' active':''),lab);b.type='button';

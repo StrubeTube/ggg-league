@@ -287,19 +287,25 @@ def planner_teams():
                    for p in load("draftpicks_2025_1256797701333319680.json")}
     name_of = {r["roster_id"]: (users.get(r["owner_id"]) or {}).get("display_name", "Former manager")
                for r in rosters}
-    owner = {(rnd, rid): rid for rnd in range(1, 17) for rid in name_of}
-    for fname in ("tradedpicks_2024.json", "tradedpicks_2025.json"):
-        for tp in load(fname):
-            if tp["season"] == "2026" and (tp["round"], tp["roster_id"]) in owner:
-                owner[(tp["round"], tp["roster_id"])] = tp["owner_id"]
-    picks_of = {rid: [] for rid in name_of}
-    for (rnd, orig), cur in owner.items():
-        e = {"r": rnd}
-        if orig != cur:
-            e["from"] = name_of[orig]
-        picks_of[cur].append(e)
-    for rid in picks_of:
-        picks_of[rid].sort(key=lambda p: (p["r"], "from" in p))
+
+    def picks_for(season):
+        owner = {(rnd, rid): rid for rnd in range(1, 17) for rid in name_of}
+        for fname in ("tradedpicks_2024.json", "tradedpicks_2025.json"):
+            for tp in load(fname):
+                if tp["season"] == season and (tp["round"], tp["roster_id"]) in owner:
+                    owner[(tp["round"], tp["roster_id"])] = tp["owner_id"]
+        po = {rid: [] for rid in name_of}
+        for (rnd, orig), cur in owner.items():
+            e = {"r": rnd}
+            if orig != cur:
+                e["from"] = name_of[orig]
+            po[cur].append(e)
+        for rid in po:
+            po[rid].sort(key=lambda p: (p["r"], "from" in p))
+        return po
+
+    picks_of = picks_for("2026")
+    picks_27 = picks_for("2027")
     teams = []
     for r in sorted(rosters, key=lambda x: x["roster_id"]):
         plist = []
@@ -315,7 +321,7 @@ def planner_teams():
             plist.append(e)
         plist.sort(key=lambda p: (not p["el"], p.get("k26", 999), p["n"]))
         teams.append({"name": name_of[r["roster_id"]], "picks": picks_of[r["roster_id"]],
-                      "players": plist})
+                      "p27": picks_27[r["roster_id"]], "players": plist})
     return teams
 
 
