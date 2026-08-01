@@ -38,6 +38,9 @@ __NAV__
 
       <div class="ctl"><div class="mlabel">Franchise keep (budget-exempt star)</div>
         <div class="filterrow tight" id="franchiseMode"></div></div>
+
+      <div class="ctl"><div class="mlabel">Keeper salaries count against the team cap <span class="mut small">(if off, try cap ≈ $200)</span></div>
+        <div class="filterrow tight" id="kcapMode"></div></div>
     </div>
 
     <div class="dcard c7">
@@ -60,7 +63,7 @@ const sel=ti=>new Set(kstate.picks[ti]||[]);
 
 /* lab settings */
 const DEFAULTS={flat:null,preset:'adopted',cap:DATA.defaults.cap,budget:DATA.defaults.budget,
-  maxk:DATA.defaults.maxKeep,slot:'tail',bmode:'budget',fr:'on'};
+  maxk:DATA.defaults.maxKeep,slot:'tail',bmode:'budget',fr:'on',kcap:'on'};
 let S={...DEFAULTS};
 try{const s=JSON.parse(localStorage.getItem('ggg-lab-v1'));if(s)S={...DEFAULTS,...s};}catch(e){}
 const saveS=()=>{try{localStorage.setItem('ggg-lab-v1',JSON.stringify(S));}catch(e){}};
@@ -84,22 +87,26 @@ function evalLab(ti,table){
     const c=escal(table,p.r,1);keepSpend+=c;if(c>maxSel)maxSel=c;});
   const k=chosen.size;
   const budgetSpend=(S.fr==='on'&&k)?keepSpend-maxSel:keepSpend;
-  let opening,draftSpend=0;
+  let capKeep=0,capDraft=0;
   if(S.slot==='round'){
     const picks=tm.picks.slice(0,16);
-    picks.forEach(p=>draftSpend+=table[p.r]);
-    opening=draftSpend;           // keepers occupy their round's pick at the same price
+    picks.forEach(p=>capDraft+=table[p.r]);   // keepers occupy their round's pick
+    if(S.kcap==='off'){
+      let kr=0;chosen.forEach(pi=>{const p=tm.players[pi];if(p.el)kr+=table[p.r];});
+      capDraft=Math.max(0,capDraft-kr);
+    }
   }else{
     const picks=tm.picks.slice();
     picks.splice(Math.max(0,picks.length-k),k);
     const used=picks.slice(0,16-k);
-    used.forEach(p=>draftSpend+=table[p.r]);
-    opening=keepSpend+draftSpend;
+    used.forEach(p=>capDraft+=table[p.r]);
+    if(S.kcap!=='off')capKeep=keepSpend;
   }
+  const opening=capKeep+capDraft;
   const overBudget=S.bmode==='guaranteed3'
     ? (k>3 && budgetSpend>S.budget)
     : budgetSpend>S.budget;
-  return {k,keepSpend,budgetSpend,draftSpend,opening,overBudget,overCount:k>S.maxk};
+  return {k,keepSpend,budgetSpend,capKeep,capDraft,opening,overBudget,overCount:k>S.maxk};
 }
 
 /* ---- controls ---- */
@@ -130,6 +137,7 @@ function render(){
   pillGroup('budgetMode',[['budget','Budget governs all keeps'],['guaranteed3','3 keeps guaranteed, budget only for extras']],
     ()=>S.bmode,k=>S.bmode=k);
   pillGroup('franchiseMode',[['on','On'],['off','Off']],()=>S.fr,k=>S.fr=k);
+  pillGroup('kcapMode',[['on','Count (adopted)'],['off','Exempt — budget only']],()=>S.kcap,k=>S.kcap=k);
 
   sliders.forEach(([id,fmt])=>{
     const el=document.getElementById(id);
@@ -164,7 +172,7 @@ function render(){
     row.appendChild(nm);
     const track=$('div','cbtrack');
     let x=0;
-    [['k',S.slot==='round'?0:r.ev.keepSpend],['d',r.ev.draftSpend]].forEach(([cls,v])=>{
+    [['k',r.ev.capKeep],['d',r.ev.capDraft]].forEach(([cls,v])=>{
       if(v<=0)return;
       const seg=$('div','cbseg '+cls);
       seg.style.left=(x/scale*100)+'%';seg.style.width=(Math.min(v,scale-x)/scale*100)+'%';
