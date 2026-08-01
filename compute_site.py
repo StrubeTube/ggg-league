@@ -262,12 +262,47 @@ for r in all_rows:
 steals = sorted([r for r in all_rows if r["round"] >= 6], key=lambda x: -x["voe"])[:12]
 busts = sorted([r for r in all_rows if r["round"] <= 2 and not r["keeper"]], key=lambda x: x["voe"])[:12]
 
-# ---------- trades archive with verdicts (+ activity counts) ----------
+# ---------- trade valuation model ----------
+# Player value = position-adjusted points over replacement (rest of season,
+# realized on the acquiring roster) + a 30% keeper premium on value-over-round
+# for cheap-drafted producers. Pick value = historical median VOR of that
+# round's picks (6 drafts), discounted 15% per year until it conveys.
+REPL_RANK = {"QB": 12, "RB": 28, "WR": 28, "TE": 12, "DEF": 12}
+TOT_WEEKS = {s: (16 if s == "2020" else 17) for s in SEASONS}
+
+draft_round_by = {}   # (season, pid) -> round
+for s in SEASONS:
+    for p in load(f"draftpicks_{s}_{drafts_meta[s]['draft_id']}.json"):
+        draft_round_by[(s, str(p["player_id"]))] = p["round"]
+
+repl = {}             # (season, pos) -> replacement season total
+for s in SEASONS:
+    by_pos = defaultdict(list)
+    for (s2, pid), pts in player_season_pts.items():
+        if s2 == s:
+            by_pos[ppos(pid)].append(pts)
+    for pos, lst in by_pos.items():
+        lst.sort(reverse=True)
+        rank = REPL_RANK.get(pos, 24)
+        repl[(s, pos)] = lst[rank - 1] if len(lst) >= rank else (lst[-1] if lst else 0)
+
+round_vor_samples = defaultdict(list)
+for (s, pid), rnd in draft_round_by.items():
+    pts = player_season_pts.get((s, pid), 0)
+    vor = max(0.0, pts - repl.get((s, ppos(pid)), 0))
+    round_vor_samples[rnd].append(vor)
+# mean (picks are lottery tickets — upside counts), smoothed to be non-increasing
+round_vor = {r: sum(v) / len(v) for r, v in round_vor_samples.items()}
+for r in range(15, 0, -1):
+    round_vor[r] = max(round_vor[r], round_vor.get(r + 1, 0))
+
+# ---------- trades archive with model verdicts (+ activity counts) ----------
 trades_out = []
 activity = defaultdict(lambda: {"trades_n": 0, "adds_n": 0})
 for s in SEASONS:
     ctx = season_ctx[s]
     tx = load(f"transactions_{s}.json")
+    tot_w = TOT_WEEKS[s]
     for wk_s, items in tx.items():
         for t in items:
             if t["status"] != "complete":
@@ -282,33 +317,48 @@ for s in SEASONS:
             for rid in t["roster_ids"]:
                 if rid in ctx["rmap"]:
                     activity[oname(ctx["rmap"][rid])]["trades_n"] += 1
-            if t.get("draft_picks"):
-                continue  # pick trades excluded from the archive
             wk = int(wk_s)
             adds = t.get("adds") or {}
+            remain_frac = max(0, tot_w - wk) / tot_w
             sides = []
             for rid in t["roster_ids"]:
                 uid = ctx["rmap"][rid]
-                got = []
-                side_pts = 0.0
+                players, picks = [], []
+                P = A = K = 0.0
                 for pid, to_rid in adds.items():
                     if to_rid != rid:
                         continue
-                    after = sum(v.get(pid, 0) or 0
-                                for (s2, w2, r2), v in roster_week_pts.items()
-                                if s2 == s and r2 == rid and w2 > wk)
-                    side_pts += after
-                    got.append({"p": pname(pid), "pts": round(after, 1)})
-                avg = side_pts / len(got) if got else 0.0
-                sides.append({"name": oname(uid), "got": got,
-                              "pts": round(side_pts, 1), "avg": round(avg, 1)})
-            if len(sides) == 2 and all(sd["got"] for sd in sides):
-                diff = sides[0]["avg"] - sides[1]["avg"]
+                    ros = sum(v.get(pid, 0) or 0
+                              for (s2, w2, r2), v in roster_week_pts.items()
+                              if s2 == s and r2 == rid and w2 > wk)
+                    p_val = max(0.0, ros - repl.get((s, ppos(pid)), 0) * remain_frac)
+                    a_val = 0.0
+                    rnd = draft_round_by.get((s, str(pid)))
+                    if rnd is not None:
+                        season_pts = player_season_pts.get((s, str(pid)), 0)
+                        a_val = 0.3 * max(0.0, season_pts - med[rnd])
+                    P += p_val
+                    A += a_val
+                    players.append({"p": pname(pid), "pts": round(ros, 1),
+                                    "val": round(p_val + a_val, 1)})
+                for dp in t.get("draft_picks") or []:
+                    if dp["owner_id"] != rid:
+                        continue
+                    years_out = max(0, int(dp["season"]) - int(s))
+                    v = round_vor.get(dp["round"], 0) * (0.85 ** years_out)
+                    K += v
+                    picks.append({"lab": f"{dp['season']} R{dp['round']}", "val": round(v, 1)})
+                sides.append({"name": oname(uid), "players": players, "picks": picks,
+                              "P": round(P, 1), "A": round(A, 1), "K": round(K, 1),
+                              "total": round(P + A + K, 1)})
+            if len(sides) == 2 and any(sd["players"] or sd["picks"] for sd in sides):
+                diff = sides[0]["total"] - sides[1]["total"]
                 loser = None
-                if abs(diff) >= 20:
+                if abs(diff) >= 50:
                     loser = sides[0]["name"] if diff < 0 else sides[1]["name"]
-                trades_out.append({"s": s, "wk": wk, "sides": sides,
-                                   "diff": round(abs(diff), 1), "loser": loser})
+                trades_out.append({"s": s, "wk": wk,
+                                   "type": "picks" if any(sd["picks"] for sd in sides) else "players",
+                                   "sides": sides, "diff": round(abs(diff), 1), "loser": loser})
 trades_out.sort(key=lambda x: (x["s"], x["wk"]))
 
 # fleece tallies + draft resume onto career rows
@@ -335,6 +385,7 @@ site = {
     "records": record_book,
     "drafts": {"boards": draft_rows, "steals": steals, "busts": busts, "round_median": med},
     "trades": trades_out,
+    "pick_values": {r: round(v, 1) for r, v in sorted(round_vor.items())},
 }
 with open(os.path.join(DATA, "site_data.json"), "w", encoding="utf-8") as f:
     json.dump(site, f, ensure_ascii=False)
@@ -346,3 +397,11 @@ for c in career_out:
 print("\ntop steals:", [(r["player"], r["s"], f"R{r['round']}", r["voe"]) for r in steals[:5]])
 print("top busts:", [(r["player"], r["s"], f"R{r['round']}", r["voe"]) for r in busts[:5]])
 print("trades:", len(trades_out), "| size:", os.path.getsize(os.path.join(DATA, "site_data.json")) // 1024, "KB")
+print("pick values:", {r: round(v) for r, v in sorted(round_vor.items())})
+diffs = sorted(t["diff"] for t in trades_out)
+print("diff percentiles: p25", diffs[len(diffs)//4], "p50", diffs[len(diffs)//2],
+      "p75", diffs[3*len(diffs)//4], "max", diffs[-1])
+heists = sorted(trades_out, key=lambda t: -t["diff"])[:5]
+for h in heists:
+    print(f"  HEIST {h['s']} wk{h['wk']} ({h['type']}): loser {h['loser']} by {h['diff']} | "
+          + " vs ".join(f"{sd['name']} {sd['total']}" for sd in h["sides"]))

@@ -248,6 +248,15 @@ input[type=range]:disabled{opacity:.35}
 .ctlnote{font-size:11px;color:var(--ink3);line-height:1.5;margin-top:6px}
 .labbanner{margin-top:14px;background:var(--card);border:1px dashed var(--gold);border-radius:10px;padding:9px 14px;font-size:12.5px;color:var(--ink2);line-height:1.5}
 .labbanner a{color:var(--gold);font-weight:600}
+nav.ggg a.labtab{margin-left:auto;border:1px dashed var(--gold);color:var(--gold);border-radius:999px;padding:5px 13px}
+nav.ggg a.labtab.on{background:var(--card);color:var(--gold)}
+.tbl td{white-space:nowrap}
+.tbl td.wrapok{white-space:normal}
+.tbl th.sortable{cursor:pointer;user-select:none;white-space:nowrap}
+.tbl th.sortable:hover{color:var(--mint)}
+.valbreak{margin-top:8px;font-size:11px;color:var(--ink3);font-variant-numeric:tabular-nums}
+.tbl-details{margin-top:12px;font-size:12.5px}
+.tbl-details summary{cursor:pointer}
 """
 CSS = CSS.replace("F400", fonts["400"]).replace("F600", fonts["600"]).replace("F800", fonts["800"])
 with open(os.path.join(OUT, "ggg.css"), "w", encoding="utf-8") as f:
@@ -260,8 +269,10 @@ NAV_LINKS = [("index.html", "Home"), ("history.html", "History"), ("records.html
 
 
 def nav(active):
-    links = "".join(f'<a href="{h}" class="{"on" if h == active else ""}">{t}</a>' for h, t in NAV_LINKS)
-    return f'<nav class="ggg"><div class="in"><span class="logo">GGG</span>{links}</div></nav>'
+    links = "".join(f'<a href="{h}" class="{"on" if h == active else ""}">{t}</a>'
+                    for h, t in NAV_LINKS if h != "lab.html")
+    lab = f'<a href="lab.html" class="labtab{" on" if active == "lab.html" else ""}">🧪 Lab</a>'
+    return f'<nav class="ggg"><div class="in"><span class="logo">GGG</span>{links}{lab}</div></nav>'
 
 
 FOOT = ('<footer class="ggg"><div class="in">GGG League · data from the Sleeper API · '
@@ -341,7 +352,7 @@ slices = {
     "history.html": {"seasons": site["seasons"], "career": career, "h2h": site["h2h"]},
     "records.html": {"records": site["records"], "career": career},
     "drafts.html": {"drafts": site["drafts"]},
-    "trades.html": {"trades": site["trades"]},
+    "trades.html": {"trades": site["trades"], "pickValues": site["pick_values"]},
     "lab.html": {"teams": planner_teams(), "steep": STEEP_TABLE, "adopted": CFG["table"],
                  "defaults": {"cap": CFG["cap"], "budget": CFG["budget"], "maxKeep": CFG["maxKeep"]}},
 }

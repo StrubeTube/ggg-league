@@ -225,3 +225,12 @@ input[type=range]:disabled{opacity:.35}
 .ctlnote{font-size:11px;color:var(--ink3);line-height:1.5;margin-top:6px}
 .labbanner{margin-top:14px;background:var(--card);border:1px dashed var(--gold);border-radius:10px;padding:9px 14px;font-size:12.5px;color:var(--ink2);line-height:1.5}
 .labbanner a{color:var(--gold);font-weight:600}
+nav.ggg a.labtab{margin-left:auto;border:1px dashed var(--gold);color:var(--gold);border-radius:999px;padding:5px 13px}
+nav.ggg a.labtab.on{background:var(--card);color:var(--gold)}
+.tbl td{white-space:nowrap}
+.tbl td.wrapok{white-space:normal}
+.tbl th.sortable{cursor:pointer;user-select:none;white-space:nowrap}
+.tbl th.sortable:hover{color:var(--mint)}
+.valbreak{margin-top:8px;font-size:11px;color:var(--ink3);font-variant-numeric:tabular-nums}
+.tbl-details{margin-top:12px;font-size:12.5px}
+.tbl-details summary{cursor:pointer}

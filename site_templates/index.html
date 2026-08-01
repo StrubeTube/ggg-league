@@ -144,8 +144,7 @@ function renderDash(){
     const c=card(12,'Pick your team above');
     c.appendChild($('p','mut','The dashboard builds itself around your franchise — keepers, cap, grudges, draft capital, and your whole history.'));
     dash.appendChild(c);
-    dash.appendChild(capBoardCard(6));
-    dash.appendChild(checklistCard(6));
+    dash.appendChild(capBoardCard(12));
     return;
   }
   const tm=DATA.teams[myTeam],c=DATA.career.find(x=>x.name===tm.name),ev=evalTeam(myTeam);
@@ -299,26 +298,6 @@ function renderDash(){
   g.appendChild(gr);
   hist.appendChild(g);
 
-  /* --- offseason checklist (span 6) --- */
-  dash.appendChild(checklistCard(6));
-
-  /* --- 2027 outlook (span 3) --- */
-  const ok=card(3,'2027 outlook');
-  const bn3=$('div','bignum');bn3.appendChild(document.createTextNode('$'+ev.next27));
-  bn3.appendChild($('small',null,' if kept again'));
-  ok.appendChild(bn3);
-  ok.appendChild($('p','cardnote',ev.k?('Your selected '+ev.k+'-keeper class costs $'+ev.keepSpend+' now and $'+ev.next27+' in 2027. Escalation always wins in the end.'):'Select keepers to see what this class costs you in 2027.'));
-  dash.appendChild(ok);
-
-  /* --- awards shelf (span 3) --- */
-  const aw=card(3,'2026 awards shelf','LIVE WK 1');
-  [['🎯 Weekly high scores','$10 each — career: '+c.high_weeks],
-   ['🚽 Toilet seat weeks','lowest score of the week'],
-   ['🪑 Bench blunders','most points left at home']]
-    .forEach(([k2,v])=>{const r=$('div','vrow');r.appendChild($('span',null,k2));r.appendChild($('span','mut',v));aw.appendChild(r);});
-  aw.appendChild($('p','cardnote','Auto-awarded every week of the 2026 season.'));
-  dash.appendChild(aw);
-
   /* --- team history dropdown (span 12) --- */
   const det=document.createElement('details');
   det.className='histbox';
@@ -418,26 +397,6 @@ function capBoardCard(span){
   return cb;
 }
 
-function checklistCard(span){
-  const w=card(span,'Offseason checklist');
-  const items=[
-    ['chkRenew',false,'League renews on Sleeper','auto-detected — not yet'],
-    ['chkVote',false,'Ratify the Cap Keeper amendment','send the league The Case'],
-    ['chkDraft',false,'Schedule the 2026 draft','late August, as always'],
-    ['chkKeep',false,'Lock keepers','due 2 weeks before draft'],
-    ['chkBuyin',false,'Collect $100 buy-ins','plus last year’s toilet $75'],
-  ];
-  items.forEach(([id,done,txt,sub])=>{
-    const r=$('div','chk'+(done?' done':''));r.id=id;
-    r.appendChild($('span','chkbox',done?'✓':''));
-    const t=$('div');
-    t.appendChild($('div','chktxt',txt));
-    t.appendChild($('div','mut small',sub));
-    r.appendChild(t);
-    w.appendChild(r);
-  });
-  return w;
-}
 
 render();
 
@@ -449,9 +408,6 @@ render();
     const lg=(leagues||[]).find(l=>l.previous_league_id===DATA.leagueId2025);
     if(!lg)return;
     document.getElementById('heroSub').textContent=lg.name+' is renewed on Sleeper ('+lg.status.replace('_',' ')+') — official keepers sync here once set.';
-    const chk=document.getElementById('chkRenew');
-    if(chk){chk.classList.add('done');chk.querySelector('.chkbox').textContent='✓';
-      chk.querySelector('.mut').textContent='renewed — '+lg.status.replace('_',' ');}
   }catch(e){}
 })();
 </script>
