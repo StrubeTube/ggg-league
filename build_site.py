@@ -204,6 +204,26 @@ footer.ggg .in{max-width:980px;margin:0 auto;padding:18px 16px;font-size:12px;co
 .pickchips{display:flex;flex-wrap:wrap;gap:6px}
 .pk{background:var(--card2);border:1px solid var(--line2);border-radius:8px;padding:3px 10px;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
 .pk .frm{font-weight:400;color:var(--ink3);font-size:11px}
+.cardnote2{font-size:11.5px;color:var(--ink3);line-height:1.5}
+.cbrow{display:grid;grid-template-columns:minmax(120px,150px) 1fr 92px;align-items:center;gap:10px;min-height:38px}
+.cbname{display:flex;align-items:center;gap:6px;min-width:0}
+.cbteam{font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cbname.good .cbteam{color:var(--mint)}
+.cbtrack{position:relative;height:18px;background:var(--card2);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.cbseg{position:absolute;top:2px;bottom:2px;transition:width .18s,left .18s}
+.cbseg.k{background:var(--mark);border-radius:7px 0 0 7px}
+.cbseg.d{background:var(--mark);opacity:.4}
+.cbseg.f{background:var(--mark);opacity:.15}
+.cbcap{position:absolute;top:-2px;bottom:-2px;width:0;border-left:2px dashed var(--coral)}
+.cbval{display:flex;flex-direction:column;align-items:flex-end;line-height:1.25;font-variant-numeric:tabular-nums}
+.cbval b{font-weight:800;font-size:13.5px}
+.cbval b.bad{color:var(--coral)}
+.chk{display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line)}
+.chk:last-of-type{border-bottom:none}
+.chkbox{flex:none;width:20px;height:20px;border-radius:6px;border:2px solid var(--line2);display:grid;place-items:center;font-size:12px;color:var(--mint-ink);margin-top:1px}
+.chk.done .chkbox{background:var(--mint);border-color:var(--mint)}
+.chk.done .chktxt{text-decoration:line-through;color:var(--ink2)}
+.chktxt{font-size:13.5px;font-weight:600}
 """
 CSS = CSS.replace("F400", fonts["400"]).replace("F600", fonts["600"]).replace("F800", fonts["800"])
 with open(os.path.join(OUT, "ggg.css"), "w", encoding="utf-8") as f:
@@ -285,7 +305,7 @@ for sn in site["seasons"]:
              "champ": t["name"] == sn["champ"], "toilet": t["name"] == sn["toilet"]})
 slices = {
     "index.html": {"cfg": CFG, "teams": planner_teams(), "career": career,
-                   "h2h": site["h2h"], "finishes": finishes, "records": site["records"],
+                   "h2h": site["h2h"], "finishes": finishes,
                    "commishUserId": commish_uid, "leagueId2025": "1256797701320753152"},
     "history.html": {"seasons": site["seasons"], "career": career, "h2h": site["h2h"]},
     "records.html": {"records": site["records"], "career": career},

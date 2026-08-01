@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <title>GGG League — Trade Archive</title>
-<link rel="stylesheet" href="ggg.css?v=8807577f">
+<link rel="stylesheet" href="ggg.css?v=ed0e3d00">
 <nav class="ggg"><div class="in"><span class="logo">GGG</span><a href="index.html" class="">Home</a><a href="history.html" class="">History</a><a href="records.html" class="">Records</a><a href="drafts.html" class="">Drafts</a><a href="trades.html" class="on">Trades</a><a href="cap-planner.html" class="">Planner</a><a href="cap-report.html" class="">The Case</a></div></nav>
 <div class="wrap">
   <header class="hero">
@@ -10,7 +10,15 @@
   </header>
 
   <section>
+    <div class="sec-head"><div class="eyebrow">The leaderboard</div><h2>Who actually wins trades</h2>
+    <p class="sec-note">Every player deal a team has made, scored by their average points-per-player edge over the other side, rest-of-season. W = won by 20+ pts/player, L = got fleeced, E = fair fight.</p></div>
+    <div class="card scroll" id="tstats"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><div class="eyebrow">The archive</div><h2>Every deal, graded</h2></div>
     <div class="filterrow" id="filters"></div>
+    <div class="filterrow" id="teamfilters"></div>
     <div class="trades" id="trades"></div>
   </section>
 </div>
@@ -19,17 +27,57 @@
 const DATA = {"trades": [{"s": "2020", "wk": 1, "sides": [{"name": "Strubes", "got": [{"p": "Chris Carson", "pts": 71.4}], "pts": 71.4, "avg": 71.4}, {"name": "swinglejt", "got": [{"p": "A.J. Brown", "pts": 204.1}], "pts": 204.1, "avg": 204.1}], "diff": 132.7, "loser": "Strubes"}, {"s": "2020", "wk": 1, "sides": [{"name": "lynnkm23", "got": [{"p": "George Kittle", "pts": 93.8}], "pts": 93.8, "avg": 93.8}, {"name": "Philly000", "got": [{"p": "Kenny Golladay", "pts": 55.8}], "pts": 55.8, "avg": 55.8}], "diff": 38.0, "loser": "Philly000"}, {"s": "2020", "wk": 5, "sides": [{"name": "Strubes", "got": [{"p": "Amari Cooper", "pts": 121.1}, {"p": "Joe Mixon", "pts": 13.9}], "pts": 135.0, "avg": 67.5}, {"name": "DaBlondest", "got": [{"p": "David Johnson", "pts": 103.5}, {"p": "James Robinson", "pts": 80.5}], "pts": 184.0, "avg": 92.0}], "diff": 24.5, "loser": "Strubes"}, {"s": "2020", "wk": 5, "sides": [{"name": "Strubes", "got": [{"p": "Chase Edmonds", "pts": 92.1}, {"p": "Joe Burrow", "pts": 50.5}], "pts": 142.6, "avg": 71.3}, {"name": "TommyHolland", "got": [{"p": "Jamison Crowder", "pts": 8.3}], "pts": 8.3, "avg": 8.3}], "diff": 63.0, "loser": "TommyHolland"}, {"s": "2020", "wk": 5, "sides": [{"name": "lynnkm23", "got": [{"p": "Tyler Boyd", "pts": 31.6}], "pts": 31.6, "avg": 31.6}, {"name": "VEROVILLIANZ", "got": [{"p": "Damien Harris", "pts": 77.8}], "pts": 77.8, "avg": 77.8}], "diff": 46.2, "loser": "lynnkm23"}, {"s": "2020", "wk": 6, "sides": [{"name": "EvanDeFilippis", "got": [{"p": "Justin Jackson", "pts": 23.7}], "pts": 23.7, "avg": 23.7}, {"name": "TommyHolland", "got": [{"p": "Adrian Peterson", "pts": 33.8}], "pts": 33.8, "avg": 33.8}], "diff": 10.1, "loser": null}, {"s": "2020", "wk": 7, "sides": [{"name": "lynnkm23", "got": [{"p": "Josh Jacobs", "pts": 125.2}], "pts": 125.2, "avg": 125.2}, {"name": "swinglejt", "got": [{"p": "Tyler Boyd", "pts": 61.9}], "pts": 61.9, "avg": 61.9}], "diff": 63.3, "loser": "swinglejt"}, {"s": "2020", "wk": 7, "sides": [{"name": "swinglejt", "got": [{"p": "Jamison Crowder", "pts": 77.7}], "pts": 77.7, "avg": 77.7}, {"name": "TommyHolland", "got": [{"p": "Tee Higgins", "pts": 85.4}], "pts": 85.4, "avg": 85.4}], "diff": 7.7, "loser": null}, {"s": "2020", "wk": 9, "sides": [{"name": "DaBlondest", "got": [{"p": "Hayden Hurst", "pts": 43.5}], "pts": 43.5, "avg": 43.5}, {"name": "TommyHolland", "got": [{"p": "Leonard Fournette", "pts": 13.1}], "pts": 13.1, "avg": 13.1}], "diff": 30.4, "loser": "TommyHolland"}, {"s": "2021", "wk": 2, "sides": [{"name": "Strubes", "got": [{"p": "Brandon Aiyuk", "pts": 14.5}], "pts": 14.5, "avg": 14.5}, {"name": "HartManStan", "got": [{"p": "Brandin Cooks", "pts": 152.8}], "pts": 152.8, "avg": 152.8}], "diff": 138.3, "loser": "Strubes"}, {"s": "2021", "wk": 4, "sides": [{"name": "Strubes", "got": [{"p": "T.J. Hockenson", "pts": 68.3}], "pts": 68.3, "avg": 68.3}, {"name": "VEROVILLIANZ", "got": [{"p": "Trey Sermon", "pts": 0.7}], "pts": 0.7, "avg": 0.7}], "diff": 67.6, "loser": "VEROVILLIANZ"}, {"s": "2021", "wk": 4, "sides": [{"name": "Strubes", "got": [{"p": "Zack Moss", "pts": 36.0}, {"p": "Trey Sermon", "pts": 0}], "pts": 36.0, "avg": 18.0}, {"name": "TommyHolland", "got": [{"p": "Nyheim Miller-Hines", "pts": 44.9}, {"p": "Jerry Jeudy", "pts": 43.3}], "pts": 88.2, "avg": 44.1}], "diff": 26.1, "loser": "Strubes"}, {"s": "2021", "wk": 5, "sides": [{"name": "DaBlondest", "got": [{"p": "Dawson Knox", "pts": 74.5}, {"p": "Clyde Edwards-Helaire", "pts": 59.6}], "pts": 134.1, "avg": 67.0}, {"name": "TommyHolland", "got": [{"p": "Odell Beckham", "pts": 59.6}, {"p": "Joe Mixon", "pts": 201.2}], "pts": 260.8, "avg": 130.4}], "diff": 63.4, "loser": "DaBlondest"}, {"s": "2021", "wk": 5, "sides": [{"name": "Strubes", "got": [{"p": "Elijah Mitchell", "pts": 125.6}], "pts": 125.6, "avg": 125.6}, {"name": "BJohnson5", "got": [{"p": "Tim Patrick", "pts": 22.2}, {"p": "Brandon Aiyuk", "pts": 120.5}], "pts": 142.7, "avg": 71.3}], "diff": 54.3, "loser": "BJohnson5"}, {"s": "2022", "wk": 1, "sides": [{"name": "EvanDeFilippis", "got": [{"p": "Jerry Jeudy", "pts": 59.8}, {"p": "Antonio Gibson", "pts": 79.3}], "pts": 139.1, "avg": 69.5}, {"name": "VEROVILLIANZ", "got": [{"p": "Josh Jacobs", "pts": 291.0}], "pts": 291.0, "avg": 291.0}], "diff": 221.5, "loser": "EvanDeFilippis"}, {"s": "2022", "wk": 9, "sides": [{"name": "EvanDeFilippis", "got": [{"p": "Antonio Gibson", "pts": 32.0}], "pts": 32.0, "avg": 32.0}, {"name": "TommyHolland", "got": [{"p": "Dalton Schultz", "pts": 85.9}, {"p": "Diontae Johnson", "pts": 74.8}], "pts": 160.7, "avg": 80.3}], "diff": 48.3, "loser": "EvanDeFilippis"}, {"s": "2022", "wk": 12, "sides": [{"name": "Strubes", "got": [{"p": "David Njoku", "pts": 36.7}, {"p": "Saquon Barkley", "pts": 72.5}], "pts": 109.2, "avg": 54.6}, {"name": "EvanDeFilippis", "got": [{"p": "Travis Kelce", "pts": 58.1}], "pts": 58.1, "avg": 58.1}], "diff": 3.5, "loser": null}, {"s": "2022", "wk": 12, "sides": [{"name": "HartManStan", "got": [{"p": "Jerry Jeudy", "pts": 92.7}, {"p": "Antonio Gibson", "pts": 13.7}], "pts": 106.4, "avg": 53.2}, {"name": "EvanDeFilippis", "got": [{"p": "D'Onta Foreman", "pts": 40.7}], "pts": 40.7, "avg": 40.7}], "diff": 12.5, "loser": null}, {"s": "2022", "wk": 12, "sides": [{"name": "Strubes", "got": [{"p": "DK Metcalf", "pts": 65.2}, {"p": "Rhamondre Stevenson", "pts": 51.7}], "pts": 116.9, "avg": 58.5}, {"name": "HartManStan", "got": [{"p": "Stefon Diggs", "pts": 59.2}], "pts": 59.2, "avg": 59.2}], "diff": 0.7, "loser": null}, {"s": "2023", "wk": 1, "sides": [{"name": "EvanDeFilippis", "got": [{"p": "Travis Etienne", "pts": 234.5}], "pts": 234.5, "avg": 234.5}, {"name": "VEROVILLIANZ", "got": [{"p": "Deebo Samuel", "pts": 50.8}, {"p": "Philadelphia Eagles", "pts": 101.0}], "pts": 151.8, "avg": 75.9}], "diff": 158.6, "loser": "VEROVILLIANZ"}, {"s": "2023", "wk": 4, "sides": [{"name": "Strubes", "got": [{"p": "Gabe Davis", "pts": 19.6}, {"p": "Amon-Ra St. Brown", "pts": 214.9}], "pts": 234.5, "avg": 117.2}, {"name": "BJohnson5", "got": [{"p": "Raheem Mostert", "pts": 170.3}, {"p": "Marvin Mims", "pts": -2.1}], "pts": 168.2, "avg": 84.1}], "diff": 33.1, "loser": "BJohnson5"}, {"s": "2023", "wk": 7, "sides": [{"name": "Strubes", "got": [{"p": "Diontae Johnson", "pts": 109.5}, {"p": "Najee Harris", "pts": 43.8}], "pts": 153.3, "avg": 76.7}, {"name": "VEROVILLIANZ", "got": [{"p": "Drake London", "pts": 72.7}], "pts": 72.7, "avg": 72.7}], "diff": 4.0, "loser": null}, {"s": "2023", "wk": 7, "sides": [{"name": "Strubes", "got": [{"p": "Salvon Ahmed", "pts": 0}, {"p": "Chris Olave", "pts": 115.2}], "pts": 115.2, "avg": 57.6}, {"name": "swinglejt", "got": [{"p": "Gabe Davis", "pts": 47.3}, {"p": "Rhamondre Stevenson", "pts": 59.2}], "pts": 106.5, "avg": 53.2}], "diff": 4.4, "loser": null}, {"s": "2023", "wk": 12, "sides": [{"name": "Strubes", "got": [{"p": "David Njoku", "pts": 75.0}], "pts": 75.0, "avg": 75.0}, {"name": "EvanDeFilippis", "got": [{"p": "Najee Harris", "pts": 75.1}], "pts": 75.1, "avg": 75.1}], "diff": 0.1, "loser": null}, {"s": "2023", "wk": 12, "sides": [{"name": "BJohnson5", "got": [{"p": "Tua Tagovailoa", "pts": 80.3}, {"p": "Nico Collins", "pts": 84.4}, {"p": "Javonte Williams", "pts": 60.8}], "pts": 225.5, "avg": 75.2}, {"name": "EvanDeFilippis", "got": [{"p": "Josh Allen", "pts": 107.9}], "pts": 107.9, "avg": 107.9}], "diff": 32.7, "loser": "BJohnson5"}, {"s": "2023", "wk": 12, "sides": [{"name": "EvanDeFilippis", "got": [{"p": "Dalton Schultz", "pts": 27.5}], "pts": 27.5, "avg": 27.5}, {"name": "TommyHolland", "got": [{"p": "Alexander Mattison", "pts": 13.9}], "pts": 13.9, "avg": 13.9}], "diff": 13.6, "loser": null}, {"s": "2024", "wk": 1, "sides": [{"name": "lynnkm23", "got": [{"p": "Rashee Rice", "pts": 39.1}], "pts": 39.1, "avg": 39.1}, {"name": "VEROVILLIANZ", "got": [{"p": "Anthony Richardson", "pts": 136.8}], "pts": 136.8, "avg": 136.8}], "diff": 97.7, "loser": "lynnkm23"}, {"s": "2024", "wk": 2, "sides": [{"name": "HartManStan", "got": [{"p": "Travis Kelce", "pts": 140.9}, {"p": "George Pickens", "pts": 120.5}], "pts": 261.4, "avg": 130.7}, {"name": "EvanDeFilippis", "got": [{"p": "Mike Evans", "pts": 47.2}], "pts": 47.2, "avg": 47.2}], "diff": 83.5, "loser": "EvanDeFilippis"}, {"s": "2024", "wk": 3, "sides": [{"name": "DaBlondest", "got": [{"p": "Joe Mixon", "pts": 190.7}, {"p": "Jaylen Waddle", "pts": 95.8}, {"p": "Trey McBride", "pts": 169.1}], "pts": 455.6, "avg": 151.9}, {"name": "HartManStan", "got": [{"p": "Saquon Barkley", "pts": 259.4}, {"p": "Brandon Aiyuk", "pts": 32.5}], "pts": 291.9, "avg": 145.9}], "diff": 6.0, "loser": null}, {"s": "2024", "wk": 7, "sides": [{"name": "lynnkm23", "got": [{"p": "Courtland Sutton", "pts": 149.6}, {"p": "Terry McLaurin", "pts": 141.7}, {"p": "Alexander Mattison", "pts": 18.9}, {"p": "Jahmyr Gibbs", "pts": 230.7}], "pts": 540.9, "avg": 135.2}, {"name": "VEROVILLIANZ", "got": [{"p": "Josh Jacobs", "pts": 0}, {"p": "Najee Harris", "pts": 106.3}, {"p": "Tank Dell", "pts": 76.1}, {"p": "Quentin Johnston", "pts": 105.4}], "pts": 287.8, "avg": 71.9}], "diff": 63.3, "loser": "VEROVILLIANZ"}, {"s": "2025", "wk": 3, "sides": [{"name": "PrezNix", "got": [{"p": "Emeka Egbuka", "pts": 120.2}, {"p": "Juwan Johnson", "pts": 7.5}], "pts": 127.7, "avg": 63.9}, {"name": "EvanDeFilippis", "got": [{"p": "Terry McLaurin", "pts": 75.3}], "pts": 75.3, "avg": 75.3}], "diff": 11.4, "loser": null}, {"s": "2025", "wk": 11, "sides": [{"name": "VEROVILLIANZ", "got": [{"p": "Malik Nabers", "pts": 0}, {"p": "Joe Burrow", "pts": 118.6}, {"p": "Jordan Mason", "pts": 4.2}], "pts": 122.8, "avg": 40.9}, {"name": "TommyHolland", "got": [{"p": "Derrick Henry", "pts": 140.4}, {"p": "Chris Olave", "pts": 99.9}], "pts": 240.3, "avg": 120.2}], "diff": 79.3, "loser": "VEROVILLIANZ"}]};
 const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
 
-let filter = 'all';
+let sfilter = 'all', tfilter = 'all';
 const seasons = [...new Set(DATA.trades.map(t=>t.s))].sort().reverse();
+const teams = [...new Set(DATA.trades.flatMap(t=>t.sides.map(sd=>sd.name)))].sort();
+
+/* trading leaderboard */
+(function(){
+  const st = {};
+  DATA.trades.forEach(t=>{
+    t.sides.forEach((sd,i)=>{
+      const opp = t.sides[1-i];
+      const margin = sd.avg - opp.avg;
+      const s = st[sd.name] = st[sd.name] || {deals:0,w:0,l:0,e:0,net:0};
+      s.deals++; s.net += margin;
+      if (margin >= 20) s.w++; else if (margin <= -20) s.l++; else s.e++;
+    });
+  });
+  const rows = Object.entries(st).sort((a,b)=>b[1].net-a[1].net);
+  const tbl = $('table','tbl');
+  const hr = $('tr'); ['Team','Deals','W-L-E','Net pts/player',''].forEach(h=>hr.appendChild($('th',null,h)));
+  tbl.appendChild(hr);
+  rows.forEach(([name,s],i)=>{
+    const r = $('tr');
+    r.appendChild($('td',null,name));
+    r.appendChild($('td',null,String(s.deals)));
+    r.appendChild($('td',null,s.w+'-'+s.l+'-'+s.e));
+    r.appendChild($('td', s.net>0?'good':(s.net<0?'bad':''), (s.net>0?'+':'')+s.net.toFixed(0)));
+    const tag=$('td');
+    if(i===0) tag.appendChild($('span','chip mini','🦈 APEX TRADER'));
+    if(i===rows.length-1) tag.appendChild($('span','chip fire','🐟 THE FISH'));
+    r.appendChild(tag);
+    tbl.appendChild(r);
+  });
+  document.getElementById('tstats').appendChild(tbl);
+})();
 
 function renderFilters(){
   const host = document.getElementById('filters');
   host.textContent='';
   ['all', ...seasons].forEach(s=>{
-    const b = $('button','tpill'+(filter===s?' active':''), s==='all'?'All ('+DATA.trades.length+')':s);
+    const b = $('button','tpill'+(sfilter===s?' active':''), s==='all'?'All seasons':s);
     b.type='button';
-    b.addEventListener('click',()=>{filter=s;render();});
+    b.addEventListener('click',()=>{sfilter=s;render();});
     host.appendChild(b);
+  });
+  const th = document.getElementById('teamfilters');
+  th.textContent='';
+  ['all', ...teams].forEach(n=>{
+    const b = $('button','tpill'+(tfilter===n?' active':''), n==='all'?'All teams':n);
+    b.type='button';
+    b.addEventListener('click',()=>{tfilter=n;render();});
+    th.appendChild(b);
   });
 }
 
@@ -37,7 +85,8 @@ function render(){
   renderFilters();
   const host = document.getElementById('trades');
   host.textContent='';
-  const rows = DATA.trades.filter(t=>filter==='all'||t.s===filter);
+  const rows = DATA.trades.filter(t=>(sfilter==='all'||t.s===sfilter)
+    && (tfilter==='all'||t.sides.some(sd=>sd.name===tfilter)));
   [...rows].reverse().forEach(t=>{
     const card = $('article','trade');
     const th = $('div','trade-head');

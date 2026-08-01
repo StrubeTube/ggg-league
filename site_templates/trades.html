@@ -10,7 +10,15 @@ __NAV__
   </header>
 
   <section>
+    <div class="sec-head"><div class="eyebrow">The leaderboard</div><h2>Who actually wins trades</h2>
+    <p class="sec-note">Every player deal a team has made, scored by their average points-per-player edge over the other side, rest-of-season. W = won by 20+ pts/player, L = got fleeced, E = fair fight.</p></div>
+    <div class="card scroll" id="tstats"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><div class="eyebrow">The archive</div><h2>Every deal, graded</h2></div>
     <div class="filterrow" id="filters"></div>
+    <div class="filterrow" id="teamfilters"></div>
     <div class="trades" id="trades"></div>
   </section>
 </div>
@@ -19,17 +27,57 @@ __FOOT__
 const DATA = /*__DATA__*/{};
 const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
 
-let filter = 'all';
+let sfilter = 'all', tfilter = 'all';
 const seasons = [...new Set(DATA.trades.map(t=>t.s))].sort().reverse();
+const teams = [...new Set(DATA.trades.flatMap(t=>t.sides.map(sd=>sd.name)))].sort();
+
+/* trading leaderboard */
+(function(){
+  const st = {};
+  DATA.trades.forEach(t=>{
+    t.sides.forEach((sd,i)=>{
+      const opp = t.sides[1-i];
+      const margin = sd.avg - opp.avg;
+      const s = st[sd.name] = st[sd.name] || {deals:0,w:0,l:0,e:0,net:0};
+      s.deals++; s.net += margin;
+      if (margin >= 20) s.w++; else if (margin <= -20) s.l++; else s.e++;
+    });
+  });
+  const rows = Object.entries(st).sort((a,b)=>b[1].net-a[1].net);
+  const tbl = $('table','tbl');
+  const hr = $('tr'); ['Team','Deals','W-L-E','Net pts/player',''].forEach(h=>hr.appendChild($('th',null,h)));
+  tbl.appendChild(hr);
+  rows.forEach(([name,s],i)=>{
+    const r = $('tr');
+    r.appendChild($('td',null,name));
+    r.appendChild($('td',null,String(s.deals)));
+    r.appendChild($('td',null,s.w+'-'+s.l+'-'+s.e));
+    r.appendChild($('td', s.net>0?'good':(s.net<0?'bad':''), (s.net>0?'+':'')+s.net.toFixed(0)));
+    const tag=$('td');
+    if(i===0) tag.appendChild($('span','chip mini','🦈 APEX TRADER'));
+    if(i===rows.length-1) tag.appendChild($('span','chip fire','🐟 THE FISH'));
+    r.appendChild(tag);
+    tbl.appendChild(r);
+  });
+  document.getElementById('tstats').appendChild(tbl);
+})();
 
 function renderFilters(){
   const host = document.getElementById('filters');
   host.textContent='';
   ['all', ...seasons].forEach(s=>{
-    const b = $('button','tpill'+(filter===s?' active':''), s==='all'?'All ('+DATA.trades.length+')':s);
+    const b = $('button','tpill'+(sfilter===s?' active':''), s==='all'?'All seasons':s);
     b.type='button';
-    b.addEventListener('click',()=>{filter=s;render();});
+    b.addEventListener('click',()=>{sfilter=s;render();});
     host.appendChild(b);
+  });
+  const th = document.getElementById('teamfilters');
+  th.textContent='';
+  ['all', ...teams].forEach(n=>{
+    const b = $('button','tpill'+(tfilter===n?' active':''), n==='all'?'All teams':n);
+    b.type='button';
+    b.addEventListener('click',()=>{tfilter=n;render();});
+    th.appendChild(b);
   });
 }
 
@@ -37,7 +85,8 @@ function render(){
   renderFilters();
   const host = document.getElementById('trades');
   host.textContent='';
-  const rows = DATA.trades.filter(t=>filter==='all'||t.s===filter);
+  const rows = DATA.trades.filter(t=>(sfilter==='all'||t.s===sfilter)
+    && (tfilter==='all'||t.sides.some(sd=>sd.name===tfilter)));
   [...rows].reverse().forEach(t=>{
     const card = $('article','trade');
     const th = $('div','trade-head');

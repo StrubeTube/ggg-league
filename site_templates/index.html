@@ -38,7 +38,8 @@ function evalTeam(ti){
   const slots=16-k,used=picks.slice(0,slots);
   let draftSpend=0;used.forEach(p=>draftSpend+=TABLE[p.r]);
   const fills=Math.max(0,slots-used.length);
-  return {keepSpend,next27,k,opening:keepSpend+draftSpend+fills*CFG.waiver,
+  return {keepSpend,next27,k,draftSpend,fills,
+          opening:keepSpend+draftSpend+fills*CFG.waiver,
           overBudget:keepSpend>CFG.budget,overCount:k>CFG.maxKeep};
 }
 const capital=ti=>DATA.teams[ti].picks.reduce((a,p)=>a+TABLE[p.r],0);
@@ -125,7 +126,7 @@ function renderDash(){
     c.appendChild($('p','mut','The dashboard builds itself around your franchise — keepers, cap, grudges, draft capital, and your whole history.'));
     dash.appendChild(c);
     dash.appendChild(capBoardCard(6));
-    dash.appendChild(wireCard(6));
+    dash.appendChild(checklistCard(6));
     return;
   }
   const tm=DATA.teams[myTeam],c=DATA.career.find(x=>x.name===tm.name),ev=evalTeam(myTeam);
@@ -147,20 +148,23 @@ function renderDash(){
   meters.appendChild(m2);
   kc.appendChild(meters);
   const list=$('div','roster tallroster');
-  tm.players.forEach((p,pi)=>{
+  tm.players.map((p,pi)=>({p,pi}))
+    .filter(x=>x.p.el && x.p.pos!=='DEF')
+    .sort((a,b)=>b.p.k26-a.p.k26)
+    .forEach(({p,pi})=>{
     const on=sel(myTeam).has(pi);
-    const row=$('div','prow'+(on?' on':'')+(p.el?'':' inel'));
+    const row=$('div','prow'+(on?' on':''));
     row.appendChild($('span','tick',on?'✓':''));
     const nm=$('span','pname',p.n);nm.appendChild($('span','meta',p.pos+(p.t?' · '+p.t:'')));
     row.appendChild(nm);
-    row.appendChild($('span','rnd',p.el?'R'+p.r:'—'));
-    row.appendChild($('span','cost',p.el?'$'+p.k26:''));
-    row.appendChild($('span','next',p.el?'→ $'+p.k27:'rental only'));
-    if(p.el){row.tabIndex=0;
-      const tog=()=>{const s2=sel(myTeam);s2.has(pi)?s2.delete(pi):s2.add(pi);
-        kstate.picks[myTeam]=[...s2];saveK();render();};
-      row.addEventListener('click',tog);
-      row.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();tog();}});}
+    row.appendChild($('span','rnd','R'+p.r));
+    row.appendChild($('span','cost','$'+p.k26));
+    row.appendChild($('span','next','→ $'+p.k27));
+    row.tabIndex=0;
+    const tog=()=>{const s2=sel(myTeam);s2.has(pi)?s2.delete(pi):s2.add(pi);
+      kstate.picks[myTeam]=[...s2];saveK();render();};
+    row.addEventListener('click',tog);
+    row.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();tog();}});
     list.appendChild(row);
   });
   kc.appendChild(list);
@@ -261,18 +265,8 @@ function renderDash(){
   g.appendChild(gr);
   dash.appendChild(g);
 
-  /* --- personal records (span 6) --- */
-  const pr=card(6,'Personal records');
-  const tiles=$('div','tiles');
-  const mk=(num,lbl,bad)=>{const t=$('div','tile');t.appendChild($('div','num '+(bad?'bad':'good'),num));
-    t.appendChild($('div','lbl',lbl));tiles.appendChild(t);};
-  mk(c.best_week.pts.toFixed(1),'best week · '+c.best_week.s+' wk'+c.best_week.wk,false);
-  mk(c.worst_week.pts.toFixed(1),'worst week · '+c.worst_week.s+' wk'+c.worst_week.wk,true);
-  if(c.blunder)mk(c.blunder.bench.toFixed(1),'benched pts record · '+c.blunder.s+' wk'+c.blunder.wk,true);
-  if(c.steal)mk('+'+c.steal.voe.toFixed(0),'best pick: '+c.steal.player+' R'+c.steal.round+' '+c.steal.s,false);
-  if(c.bust)mk(c.bust.voe.toFixed(0),'worst pick: '+c.bust.player+' R'+c.bust.round+' '+c.bust.s,true);
-  pr.appendChild(tiles);
-  dash.appendChild(pr);
+  /* --- offseason checklist (span 6) --- */
+  dash.appendChild(checklistCard(6));
 
   /* --- 2027 outlook (span 3) --- */
   const ok=card(3,'2027 outlook');
@@ -290,43 +284,57 @@ function renderDash(){
     .forEach(([k2,v])=>{const r=$('div','vrow');r.appendChild($('span',null,k2));r.appendChild($('span','mut',v));aw.appendChild(r);});
   aw.appendChild($('p','cardnote','Auto-awarded every week of the 2026 season.'));
   dash.appendChild(aw);
-
-  /* --- league wire (span 6) --- */
-  dash.appendChild(wireCard(6));
 }
 
 function capBoardCard(span){
   const cb=card(span,'League cap board');
+  cb.appendChild($('p','cardnote2','Opening cap by source — solid = keepers, faded = draft picks. Dashed line = $'+CFG.cap+' cap.'));
   const rows=DATA.teams.map((tm,ti)=>({name:tm.name,ti,ev:evalTeam(ti)})).sort((a,b)=>b.ev.opening-a.ev.opening);
   rows.forEach(r=>{
-    const row=$('div','luckrow');
-    row.appendChild($('span','lname'+(r.ti===myTeam?' good':''),r.name+(r.ev.k?' · '+r.ev.k+'K':'')));
-    const track=$('div','lucktrack');
-    const barEl=$('div','luckbar '+(r.ev.opening>CFG.cap?'neg':'pos'));
-    barEl.style.left='0';barEl.style.right='auto';
-    barEl.style.width=Math.min(100,r.ev.opening/250*100)+'%';
-    track.appendChild(barEl);
-    const mid=$('div','luckmid');mid.style.left=(CFG.cap/250*100)+'%';track.appendChild(mid);
+    const kPct=r.ev.opening?Math.round(r.ev.keepSpend/r.ev.opening*100):0;
+    const row=$('div','cbrow');
+    const nm=$('div','cbname'+(r.ti===myTeam?' good':''));
+    nm.appendChild($('span','cbteam',r.name));
+    nm.appendChild($('span','chip mini',r.ev.k+' K'));
+    row.appendChild(nm);
+    const track=$('div','cbtrack');
+    let x=0;
+    [['k',r.ev.keepSpend],['d',r.ev.draftSpend],['f',r.ev.fills*CFG.waiver]].forEach(([cls,v])=>{
+      if(v<=0)return;
+      const seg=$('div','cbseg '+cls);
+      seg.style.left=(x/250*100)+'%';seg.style.width=(v/250*100)+'%';
+      track.appendChild(seg);x+=v;
+    });
+    const cap=$('div','cbcap');cap.style.left=(CFG.cap/250*100)+'%';track.appendChild(cap);
     row.appendChild(track);
-    row.appendChild($('span','lval'+(r.ev.opening>CFG.cap?' bad':''),'$'+r.ev.opening));
+    const val=$('div','cbval');
+    val.appendChild($('b',r.ev.opening>CFG.cap?'bad':'','$'+r.ev.opening));
+    val.appendChild($('span','mut small',kPct+'% keepers'));
+    row.appendChild(val);
     cb.appendChild(row);
   });
   cb.appendChild($('p','cardnote','Your device’s keeper picks included. Official league-wide keepers appear automatically once set in Sleeper.'));
   return cb;
 }
 
-function wireCard(span){
-  const w=card(span,'This date in GGG history');
-  const pool=[];
-  DATA.records.high_weeks.slice(0,5).forEach(e=>pool.push('🔥 '+e.name+' hung '+e.pts.toFixed(1)+' in '+e.s+' wk'+e.wk+' — still top-5 all-time.'));
-  DATA.records.blowouts.slice(0,3).forEach(e=>pool.push('💥 '+e.s+' wk'+e.wk+': '+e.w+' beat '+e.l+' by '+e.margin.toFixed(1)+'.'));
-  DATA.records.closest.slice(0,3).forEach(e=>pool.push('😱 '+e.s+' wk'+e.wk+': '+e.w+' survived '+e.l+' by '+e.margin.toFixed(2)+'.'));
-  DATA.records.blunders.slice(0,3).forEach(e=>pool.push('🪑 '+e.s+' wk'+e.wk+': '+e.name+' left '+e.bench.toFixed(1)+' points on the bench.'));
-  const day=Math.floor(Date.now()/86400000);
-  for(let i=0;i<4;i++){
-    const r=$('div','vrow wire');r.appendChild($('span',null,pool[(day+i*3)%pool.length]));w.appendChild(r);
-  }
-  w.appendChild($('p','cardnote','Rotates daily. Becomes the live transaction wire once the 2026 season starts.'));
+function checklistCard(span){
+  const w=card(span,'Offseason checklist');
+  const items=[
+    ['chkRenew',false,'League renews on Sleeper','auto-detected — not yet'],
+    ['chkVote',false,'Ratify the Cap Keeper amendment','send the league The Case'],
+    ['chkDraft',false,'Schedule the 2026 draft','late August, as always'],
+    ['chkKeep',false,'Lock keepers','due 2 weeks before draft'],
+    ['chkBuyin',false,'Collect $100 buy-ins','plus last year’s toilet $75'],
+  ];
+  items.forEach(([id,done,txt,sub])=>{
+    const r=$('div','chk'+(done?' done':''));r.id=id;
+    r.appendChild($('span','chkbox',done?'✓':''));
+    const t=$('div');
+    t.appendChild($('div','chktxt',txt));
+    t.appendChild($('div','mut small',sub));
+    r.appendChild(t);
+    w.appendChild(r);
+  });
   return w;
 }
 
@@ -340,6 +348,9 @@ render();
     const lg=(leagues||[]).find(l=>l.previous_league_id===DATA.leagueId2025);
     if(!lg)return;
     document.getElementById('heroSub').textContent=lg.name+' is renewed on Sleeper ('+lg.status.replace('_',' ')+') — official keepers sync here once set.';
+    const chk=document.getElementById('chkRenew');
+    if(chk){chk.classList.add('done');chk.querySelector('.chkbox').textContent='✓';
+      chk.querySelector('.mut').textContent='renewed — '+lg.status.replace('_',' ');}
   }catch(e){}
 })();
 </script>
