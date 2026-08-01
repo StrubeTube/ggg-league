@@ -7,22 +7,23 @@ __NAV__
     <div class="eyebrow">GGG League &middot; 2020&ndash;2025</div>
     <h1>The Draft Archive</h1>
     <p class="lede">Every pick ever made, graded against its round. VOE = season points versus the all-time median for that round — the steal-and-bust detector.</p>
+    <div class="filterrow" id="teamfilter" style="margin-top:16px"></div>
   </header>
 
   <section>
-    <div class="sec-head"><div class="eyebrow">The pantheon</div><h2>💎 Greatest steals in league history</h2>
-    <p class="sec-note">Round 6 or later only — where legends are made.</p></div>
+    <div class="sec-head"><div class="eyebrow">The pantheon</div><h2 id="stealsTitle"></h2>
+    <p class="sec-note" id="stealsNote"></p></div>
     <div class="card" id="steals"></div>
   </section>
 
   <section>
-    <div class="sec-head"><div class="eyebrow">The graveyard</div><h2>🪦 Biggest busts in league history</h2>
-    <p class="sec-note">First two rounds only, keepers excluded. Someone said these names out loud with confidence.</p></div>
+    <div class="sec-head"><div class="eyebrow">The graveyard</div><h2 id="bustsTitle"></h2>
+    <p class="sec-note" id="bustsNote"></p></div>
     <div class="card" id="busts"></div>
   </section>
 
   <section>
-    <div class="sec-head"><div class="eyebrow">The boards</div><h2>Every draft, every pick</h2></div>
+    <div class="sec-head"><div class="eyebrow">The boards</div><h2 id="boardsTitle"></h2></div>
     <div id="boards"></div>
   </section>
 </div>
@@ -31,30 +32,66 @@ __FOOT__
 const DATA = /*__DATA__*/{};
 const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
 
+let tf = 'all';
+const allRows = Object.values(DATA.drafts.boards).flat();
+const teams = [...new Set(allRows.map(r=>r.by))].sort();
+
+function renderFilter(){
+  const host = document.getElementById('teamfilter');
+  host.textContent='';
+  ['all', ...teams].forEach(n=>{
+    const b = $('button','tpill'+(tf===n?' active':''), n==='all'?'All teams':n);
+    b.type='button';
+    b.addEventListener('click',()=>{tf=n;render();});
+    host.appendChild(b);
+  });
+}
+
 function bigList(id, rows, cls){
   const host = document.getElementById(id);
+  host.textContent='';
+  if(!rows.length){ host.appendChild($('p','mut','Nothing qualifies. Suspiciously clean.')); return; }
   const ol = $('ol','reclist');
   rows.forEach(r=>{
     const li = $('li');
     li.appendChild($('b', cls, (r.voe>0?'+':'')+r.voe.toFixed(0)));
-    li.appendChild(document.createTextNode(' — ' + r.player + ' (' + r.pos + ') · R' + r.round + ' ' + r.s + ' by ' + r.by + ' · ' + r.pts.toFixed(0) + ' pts'));
+    li.appendChild(document.createTextNode(' — ' + r.player + ' (' + r.pos + ') · R' + r.round + ' ' + r.s + (tf==='all'?' by ' + r.by:'') + ' · ' + r.pts.toFixed(0) + ' pts'));
     ol.appendChild(li);
   });
   host.appendChild(ol);
 }
-bigList('steals', DATA.drafts.steals, 'good');
-bigList('busts', DATA.drafts.busts, 'bad');
 
-/* boards */
-(function(){
+function render(){
+  renderFilter();
+  const mine = tf==='all' ? null : allRows.filter(r=>r.by===tf);
+
+  document.getElementById('stealsTitle').textContent = tf==='all' ? '💎 Greatest steals in league history' : '💎 Best picks — ' + tf;
+  document.getElementById('stealsNote').textContent = tf==='all' ? 'Round 6 or later only — where legends are made.' : 'Round 6 or later, ranked by value over round expectation.';
+  document.getElementById('bustsTitle').textContent = tf==='all' ? '🪦 Biggest busts in league history' : '🪦 Worst picks — ' + tf;
+  document.getElementById('bustsNote').textContent = tf==='all' ? 'First two rounds only, keepers excluded. Someone said these names out loud with confidence.' : 'Rounds 1–4, keepers excluded. We all saw you reach.';
+
+  if(tf==='all'){
+    bigList('steals', DATA.drafts.steals, 'good');
+    bigList('busts', DATA.drafts.busts, 'bad');
+  }else{
+    bigList('steals', mine.filter(r=>r.round>=6).sort((a,b)=>b.voe-a.voe).slice(0,10), 'good');
+    bigList('busts', mine.filter(r=>r.round<=4&&!r.keeper).sort((a,b)=>a.voe-b.voe).slice(0,10), 'bad');
+  }
+
+  document.getElementById('boardsTitle').textContent = tf==='all' ? 'Every draft, every pick' : 'Every ' + tf + ' pick, every year';
   const host = document.getElementById('boards');
+  host.textContent='';
   const seasons = Object.keys(DATA.drafts.boards).sort().reverse();
   seasons.forEach(s=>{
+    const rows = DATA.drafts.boards[s].filter(r=>tf==='all'||r.by===tf);
+    if(!rows.length) return;
     const det = $('details','seasonbox');
-    const sum = $('summary'); sum.appendChild($('b',null,s + ' draft')); det.appendChild(sum);
+    if(tf!=='all') det.open = true;
+    const sum = $('summary'); sum.appendChild($('b',null,s + ' draft' + (tf==='all'?'':' — ' + rows.length + ' picks')));
+    det.appendChild(sum);
     const tbl = $('table','tbl');
     const hr = $('tr'); ['Pick','Player','Pos','By','Pts','VOE',''].forEach(h=>hr.appendChild($('th',null,h))); tbl.appendChild(hr);
-    DATA.drafts.boards[s].forEach(p=>{
+    rows.forEach(p=>{
       const r = $('tr');
       r.appendChild($('td','mut', p.round + '.' + String(p.pick).padStart(3,'0').slice(-2)));
       r.appendChild($('td',null,p.player));
@@ -70,5 +107,6 @@ bigList('busts', DATA.drafts.busts, 'bad');
     const sc=$('div','scroll'); sc.appendChild(tbl); det.appendChild(sc);
     host.appendChild(det);
   });
-})();
+}
+render();
 </script>

@@ -10,6 +10,7 @@ __NAV__
       <p class="lede" id="heroSub">Pick your team — this becomes your franchise dashboard.</p>
     </div>
     <div class="teambar" id="teambar"></div>
+    <div id="labbanner"></div>
   </header>
 
   <div id="identity"></div>
@@ -18,7 +19,29 @@ __NAV__
 __FOOT__
 <script>
 const DATA = /*__DATA__*/{};
-const CFG = DATA.cfg, TABLE = CFG.table;
+const CFG = DATA.cfg;
+let TABLE = CFG.table, KCAP = 'on', BMODE = 'budget', LAB = null;
+try{
+  const L = JSON.parse(localStorage.getItem('ggg-lab-v1'));
+  if(L && L.apply === 'on'){
+    LAB = L;
+    if(L.preset === 'old') TABLE = DATA.steep;
+    else if(L.preset === 'custom'){
+      const t = (L.flat ?? 30)/100, tb = {};
+      for(let r=1;r<=16;r++) tb[r] = Math.max(1, Math.round(DATA.steep[r]*(1-t)+11*t));
+      TABLE = tb;
+    }
+    CFG.table = TABLE;
+    if(L.cap) CFG.cap = L.cap;
+    if(L.budget) CFG.budget = L.budget;
+    if(L.maxk) CFG.maxKeep = L.maxk;
+    CFG.franchise = L.fr !== 'off';
+    KCAP = L.kcap || 'on';
+    BMODE = L.bmode || 'budget';
+  }
+}catch(e){}
+const escal = (r,s)=>{const n=r-s;return n>=1?TABLE[n]:TABLE[1]+6*(1-n);};
+DATA.teams.forEach(tm=>tm.players.forEach(p=>{if(p.el){p.k26=escal(p.r,1);p.k27=escal(p.r,2);}}));
 const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
 
 /* ---------- state (keeper selections shared with the planner) ---------- */
@@ -42,8 +65,9 @@ function evalTeam(ti){
   let draftSpend=0;used.forEach(p=>draftSpend+=TABLE[p.r]);
   const fills=Math.max(0,slots-used.length);
   return {keepSpend,budgetSpend,franchiseName,next27,k,draftSpend,fills,usedPicks:used.length,
-          opening:keepSpend+draftSpend+fills*CFG.waiver,
-          overBudget:budgetSpend>CFG.budget,overCount:k>CFG.maxKeep};
+          opening:(KCAP==='off'?0:keepSpend)+draftSpend+fills*CFG.waiver,
+          overBudget:BMODE==='guaranteed3'?(k>3&&budgetSpend>CFG.budget):budgetSpend>CFG.budget,
+          overCount:k>CFG.maxKeep};
 }
 const capital=ti=>DATA.teams[ti].picks.reduce((a,p)=>a+TABLE[p.r],0);
 
@@ -58,6 +82,19 @@ function card(span,title,chipTxt){
 }
 function skel(card,lines){
   for(let i=0;i<lines;i++){const s=$('div','skel');s.style.width=(88-i*14)+'%';card.appendChild(s);}
+}
+
+/* ---------- lab banner ---------- */
+if(LAB){
+  const b=document.getElementById('labbanner');
+  const wrap=$('div','labbanner');
+  wrap.appendChild($('span',null,'⚗️ Lab rules active on this device: cap $'+CFG.cap+' · budget $'+CFG.budget+' · '
+    +(LAB.preset==='old'?'old steep table':(LAB.preset==='custom'?'custom table':'adopted table'))
+    +' · keepers '+(KCAP==='off'?'cap-exempt':'cap-counted')
+    +(BMODE==='guaranteed3'?' · 3 keeps guaranteed':'')+(CFG.franchise?'':' · no franchise keep')+' — '));
+  const a=document.createElement('a');a.href='lab.html';a.textContent='adjust or turn off in the Lab';
+  wrap.appendChild(a);
+  b.appendChild(wrap);
 }
 
 /* ---------- team picker ---------- */
@@ -343,7 +380,7 @@ function capBoardCard(span){
                k:'Keeper salary only. Dashed line = $'+CFG.budget+' keeper budget.',
                d:'Draft-round salary only, from the picks each team holds for 2026.'};
   cb.appendChild($('p','cardnote2',notes[cbFilter]));
-  const scale=cbFilter==='k'?60:250;
+  const scale=cbFilter==='k'?Math.max(60,CFG.budget+15):250;
   const capLine=cbFilter==='k'?CFG.budget:(cbFilter==='d'?null:CFG.cap);
   const rows=DATA.teams.map((tm,ti)=>{
     const ev=evalTeam(ti);

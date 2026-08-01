@@ -246,6 +246,8 @@ input[type=range]:disabled{opacity:.35}
 .tmini b{font-size:11.5px;font-weight:800;font-variant-numeric:tabular-nums}
 .tmini i{font-style:normal;font-size:9px;color:var(--ink3);letter-spacing:.04em}
 .ctlnote{font-size:11px;color:var(--ink3);line-height:1.5;margin-top:6px}
+.labbanner{margin-top:14px;background:var(--card);border:1px dashed var(--gold);border-radius:10px;padding:9px 14px;font-size:12.5px;color:var(--ink2);line-height:1.5}
+.labbanner a{color:var(--gold);font-weight:600}
 """
 CSS = CSS.replace("F400", fonts["400"]).replace("F600", fonts["600"]).replace("F800", fonts["800"])
 with open(os.path.join(OUT, "ggg.css"), "w", encoding="utf-8") as f:
@@ -334,7 +336,7 @@ for sn in site["seasons"]:
              "champ": t["name"] == sn["champ"], "toilet": t["name"] == sn["toilet"]})
 slices = {
     "index.html": {"cfg": CFG, "teams": planner_teams(), "career": career,
-                   "h2h": site["h2h"], "finishes": finishes,
+                   "h2h": site["h2h"], "finishes": finishes, "steep": STEEP_TABLE,
                    "commishUserId": commish_uid, "leagueId2025": "1256797701320753152"},
     "history.html": {"seasons": site["seasons"], "career": career, "h2h": site["h2h"]},
     "records.html": {"records": site["records"], "career": career},

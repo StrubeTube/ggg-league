@@ -49,6 +49,10 @@ __NAV__
       <div class="ctl"><div class="mlabel">Keeper salaries count against the team cap <span class="mut small">(if off, try cap ≈ $200)</span></div>
         <div class="filterrow tight" id="kcapMode"></div>
         <div class="ctlnote">Count → heavy keeper classes pay in season flexibility (less deadline ammo). Exempt → keeping is never punished and the cap polices only the draft + trade market; needs the re-attach rule (acquired players count at full salary) to stay fire-sale-proof.</div></div>
+
+      <div class="ctl"><div class="mlabel">Apply these rules to the Home page</div>
+        <div class="filterrow tight" id="applyMode"></div>
+        <div class="ctlnote">While on, the Home page keeper corner and cap board use these Lab settings instead of the adopted rules, with a banner so nobody mistakes the sandbox for policy. Per device.</div></div>
     </div>
 
     <div class="dcard c7">
@@ -71,7 +75,7 @@ const sel=ti=>new Set(kstate.picks[ti]||[]);
 
 /* lab settings */
 const DEFAULTS={flat:null,preset:'adopted',cap:DATA.defaults.cap,budget:DATA.defaults.budget,
-  maxk:DATA.defaults.maxKeep,slot:'tail',bmode:'budget',fr:'on',kcap:'on'};
+  maxk:DATA.defaults.maxKeep,slot:'tail',bmode:'budget',fr:'on',kcap:'on',apply:'off'};
 let S={...DEFAULTS};
 try{const s=JSON.parse(localStorage.getItem('ggg-lab-v1'));if(s)S={...DEFAULTS,...s};}catch(e){}
 const saveS=()=>{try{localStorage.setItem('ggg-lab-v1',JSON.stringify(S));}catch(e){}};
@@ -145,6 +149,7 @@ function render(){
   pillGroup('budgetMode',[['budget','Budget governs all keeps'],['guaranteed3','3 keeps guaranteed, budget only for extras']],
     ()=>S.bmode,k=>S.bmode=k);
   pillGroup('franchiseMode',[['on','On'],['off','Off']],()=>S.fr,k=>S.fr=k);
+  pillGroup('applyMode',[['off','Off — Home uses adopted rules'],['on','On — Home mirrors the Lab']],()=>S.apply,k=>S.apply=k);
   pillGroup('kcapMode',[['on','Count (adopted)'],['off','Exempt — budget only']],()=>S.kcap,k=>S.kcap=k);
 
   sliders.forEach(([id,fmt])=>{
