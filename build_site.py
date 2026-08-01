@@ -257,6 +257,11 @@ nav.ggg a.labtab.on{background:var(--card);color:var(--gold)}
 .valbreak{margin-top:8px;font-size:11px;color:var(--ink3);font-variant-numeric:tabular-nums}
 .tbl-details{margin-top:12px;font-size:12.5px}
 .tbl-details summary{cursor:pointer}
+.chip.ok{color:var(--mint);border:1px solid var(--mint);letter-spacing:.04em}
+.rtrade{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:12px}
+.rtrade.rblocked{border-color:var(--coral)}
+.rtrade .trade-head{margin-bottom:6px}
+.rline{display:flex;justify-content:space-between;gap:12px;padding:2px 0;flex-wrap:wrap;font-variant-numeric:tabular-nums}
 """
 CSS = CSS.replace("F400", fonts["400"]).replace("F600", fonts["600"]).replace("F800", fonts["800"])
 with open(os.path.join(OUT, "ggg.css"), "w", encoding="utf-8") as f:
@@ -338,6 +343,91 @@ def planner_teams():
     return teams
 
 
+def build_replay():
+    """Compact per-season replay logs so the Lab can re-run history client-side."""
+    from collections import defaultdict
+    players_db = load("players_nfl.json")
+    out = []
+    for s in ["2025", "2024", "2023", "2022", "2021", "2020"]:
+        users = {u["user_id"]: u["display_name"] for u in load(f"users_{s}.json")}
+        rosters = load(f"rosters_{s}.json")
+        rmap = {r["roster_id"]: users.get(r["owner_id"], "Former manager") for r in rosters}
+        dmeta = load(f"drafts_{s}.json")[0]
+        cutoff = dmeta.get("last_picked") or dmeta.get("start_time") or 0
+        picks = load(f"draftpicks_{s}_{dmeta['draft_id']}.json")
+        draft = [{"pid": str(p["player_id"]), "r": p["round"], "rid": p["roster_id"],
+                  "k": 1 if p.get("is_keeper") else 0}
+                 for p in picks if p.get("roster_id") is not None]
+        dround = {d["pid"]: d["r"] for d in draft}
+
+        matchups = load(f"matchups_full_{s}.json")
+        pws = load(f"league_{s}.json")["settings"].get("playoff_week_start", 15)
+        results = []  # (week, winner_rid, loser_rid)
+        for wk_s, items in matchups.items():
+            wk = int(wk_s)
+            if wk >= pws:
+                continue
+            by_m = defaultdict(list)
+            for m in items:
+                if m.get("matchup_id") is not None and (m.get("points") or 0) > 0:
+                    by_m[m["matchup_id"]].append(m)
+            for pair in by_m.values():
+                if len(pair) != 2:
+                    continue
+                a, b = pair
+                w_, l_ = (a, b) if a["points"] > b["points"] else (b, a)
+                results.append((wk, w_["roster_id"], l_["roster_id"]))
+
+        def losing_record(rid, week):
+            w = sum(1 for wk, wr, _ in results if wk < week and wr == rid)
+            l = sum(1 for wk, _, lr in results if wk < week and lr == rid)
+            return l > w
+
+        allt = []
+        for wk_s, items in load(f"transactions_{s}.json").items():
+            for t in items:
+                if t["status"] == "complete":
+                    allt.append((int(wk_s), t))
+        allt.sort(key=lambda x: x[1]["status_updated"])
+
+        evs, names = [], {}
+        for wk, t in allt:
+            adds = t.get("adds") or {}
+            drops = t.get("drops") or {}
+            if t["type"] == "trade":
+                if t["status_updated"] < cutoff:
+                    continue
+                mv = []
+                for pid, rid in adds.items():
+                    pid = str(pid)
+                    mv.append([pid, drops.get(pid), rid])
+                    names[pid] = (players_db.get(pid) or {}).get("name") or "?"
+                pk = {}
+                for dp in t.get("draft_picks") or []:
+                    pk[str(dp["owner_id"])] = pk.get(str(dp["owner_id"]), 0) + 1
+                fire = 0
+                rids = t.get("roster_ids") or []
+                if len(rids) == 2:
+                    for rid in rids:
+                        if not losing_record(rid, wk):
+                            continue
+                        sent = [dround.get(p, 16) for p, frm, _ in mv if frm == rid]
+                        got = [dround.get(p, 16) for p, _, to in mv if to == rid]
+                        if sent and min(sent) <= 7 and (not got or min(got) >= 8):
+                            fire = 1
+                ev = {"w": wk, "t": 1, "mv": mv, "f": fire}
+                if pk:
+                    ev["pk"] = pk
+                evs.append(ev)
+            elif t["type"] in ("waiver", "free_agent"):
+                mv = ([[str(p), None, rid] for p, rid in adds.items()]
+                      + [[str(p), rid, None] for p, rid in drops.items()])
+                evs.append({"w": wk, "t": 0, "mv": mv})
+        out.append({"s": s, "teams": [{"rid": rid, "name": nm} for rid, nm in sorted(rmap.items())],
+                    "draft": draft, "events": evs, "names": names})
+    return out
+
+
 career = site["career"]
 finishes = {}
 for sn in site["seasons"]:
@@ -354,7 +444,8 @@ slices = {
     "drafts.html": {"drafts": site["drafts"]},
     "trades.html": {"trades": site["trades"], "pickValues": site["pick_values"]},
     "lab.html": {"teams": planner_teams(), "steep": STEEP_TABLE, "adopted": CFG["table"],
-                 "defaults": {"cap": CFG["cap"], "budget": CFG["budget"], "maxKeep": CFG["maxKeep"]}},
+                 "defaults": {"cap": CFG["cap"], "budget": CFG["budget"], "maxKeep": CFG["maxKeep"]},
+                 "replay": build_replay()},
 }
 
 for page, data in slices.items():

@@ -234,3 +234,8 @@ nav.ggg a.labtab.on{background:var(--card);color:var(--gold)}
 .valbreak{margin-top:8px;font-size:11px;color:var(--ink3);font-variant-numeric:tabular-nums}
 .tbl-details{margin-top:12px;font-size:12.5px}
 .tbl-details summary{cursor:pointer}
+.chip.ok{color:var(--mint);border:1px solid var(--mint);letter-spacing:.04em}
+.rtrade{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:12px}
+.rtrade.rblocked{border-color:var(--coral)}
+.rtrade .trade-head{margin-bottom:6px}
+.rline{display:flex;justify-content:space-between;gap:12px;padding:2px 0;flex-wrap:wrap;font-variant-numeric:tabular-nums}
