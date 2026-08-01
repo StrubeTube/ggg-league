@@ -20,7 +20,7 @@ __FOOT__
 <script>
 const DATA = /*__DATA__*/{};
 const CFG = DATA.cfg;
-let TABLE = CFG.table, KCAP = 'on', BMODE = 'budget', LAB = null;
+let TABLE = CFG.table, KCAP = (CFG.kcap === 'off' ? 'off' : 'on'), BMODE = 'budget', LAB = null;
 try{
   const L = JSON.parse(localStorage.getItem('ggg-lab-v1'));
   if(L && L.apply === 'on'){
@@ -150,8 +150,7 @@ function renderDash(){
   const tm=DATA.teams[myTeam],c=DATA.career.find(x=>x.name===tm.name),ev=evalTeam(myTeam);
 
   /* --- keeper corner (span 7) --- */
-  const kc=card(7,'Keeper corner');
-  kc.appendChild($('p','cardnote','Tap to keep.'));
+  const kc=card(7,'Keeper corner — tap to keep');
   const meters=$('div','kmeters');
   const m1=$('div');
   m1.appendChild($('div','mlabel','Budget $'+ev.budgetSpend+' / $'+CFG.budget+' · '+ev.k+'/'+CFG.maxKeep+' slots'
@@ -355,7 +354,9 @@ function capBoardCard(span){
     fr.appendChild(b);
   });
   cb.appendChild(fr);
-  const notes={all:'Opening cap by source — solid = keepers, faded = draft picks. Dashed line = $'+CFG.cap+' cap.',
+  const notes={all:KCAP==='off'
+                 ?'Cap total (keepers are cap-exempt — governed by the budget). Dashed line = $'+CFG.cap+' cap; trades also can’t drop a roster below the $'+(CFG.floor||130)+' floor.'
+                 :'Opening cap by source — solid = keepers, faded = draft picks. Dashed line = $'+CFG.cap+' cap.',
                k:'Keeper salary only. Dashed line = $'+CFG.budget+' keeper budget.',
                d:'Draft-round salary only, from the picks each team holds for 2026.'};
   cb.appendChild($('p','cardnote2',notes[cbFilter]));
@@ -374,7 +375,7 @@ function capBoardCard(span){
     row.appendChild(nm);
     const track=$('div','cbtrack');
     let x=0;
-    const segs=cbFilter==='all'?[['k',r.ev.keepSpend],['d',r.ev.draftSpend],['f',r.ev.fills*CFG.waiver]]
+    const segs=cbFilter==='all'?[['k',KCAP==='off'?0:r.ev.keepSpend],['d',r.ev.draftSpend],['f',r.ev.fills*CFG.waiver]]
       :(cbFilter==='k'?[['k',r.ev.keepSpend]]:[['d',r.ev.draftSpend]]);
     segs.forEach(([cls,v])=>{
       if(v<=0)return;
@@ -387,7 +388,8 @@ function capBoardCard(span){
     const val=$('div','cbval');
     const over=(cbFilter==='k'&&r.val>CFG.budget)||(cbFilter==='all'&&r.val>CFG.cap);
     val.appendChild($('b',over?'bad':'','$'+r.val));
-    const sub=cbFilter==='all'?(r.val?Math.round(r.ev.keepSpend/r.val*100):0)+'% keepers'
+    const sub=cbFilter==='all'
+      ?(KCAP==='off'?('keepers $'+r.ev.keepSpend+' exempt'):((r.val?Math.round(r.ev.keepSpend/r.val*100):0)+'% keepers'))
       :(cbFilter==='k'?r.ev.k+' of '+CFG.maxKeep+' slots':r.ev.usedPicks+' picks');
     val.appendChild($('span','mut small',sub));
     row.appendChild(val);

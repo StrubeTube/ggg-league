@@ -63,6 +63,14 @@ for old_alias, new_alias in MERGES:
         owners[new_uid]["aliases"] |= owners[old_uid]["aliases"]
         owners[new_uid]["seasons"] = sorted(set(owners[new_uid]["seasons"] + owners[old_uid]["seasons"]))
         del owners[old_uid]
+# the 2024 ownerless roster was swinglejt (confirmed by Alex)
+_sw = uid_by_alias("swinglejt")
+for _uid in [u for u in owners if str(u).startswith("unknown_")]:
+    if _sw:
+        canon_map[_uid] = _sw
+        owners[_sw]["seasons"] = sorted(set(owners[_sw]["seasons"] + owners[_uid]["seasons"]))
+        del owners[_uid]
+
 canon = lambda uid: canon_map.get(uid, uid)
 for _s in SEASONS:
     season_ctx[_s]["rmap"] = {rid: canon(u) for rid, u in season_ctx[_s]["rmap"].items()}

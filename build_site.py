@@ -33,7 +33,7 @@ CSS = """
 --mark:#0A9B6C;--coral:#CC3D2F;--coral-soft:rgba(204,61,47,.10);--gold:#8C6A10;--navy:#1A2560;--navy-line:#0A9B6C;}}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:'Poppins',system-ui,sans-serif;line-height:1.55;margin:0}
-.wrap{max-width:980px;margin:0 auto;padding:28px 16px 80px}
+.wrap{max-width:1360px;margin:0 auto;padding:28px 20px 80px}
 h1,h2,h3{text-wrap:balance;margin:0}p{margin:0}a{color:var(--mint)}
 .eyebrow{font-size:12px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--mint)}
 .hero{margin:18px 0 6px}
@@ -119,13 +119,13 @@ h2{font-size:22px;font-weight:800}
 .pchip.pick{border-style:dashed;font-weight:400;color:var(--ink2)}
 .pchip.none{border:none;background:transparent;color:var(--ink3);font-weight:400}
 nav.ggg{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-nav.ggg .in{max-width:980px;margin:0 auto;display:flex;align-items:center;gap:4px;padding:10px 16px;flex-wrap:wrap}
+nav.ggg .in{max-width:1360px;margin:0 auto;display:flex;align-items:center;gap:4px;padding:10px 20px;flex-wrap:wrap}
 nav.ggg .logo{width:34px;height:34px;background:var(--mint);color:var(--mint-ink);border-radius:8px;display:grid;place-items:center;font-weight:800;font-size:13px;margin-right:10px}
 nav.ggg a{color:var(--ink2);text-decoration:none;font-size:13px;font-weight:600;padding:6px 11px;border-radius:8px}
 nav.ggg a:hover{color:var(--ink)}
 nav.ggg a.on{background:var(--card);color:var(--mint)}
 footer.ggg{border-top:1px solid var(--line);margin-top:60px}
-footer.ggg .in{max-width:980px;margin:0 auto;padding:18px 16px;font-size:12px;color:var(--ink3)}
+footer.ggg .in{max-width:1360px;margin:0 auto;padding:18px 20px;font-size:12px;color:var(--ink3)}
 .teambar{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
 .chiprow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
 .timeline{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px}
@@ -180,7 +180,7 @@ footer.ggg .in{max-width:980px;margin:0 auto;padding:18px 16px;font-size:12px;co
 .kmeters{display:grid;gap:12px}
 .mlabel{font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:5px}
 .kmeters .meter{margin-top:0}
-.tallroster{max-height:430px;overflow-y:auto;padding-right:4px}
+.tallroster{max-height:none}
 .skel{height:13px;border-radius:7px;background:var(--card2);border:1px solid var(--line)}
 @media(prefers-reduced-motion:no-preference){
 .skel{background:linear-gradient(90deg,var(--card2) 25%,var(--line) 50%,var(--card2) 75%);background-size:200% 100%;animation:shimmer 1.8s infinite}
@@ -285,7 +285,8 @@ FOOT = ('<footer class="ggg"><div class="in">GGG League · data from the Sleeper
         'grudges update automatically</div></footer>')
 
 # ---------------- keeper-planner team data (same order/sort as cap-planner) ----------------
-CFG = {"cap": 220, "budget": 45, "maxKeep": 5, "waiver": 0, "franchise": True,
+CFG = {"cap": 200, "floor": 130, "budget": 45, "maxKeep": 5, "waiver": 0,
+       "franchise": True, "kcap": "off",
        "table": {1: 30, 2: 26, 3: 22, 4: 19, 5: 16, 6: 14, 7: 12, 8: 10,
                  9: 8, 10: 7, 11: 6, 12: 5, 13: 4, 14: 3, 15: 2, 16: 2}}
 STEEP_TABLE = {1: 34, 2: 28, 3: 23, 4: 19, 5: 16, 6: 13, 7: 11, 8: 9,
@@ -351,7 +352,7 @@ def build_replay():
     for s in ["2025", "2024", "2023", "2022", "2021", "2020"]:
         users = {u["user_id"]: u["display_name"] for u in load(f"users_{s}.json")}
         rosters = load(f"rosters_{s}.json")
-        rmap = {r["roster_id"]: users.get(r["owner_id"], "Former manager") for r in rosters}
+        rmap = {r["roster_id"]: users.get(r["owner_id"], "swinglejt") for r in rosters}
         dmeta = load(f"drafts_{s}.json")[0]
         cutoff = dmeta.get("last_picked") or dmeta.get("start_time") or 0
         picks = load(f"draftpicks_{s}_{dmeta['draft_id']}.json")
@@ -444,7 +445,8 @@ slices = {
     "drafts.html": {"drafts": site["drafts"]},
     "trades.html": {"trades": site["trades"], "pickValues": site["pick_values"]},
     "lab.html": {"teams": planner_teams(), "steep": STEEP_TABLE, "adopted": CFG["table"],
-                 "defaults": {"cap": CFG["cap"], "budget": CFG["budget"], "maxKeep": CFG["maxKeep"]},
+                 "defaults": {"cap": CFG["cap"], "floor": CFG["floor"], "budget": CFG["budget"],
+                              "maxKeep": CFG["maxKeep"], "kcap": CFG["kcap"]},
                  "replay": build_replay()},
 }
 

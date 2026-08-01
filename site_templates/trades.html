@@ -13,16 +13,19 @@ __NAV__
   </header>
 
   <section>
-    <div class="sec-head"><div class="eyebrow">The leaderboard</div><h2>Who actually wins trades</h2>
-    <p class="sec-note">Career net value across every deal — players and picks alike. W = won by 50+, L = fleeced, E = fair fight.</p></div>
+    <div class="filterrow" id="typefilters"></div>
+    <div class="filterrow" id="filters"></div>
+    <div class="filterrow" id="teamfilters"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><div class="eyebrow">The leaderboard</div><h2 id="statsTitle">Who actually wins trades</h2>
+    <p class="sec-note">Net value across the deals matching the filters above. W = won by 50+, L = fleeced, E = fair fight.</p></div>
     <div class="card scroll" id="tstats"></div>
   </section>
 
   <section>
     <div class="sec-head"><div class="eyebrow">The archive</div><h2>Every deal, graded</h2></div>
-    <div class="filterrow" id="typefilters"></div>
-    <div class="filterrow" id="filters"></div>
-    <div class="filterrow" id="teamfilters"></div>
     <div class="trades" id="trades"></div>
   </section>
 </div>
@@ -41,10 +44,11 @@ Object.entries(DATA.pickValues).forEach(([r,v])=>{
   document.getElementById('pickVals').appendChild(c);
 });
 
-/* leaderboard */
-(function(){
+/* leaderboard — reacts to the filters */
+function renderStats(trades){
+  const host=document.getElementById('tstats');host.textContent='';
   const st={};
-  DATA.trades.forEach(t=>{
+  trades.forEach(t=>{
     t.sides.forEach((sd,i)=>{
       const opp=t.sides[1-i];
       const margin=sd.total-opp.total;
@@ -54,6 +58,7 @@ Object.entries(DATA.pickValues).forEach(([r,v])=>{
     });
   });
   const rows=Object.entries(st).sort((a,b)=>b[1].net-a[1].net);
+  if(!rows.length){host.appendChild($('p','mut','No trades match these filters.'));return;}
   const tbl=$('table','tbl');
   const hr=$('tr');['Team','Deals','W-L-E','Net value',''].forEach(h=>hr.appendChild($('th',null,h)));
   tbl.appendChild(hr);
@@ -64,13 +69,13 @@ Object.entries(DATA.pickValues).forEach(([r,v])=>{
     r.appendChild($('td',null,s.w+'‑'+s.l+'‑'+s.e));
     r.appendChild($('td',s.net>0?'good':(s.net<0?'bad':''),(s.net>0?'+':'')+s.net.toFixed(0)));
     const tag=$('td');
-    if(i===0)tag.appendChild($('span','chip mini','🦈 APEX TRADER'));
-    if(i===rows.length-1)tag.appendChild($('span','chip fire','🐟 THE FISH'));
+    if(rows.length>1&&i===0)tag.appendChild($('span','chip mini','🦈 APEX TRADER'));
+    if(rows.length>1&&i===rows.length-1)tag.appendChild($('span','chip fire','🐟 THE FISH'));
     r.appendChild(tag);
     tbl.appendChild(r);
   });
-  document.getElementById('tstats').appendChild(tbl);
-})();
+  host.appendChild(tbl);
+}
 
 function pills(hostId,options,get,set){
   const host=document.getElementById(hostId);host.textContent='';
@@ -93,6 +98,7 @@ function render(){
   const rows=DATA.trades.filter(t=>(yfilter==='all'||t.type===yfilter)
     &&(sfilter==='all'||t.s===sfilter)
     &&(tfilter==='all'||t.sides.some(sd=>sd.name===tfilter)));
+  renderStats(rows);
   [...rows].reverse().forEach(t=>{
     const card=$('article','trade');
     const th=$('div','trade-head');
