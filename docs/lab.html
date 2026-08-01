@@ -26,6 +26,10 @@
         <input type="range" id="cap" min="180" max="260" step="5"><span class="ctlval" id="capV"></span></div>
         <div class="ctlnote">How big an in-season buy can be. Lower → tighter trading, more cap jail, fire sales impossible to absorb. Higher → looser market, easier star-stacking.</div></div>
 
+      <div class="ctl"><div class="ctlrow"><span class="ctlname">Team floor</span>
+        <input type="range" id="floor" min="0" max="170" step="5"><span class="ctlval" id="floorV"></span></div>
+        <div class="ctlnote">The other end of the band — no trade may leave a roster below this. Blocks fire sales from the seller's side ("you have to field a real team"). $0 = off. Waivers never trip it.</div></div>
+
       <div class="ctl"><div class="ctlrow"><span class="ctlname">Keeper budget</span>
         <input type="range" id="budget" min="20" max="80" step="5"><span class="ctlval" id="budgetV"></span></div>
         <div class="ctlnote">The redraft↔dynasty dial. Higher → more and better players kept, thinner draft, less turnover. Lower → harsh keep-or-release choices, richer draft.</div></div>
@@ -76,7 +80,7 @@ const sel=ti=>new Set(kstate.picks[ti]||[]);
 
 /* lab settings */
 const DEFAULTS={flat:null,preset:'adopted',cap:DATA.defaults.cap,budget:DATA.defaults.budget,
-  maxk:DATA.defaults.maxKeep,slot:'tail',bmode:'budget',fr:'on',kcap:'on',apply:'off',season:'2026'};
+  maxk:DATA.defaults.maxKeep,slot:'tail',bmode:'budget',fr:'on',kcap:'on',apply:'off',season:'2026',floor:0};
 let S={...DEFAULTS};
 try{const s=JSON.parse(localStorage.getItem('ggg-lab-v1'));if(s)S={...DEFAULTS,...s};}catch(e){}
 const saveS=()=>{try{localStorage.setItem('ggg-lab-v1',JSON.stringify(S));}catch(e){}};
@@ -131,7 +135,7 @@ function pillGroup(hostId,options,get,set){
     host.appendChild(b);
   });
 }
-const sliders=[['flat',v=>v+'%'],['cap',v=>'$'+v],['budget',v=>'$'+v],['maxk',v=>v+' keepers']];
+const sliders=[['flat',v=>v+'%'],['cap',v=>'$'+v],['floor',v=>v?('$'+v):'off'],['budget',v=>'$'+v],['maxk',v=>v+' keepers']];
 sliders.forEach(([id])=>{
   document.getElementById(id).addEventListener('input',e=>{
     S[id]=parseInt(e.target.value);
@@ -209,12 +213,13 @@ function render(){
   }else{
     note.textContent='Historical replay: that season’s real draft priced by your table, every real transaction re-run under your cap. Keeper-flagged picks go $0 for their original team when keepers are exempt, and re-attach at full salary when traded. Budget, count, slotting, and franchise dials shape only the 2026 projection.';
     const sn=DATA.replay.find(r=>r.s===S.season);
-    const sim=simSeason(sn,table,S.cap,S.kcap==='off');
+    const sim=simSeason(sn,table,S.cap,S.kcap==='off',S.floor);
     renderRetro(sim,S.cap,sum,board);
   }
 }
 
-function simSeason(sn,table,cap,kcapOff){
+function simSeason(sn,table,cap,kcapOff,floor){
+  floor=floor||0;
   const cur={};sn.teams.forEach(t=>cur[t.rid]={});
   const nameOf={};sn.teams.forEach(t=>nameOf[t.rid]=t.name);
   sn.draft.forEach(d=>{if(cur[d.rid])cur[d.rid][d.pid]={s:table[d.r],k:d.k,home:d.rid};});
@@ -246,7 +251,7 @@ function simSeason(sn,table,cap,kcapOff){
     const srows=rids.map(rid=>{
       const after=tot(rid);
       peak[rid]=Math.max(peak[rid]||0,after);
-      const over=after>cap&&after>before[rid];
+      const over=(after>cap&&after>before[rid])||(floor&&after<floor&&after<before[rid]);
       if(over)blocked=true;
       return {name:nameOf[rid],before:before[rid],after,over,
               gets:gets[rid]||[],picks:(ev.pk&&ev.pk[String(rid)])||0};
@@ -290,7 +295,7 @@ function renderRetro(sim,cap,sum,board){
     const th=$('div','trade-head');
     th.appendChild($('span','chip wk','WK '+t.w));
     if(t.f)th.appendChild($('span','chip fire','FIRE SALE'));
-    th.appendChild(t.blocked?$('span','chip flag','BLOCKED — over the cap'):$('span','chip ok','allowed'));
+    th.appendChild(t.blocked?$('span','chip flag','BLOCKED — outside the cap band'):$('span','chip ok','allowed'));
     card.appendChild(th);
     t.sides.forEach(sd=>{
       const line=$('div','rline');
