@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <title>GGG League</title>
 <link rel="stylesheet" href="ggg.css?v=13e04c11">
-<nav class="ggg"><div class="in"><span class="logo">GGG</span><a href="index.html" class="on">Home</a><a href="history.html" class="">History</a><a href="records.html" class="">Records</a><a href="drafts.html" class="">Drafts</a><a href="trades.html" class="">Trades</a><a href="cap-planner.html" class="">Planner</a><a href="cap-report.html" class="">The Case</a><a href="lab.html" class="">Lab</a></div></nav>
+<nav class="ggg"><div class="in"><span class="logo">GGG</span><a href="index.html" class="on">Home</a><a href="history.html" class="">History</a><a href="records.html" class="">Records</a><a href="drafts.html" class="">Drafts</a><a href="trades.html" class="">Trades</a><a href="lab.html" class="">Lab</a></div></nav>
 <div class="wrap wide">
   <header class="hero dashhero">
     <div>
@@ -115,7 +115,7 @@ function renderDash(){
 
   /* --- keeper corner (span 7) --- */
   const kc=card(7,'Keeper corner');
-  kc.appendChild($('p','cardnote','Synced with the full planner. Tap to keep.'));
+  kc.appendChild($('p','cardnote','Tap to keep.'));
   const meters=$('div','kmeters');
   const m1=$('div');
   m1.appendChild($('div','mlabel','Budget $'+ev.budgetSpend+' / $'+CFG.budget+' · '+ev.k+'/'+CFG.maxKeep+' slots'

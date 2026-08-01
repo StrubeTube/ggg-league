@@ -254,9 +254,7 @@ import hashlib
 css_v = hashlib.md5(CSS.encode()).hexdigest()[:8]
 
 NAV_LINKS = [("index.html", "Home"), ("history.html", "History"), ("records.html", "Records"),
-             ("drafts.html", "Drafts"), ("trades.html", "Trades"),
-             ("cap-planner.html", "Planner"), ("cap-report.html", "The Case"),
-             ("lab.html", "Lab")]
+             ("drafts.html", "Drafts"), ("trades.html", "Trades"), ("lab.html", "Lab")]
 
 
 def nav(active):
@@ -356,13 +354,13 @@ for page, data in slices.items():
         f.write(html)
     print(f"built {page} ({os.path.getsize(os.path.join(OUT, page))//1024} KB)")
 
-# cap tools: copy the built artifacts in (generated in this directory by
-# build_planner.py / build_report.py)
-for src, dst in (("planner.html", "cap-planner.html"), ("report.html", "cap-report.html")):
-    sp = os.path.join(HERE, src)
-    if os.path.exists(sp):
-        shutil.copy(sp, os.path.join(OUT, dst))
-        print(f"copied {dst}")
+# cap tools (planner/report) removed from the site for now — sources kept in repo
+# root via build_planner.py / build_report.py for when The Case gets redone.
+for stale in ("cap-planner.html", "cap-report.html"):
+    p = os.path.join(OUT, stale)
+    if os.path.exists(p):
+        os.remove(p)
+        print(f"removed {stale}")
 
 open(os.path.join(OUT, ".nojekyll"), "w").close()
 print("site assembled ->", OUT)
