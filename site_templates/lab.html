@@ -6,7 +6,7 @@ __NAV__
   <header class="hero">
     <div class="eyebrow">GGG League &middot; Commissioner's Lab &middot; not league policy</div>
     <h1>The rule simulator</h1>
-    <p class="lede">Every slider recomputes all ten teams instantly, using the keeper selections saved on this device. Nothing here changes the real rules — it's a sandbox for arguing with Tommy. Settings save locally.</p>
+    <p class="lede">Every slider recomputes all ten teams instantly, using the keeper selections saved on this device. Defaults are the adopted fire-sale-stopping rules; <b>gold boxes mark what's net new compared to the old league setup</b> — flip a control back to the old way and its box disappears. Settings save locally.</p>
   </header>
 
   <div class="dash" style="margin-top:22px">
@@ -165,12 +165,17 @@ function render(){
     document.getElementById(id+'V').textContent=id==='flat'?(S.preset==='custom'?fmt(S.flat??30):'preset'):fmt(S[id]);
   });
 
-  /* highlight any control that departs from the adopted rules */
-  [['cap',S.cap!==DEFAULTS.cap],['floor',S.floor!==DEFAULTS.floor],
-   ['budget',S.budget!==DEFAULTS.budget],['maxk',S.maxk!==DEFAULTS.maxk],
-   ['tablePresets',S.preset!=='adopted'],['slotMode',S.slot!==DEFAULTS.slot],
-   ['budgetMode',S.bmode!==DEFAULTS.bmode],['franchiseMode',S.fr!==DEFAULTS.fr],
-   ['kcapMode',S.kcap!==DEFAULTS.kcap]]
+  /* highlight controls that are NET NEW vs the old base Sleeper rules
+     (3 keepers at their drafted round, no salaries/cap/floor/budget/franchise) */
+  [['tablePresets',true],                    // salaries didn't exist before
+   ['cap',true],                             // no team cap existed
+   ['floor',S.floor>0],
+   ['budget',S.bmode!=='guaranteed3'],       // old league: keeps had no dollar budget
+   ['maxk',S.maxk!==3],
+   ['slotMode',S.slot!=='round'],
+   ['budgetMode',S.bmode!=='guaranteed3'],
+   ['franchiseMode',S.fr!=='off'],
+   ['kcapMode',S.kcap!=='on']]
     .forEach(([id,mod])=>{
       const c=document.getElementById(id)?.closest('.ctl');
       if(c)c.classList.toggle('modded',mod);
