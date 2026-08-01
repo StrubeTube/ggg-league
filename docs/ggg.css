@@ -211,3 +211,14 @@ details.histbox{grid-column:1 / -1;background:var(--card);border:1px solid var(-
 details.histbox summary{cursor:pointer;font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2)}
 details.histbox summary:hover{color:var(--mint)}
 details.histbox .dash{margin-top:14px}
+.ctl{padding:10px 0;border-bottom:1px solid var(--line)}
+.ctl:last-of-type{border-bottom:none}
+.ctlrow{display:grid;grid-template-columns:110px 1fr 84px;align-items:center;gap:10px}
+.ctlname{font-size:12.5px;font-weight:600;color:var(--ink2)}
+.ctlval{font-size:12.5px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--mint);background:transparent}
+input[type=range]:disabled{opacity:.35}
+.salary-mini{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.tmini{display:flex;flex-direction:column;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:6px;padding:3px 6px;min-width:34px}
+.tmini b{font-size:11.5px;font-weight:800;font-variant-numeric:tabular-nums}
+.tmini i{font-style:normal;font-size:9px;color:var(--ink3);letter-spacing:.04em}

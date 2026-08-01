@@ -1,0 +1,183 @@
+<meta charset="utf-8">
+<title>GGG Commissioner's Lab</title>
+<link rel="stylesheet" href="ggg.css?v=c9f54d47">
+<nav class="ggg"><div class="in"><span class="logo">GGG</span><a href="index.html" class="">Home</a><a href="history.html" class="">History</a><a href="records.html" class="">Records</a><a href="drafts.html" class="">Drafts</a><a href="trades.html" class="">Trades</a><a href="cap-planner.html" class="">Planner</a><a href="cap-report.html" class="">The Case</a></div></nav>
+<div class="wrap wide">
+  <header class="hero">
+    <div class="eyebrow">GGG League &middot; Commissioner's Lab &middot; not league policy</div>
+    <h1>The rule simulator</h1>
+    <p class="lede">Every slider recomputes all ten teams instantly, using the keeper selections saved on this device. Nothing here changes the real rules — it's a sandbox for arguing with Tommy. Settings save locally.</p>
+  </header>
+
+  <div class="dash" style="margin-top:22px">
+    <div class="dcard c5">
+      <div class="dcard-head"><h3 class="cardh">The sliders</h3><button class="resetbtn" id="labReset" type="button">Reset to adopted rules</button></div>
+
+      <div class="ctl"><div class="mlabel">Salary table</div>
+        <div class="filterrow tight" id="tablePresets"></div>
+        <div class="ctlrow"><span class="ctlname">Flatness</span>
+          <input type="range" id="flat" min="0" max="100" step="5">
+          <span class="ctlval" id="flatV"></span></div>
+        <div class="salary-mini" id="tableStrip"></div>
+      </div>
+
+      <div class="ctl"><div class="ctlrow"><span class="ctlname">Team cap</span>
+        <input type="range" id="cap" min="180" max="260" step="5"><span class="ctlval" id="capV"></span></div></div>
+
+      <div class="ctl"><div class="ctlrow"><span class="ctlname">Keeper budget</span>
+        <input type="range" id="budget" min="20" max="80" step="5"><span class="ctlval" id="budgetV"></span></div></div>
+
+      <div class="ctl"><div class="ctlrow"><span class="ctlname">Max keepers</span>
+        <input type="range" id="maxk" min="3" max="8" step="1"><span class="ctlval" id="maxkV"></span></div></div>
+
+      <div class="ctl"><div class="mlabel">Keeper slotting</div>
+        <div class="filterrow tight" id="slotMode"></div></div>
+
+      <div class="ctl"><div class="mlabel">Budget mode</div>
+        <div class="filterrow tight" id="budgetMode"></div></div>
+
+      <div class="ctl"><div class="mlabel">Franchise keep (budget-exempt star)</div>
+        <div class="filterrow tight" id="franchiseMode"></div></div>
+    </div>
+
+    <div class="dcard c7">
+      <div class="dcard-head"><h3 class="cardh">League under these rules</h3></div>
+      <div class="chiprow" id="labSummary"></div>
+      <div id="labBoard"></div>
+      <p class="cardnote">Bars: solid = keeper salary, faded = draft-pick salary. Dashed red line = team cap. Uses keeper picks saved on this device — set them on the Home page or the Planner.</p>
+    </div>
+  </div>
+</div>
+<footer class="ggg"><div class="in">GGG League · data from the Sleeper API · stats computed 2026-07-26 · regular-season records unless noted · grudges update automatically</div></footer>
+<script>
+const DATA = {"teams": [{"name": "Strubes", "picks": [{"r": 1}, {"r": 2}, {"r": 3}, {"r": 4}, {"r": 5}, {"r": 6}, {"r": 7}, {"r": 8}, {"r": 9}, {"r": 10}, {"r": 11}, {"r": 12}, {"r": 13}, {"r": 14}, {"r": 15}, {"r": 16}], "players": [{"n": "Bhayshul Tuten", "pos": "RB", "t": "JAX", "el": true, "r": 13, "k26": 5, "k27": 6}, {"n": "Denver Broncos", "pos": "DEF", "t": "DEN", "el": true, "r": 13, "k26": 5, "k27": 6}, {"n": "Trey Benson", "pos": "RB", "t": "ARI", "el": true, "r": 12, "k26": 6, "k27": 7}, {"n": "Luther Burden", "pos": "WR", "t": "CHI", "el": true, "r": 11, "k26": 7, "k27": 8}, {"n": "Jayden Daniels", "pos": "QB", "t": "WAS", "el": true, "r": 10, "k26": 8, "k27": 10}, {"n": "Tyler Warren", "pos": "TE", "t": "IND", "el": true, "r": 9, "k26": 10, "k27": 12}, {"n": "Justin Jefferson", "pos": "WR", "t": "MIN", "el": true, "r": 8, "k26": 12, "k27": 14}, {"n": "Ricky Pearsall", "pos": "WR", "t": "SF", "el": true, "r": 6, "k26": 16, "k27": 19}, {"n": "Travis Hunter", "pos": "WR", "t": "JAX", "el": true, "r": 5, "k26": 19, "k27": 22}, {"n": "George Pickens", "pos": "WR", "t": "DAL", "el": true, "r": 4, "k26": 22, "k27": 26}, {"n": "Tetairoa McMillan", "pos": "WR", "t": "CAR", "el": true, "r": 3, "k26": 26, "k27": 30}, {"n": "Bucky Irving", "pos": "RB", "t": "TB", "el": true, "r": 2, "k26": 30, "k27": 36}, {"n": "Mike Evans", "pos": "WR", "t": "SF", "el": true, "r": 2, "k26": 30, "k27": 36}, {"n": "Bijan Robinson", "pos": "RB", "t": "ATL", "el": true, "r": 1, "k26": 36, "k27": 42}, {"n": "Chicago Bears", "pos": "DEF", "t": "CHI", "el": false}, {"n": "Devin Neal", "pos": "RB", "t": "NO", "el": false}, {"n": "Matthew Stafford", "pos": "QB", "t": "LAR", "el": false}]}, {"name": "lynnkm23", "picks": [{"r": 1}, {"r": 2}, {"r": 2, "from": "EvanDeFilippis"}, {"r": 3}, {"r": 4}, {"r": 5}, {"r": 6}, {"r": 7}, {"r": 8}, {"r": 8, "from": "EvanDeFilippis"}, {"r": 9}, {"r": 10}, {"r": 10, "from": "EvanDeFilippis"}, {"r": 12}, {"r": 13}, {"r": 14}, {"r": 15}, {"r": 16}], "players": [{"n": "Tyjae Spears", "pos": "RB", "t": "TEN", "el": true, "r": 16, "k26": 2, "k27": 3}, {"n": "Keenan Allen", "pos": "WR", "t": "", "el": true, "r": 14, "k26": 4, "k27": 5}, {"n": "Rashee Rice", "pos": "WR", "t": "KC", "el": true, "r": 13, "k26": 5, "k27": 6}, {"n": "Chuba Hubbard", "pos": "RB", "t": "CAR", "el": true, "r": 12, "k26": 6, "k27": 7}, {"n": "Chase Brown", "pos": "RB", "t": "CIN", "el": true, "r": 11, "k26": 7, "k27": 8}, {"n": "Stefon Diggs", "pos": "WR", "t": "", "el": true, "r": 8, "k26": 12, "k27": 14}, {"n": "Travis Kelce", "pos": "TE", "t": "KC", "el": true, "r": 6, "k26": 16, "k27": 19}, {"n": "Deebo Samuel", "pos": "WR", "t": "", "el": true, "r": 5, "k26": 19, "k27": 22}, {"n": "RJ Harvey", "pos": "RB", "t": "DEN", "el": true, "r": 4, "k26": 22, "k27": 26}, {"n": "TreVeyon Henderson", "pos": "RB", "t": "NE", "el": true, "r": 3, "k26": 26, "k27": 30}, {"n": "A.J. Brown", "pos": "WR", "t": "NE", "el": true, "r": 2, "k26": 30, "k27": 36}, {"n": "Brock Purdy", "pos": "QB", "t": "SF", "el": false}, {"n": "Elic Ayomanor", "pos": "WR", "t": "TEN", "el": false}, {"n": "Hunter Henry", "pos": "TE", "t": "NE", "el": false}, {"n": "Tampa Bay Buccaneers", "pos": "DEF", "t": "TB", "el": false}, {"n": "Zonovan Knight", "pos": "RB", "t": "ARI", "el": false}]}, {"name": "PrezNix", "picks": [{"r": 1}, {"r": 2}, {"r": 3}, {"r": 5}, {"r": 6}, {"r": 6, "from": "DaBlondest"}, {"r": 7}, {"r": 8}, {"r": 9}, {"r": 10}, {"r": 11}, {"r": 12}, {"r": 13}, {"r": 14}, {"r": 15}, {"r": 16}], "players": [{"n": "Brian Robinson", "pos": "RB", "t": "ATL", "el": true, "r": 13, "k26": 5, "k27": 6}, {"n": "Philadelphia Eagles", "pos": "DEF", "t": "PHI", "el": true, "r": 12, "k26": 6, "k27": 7}, {"n": "Colston Loveland", "pos": "TE", "t": "CHI", "el": true, "r": 11, "k26": 7, "k27": 8}, {"n": "Courtland Sutton", "pos": "WR", "t": "DEN", "el": true, "r": 11, "k26": 7, "k27": 8}, {"n": "Jameson Williams", "pos": "WR", "t": "DET", "el": true, "r": 10, "k26": 8, "k27": 10}, {"n": "Isiah Pacheco", "pos": "RB", "t": "DET", "el": true, "r": 9, "k26": 10, "k27": 12}, {"n": "Ladd McConkey", "pos": "WR", "t": "LAC", "el": true, "r": 7, "k26": 14, "k27": 16}, {"n": "Aaron Jones", "pos": "RB", "t": "MIN", "el": true, "r": 6, "k26": 16, "k27": 19}, {"n": "Emeka Egbuka", "pos": "WR", "t": "TB", "el": true, "r": 5, "k26": 19, "k27": 22}, {"n": "Patrick Mahomes", "pos": "QB", "t": "KC", "el": true, "r": 5, "k26": 19, "k27": 22}, {"n": "DJ Moore", "pos": "WR", "t": "BUF", "el": true, "r": 3, "k26": 26, "k27": 30}, {"n": "Christian McCaffrey", "pos": "RB", "t": "SF", "el": true, "r": 1, "k26": 36, "k27": 42}, {"n": "Jahmyr Gibbs", "pos": "RB", "t": "DET", "el": true, "r": 1, "k26": 36, "k27": 42}, {"n": "Harold Fannin", "pos": "TE", "t": "CLE", "el": false}, {"n": "Kyle Monangai", "pos": "RB", "t": "CHI", "el": false}, {"n": "Philip Rivers", "pos": "QB", "t": "", "el": false}, {"n": "Seattle Seahawks", "pos": "DEF", "t": "SEA", "el": false}]}, {"name": "Philly000", "picks": [{"r": 1}, {"r": 2}, {"r": 4}, {"r": 5}, {"r": 6}, {"r": 7}, {"r": 8}, {"r": 9}, {"r": 10}, {"r": 11}, {"r": 12}, {"r": 13}, {"r": 14}, {"r": 15}, {"r": 16}], "players": [{"n": "Woody Marks", "pos": "RB", "t": "HOU", "el": true, "r": 16, "k26": 2, "k27": 3}, {"n": "Romeo Doubs", "pos": "WR", "t": "NE", "el": true, "r": 14, "k26": 4, "k27": 5}, {"n": "Michael Pittman", "pos": "WR", "t": "PIT", "el": true, "r": 10, "k26": 8, "k27": 10}, {"n": "Brian Thomas", "pos": "WR", "t": "JAX", "el": true, "r": 9, "k26": 10, "k27": 12}, {"n": "De'Von Achane", "pos": "RB", "t": "MIA", "el": true, "r": 8, "k26": 12, "k27": 14}, {"n": "Jacory Croskey-Merritt", "pos": "RB", "t": "WAS", "el": true, "r": 7, "k26": 14, "k27": 16}, {"n": "Ja'Marr Chase", "pos": "WR", "t": "CIN", "el": true, "r": 6, "k26": 16, "k27": 19}, {"n": "Baker Mayfield", "pos": "QB", "t": "TB", "el": true, "r": 5, "k26": 19, "k27": 22}, {"n": "David Montgomery", "pos": "RB", "t": "HOU", "el": true, "r": 4, "k26": 22, "k27": 26}, {"n": "DK Metcalf", "pos": "WR", "t": "PIT", "el": true, "r": 3, "k26": 26, "k27": 30}, {"n": "Omarion Hampton", "pos": "RB", "t": "LAC", "el": true, "r": 1, "k26": 36, "k27": 42}, {"n": "Cade Otton", "pos": "TE", "t": "TB", "el": false}, {"n": "Daniel Jones", "pos": "QB", "t": "IND", "el": false}, {"n": "Jake Ferguson", "pos": "TE", "t": "DAL", "el": false}, {"n": "Michael Wilson", "pos": "WR", "t": "ARI", "el": false}, {"n": "New Orleans Saints", "pos": "DEF", "t": "NO", "el": false}]}, {"name": "DaBlondest", "picks": [{"r": 1}, {"r": 2}, {"r": 3}, {"r": 4}, {"r": 4, "from": "PrezNix"}, {"r": 5}, {"r": 7}, {"r": 8}, {"r": 9}, {"r": 10}, {"r": 11}, {"r": 12}, {"r": 13}, {"r": 14}, {"r": 15}, {"r": 16}], "players": [{"n": "Baltimore Ravens", "pos": "DEF", "t": "BAL", "el": true, "r": 16, "k26": 2, "k27": 3}, {"n": "Dak Prescott", "pos": "QB", "t": "DAL", "el": true, "r": 16, "k26": 2, "k27": 3}, {"n": "Wan'Dale Robinson", "pos": "WR", "t": "TEN", "el": true, "r": 16, "k26": 2, "k27": 3}, {"n": "Rashid Shaheed", "pos": "WR", "t": "SEA", "el": true, "r": 12, "k26": 6, "k27": 7}, {"n": "Garrett Wilson", "pos": "WR", "t": "NYJ", "el": true, "r": 9, "k26": 10, "k27": 12}, {"n": "Bo Nix", "pos": "QB", "t": "DEN", "el": true, "r": 8, "k26": 12, "k27": 14}, {"n": "Chris Godwin", "pos": "WR", "t": "TB", "el": true, "r": 8, "k26": 12, "k27": 14}, {"n": "Zach Charbonnet", "pos": "RB", "t": "SEA", "el": true, "r": 7, "k26": 14, "k27": 16}, {"n": "Jaylen Waddle", "pos": "WR", "t": "DEN", "el": true, "r": 5, "k26": 19, "k27": 22}, {"n": "D'Andre Swift", "pos": "RB", "t": "CHI", "el": true, "r": 4, "k26": 22, "k27": 26}, {"n": "Trey McBride", "pos": "TE", "t": "ARI", "el": true, "r": 4, "k26": 22, "k27": 26}, {"n": "Breece Hall", "pos": "RB", "t": "NYJ", "el": true, "r": 2, "k26": 30, "k27": 36}, {"n": "Davante Adams", "pos": "WR", "t": "LAR", "el": true, "r": 2, "k26": 30, "k27": 36}, {"n": "Detroit Lions", "pos": "DEF", "t": "DET", "el": false}, {"n": "Kimani Vidal", "pos": "RB", "t": "LAC", "el": false}, {"n": "Zach Ertz", "pos": "TE", "t": "", "el": false}]}, {"name": "HartManStan", "picks": [{"r": 1}, {"r": 2}, {"r": 2, "from": "BJohnson5"}, {"r": 3}, {"r": 4}, {"r": 5}, {"r": 5, "from": "BJohnson5"}, {"r": 5, "from": "TommyHolland"}, {"r": 6}, {"r": 7}, {"r": 8}, {"r": 10}, {"r": 11}, {"r": 12}, {"r": 13}, {"r": 14}, {"r": 15}, {"r": 16}], "players": [{"n": "Jalen Coker", "pos": "WR", "t": "CAR", "el": true, "r": 16, "k26": 2, "k27": 3}, {"n": "Josh Downs", "pos": "WR", "t": "IND", "el": true, "r": 16, "k26": 2, "k27": 3}, {"n": "Houston Texans", "pos": "DEF", "t": "HOU", "el": true, "r": 15, "k26": 3, "k27": 4}, {"n": "Dallas Goedert", "pos": "TE", "t": "PHI", "el": true, "r": 14, "k26": 4, "k27": 5}, {"n": "Tyler Allgeier", "pos": "RB", "t": "ARI", "el": true, "r": 13, "k26": 5, "k27": 6}, {"n": "Brandon Aiyuk", "pos": "WR", "t": "SF", "el": true, "r": 12, "k26": 6, "k27": 7}, {"n": "Tucker Kraft", "pos": "TE", "t": "GB", "el": true, "r": 11, "k26": 7, "k27": 8}, {"n": "Jayden Higgins", "pos": "WR", "t": "HOU", "el": true, "r": 10, "k26": 8, "k27": 10}, {"n": "Justin Herbert", "pos": "QB", "t": "LAC", "el": true, "r": 9, "k26": 10, "k27": 12}, {"n": "Khalil Shakir", "pos": "WR", "t": "BUF", "el": true, "r": 8, "k26": 12, "k27": 14}, {"n": "Mark Andrews", "pos": "TE", "t": "BAL", "el": true, "r": 8, "k26": 12, "k27": 14}, {"n": "Kaleb Johnson", "pos": "RB", "t": "PIT", "el": true, "r": 7, "k26": 14, "k27": 16}, {"n": "Tyrone Tracy", "pos": "RB", "t": "NYG", "el": true, "r": 6, "k26": 16, "k27": 19}, {"n": "Jerry Jeudy", "pos": "WR", "t": "CLE", "el": true, "r": 5, "k26": 19, "k27": 22}, {"n": "Kareem Hunt", "pos": "RB", "t": "", "el": false}, {"n": "Kenny Gainwell", "pos": "RB", "t": "TB", "el": false}, {"n": "Tre Tucker", "pos": "WR", "t": "LV", "el": false}]}, {"name": "BJohnson5", "picks": [{"r": 1}, {"r": 3}, {"r": 4}, {"r": 6}, {"r": 7}, {"r": 8}, {"r": 9}, {"r": 10}, {"r": 11}, {"r": 12}, {"r": 13}, {"r": 14}, {"r": 15}, {"r": 16}], "players": [{"n": "Jared Goff", "pos": "QB", "t": "DET", "el": true, "r": 15, "k26": 3, "k27": 4}, {"n": "Kyle Pitts", "pos": "TE", "t": "ATL", "el": true, "r": 15, "k26": 3, "k27": 4}, {"n": "Rico Dowdle", "pos": "RB", "t": "PIT", "el": true, "r": 14, "k26": 4, "k27": 5}, {"n": "Rhamondre Stevenson", "pos": "RB", "t": "NE", "el": true, "r": 13, "k26": 5, "k27": 6}, {"n": "Jauan Jennings", "pos": "WR", "t": "MIN", "el": true, "r": 9, "k26": 10, "k27": 12}, {"n": "Jaxon Smith-Njigba", "pos": "WR", "t": "SEA", "el": true, "r": 7, "k26": 14, "k27": 16}, {"n": "Rome Odunze", "pos": "WR", "t": "CHI", "el": true, "r": 5, "k26": 19, "k27": 22}, {"n": "Drake London", "pos": "WR", "t": "ATL", "el": true, "r": 4, "k26": 22, "k27": 26}, {"n": "George Kittle", "pos": "TE", "t": "SF", "el": true, "r": 4, "k26": 22, "k27": 26}, {"n": "Lamar Jackson", "pos": "QB", "t": "BAL", "el": true, "r": 3, "k26": 26, "k27": 30}, {"n": "James Cook", "pos": "RB", "t": "BUF", "el": true, "r": 2, "k26": 30, "k27": 36}, {"n": "Ashton Jeanty", "pos": "RB", "t": "LV", "el": true, "r": 1, "k26": 36, "k27": 42}, {"n": "Saquon Barkley", "pos": "RB", "t": "PHI", "el": true, "r": 1, "k26": 36, "k27": 42}, {"n": "Jacksonville Jaguars", "pos": "DEF", "t": "JAX", "el": false}, {"n": "Quentin Johnston", "pos": "WR", "t": "LAC", "el": false}, {"n": "San Francisco 49ers", "pos": "DEF", "t": "SF", "el": false}]}, {"name": "EvanDeFilippis", "picks": [{"r": 1}, {"r": 3}, {"r": 3, "from": "Philly000"}, {"r": 4}, {"r": 5}, {"r": 6}, {"r": 7}, {"r": 9}, {"r": 11}, {"r": 11, "from": "lynnkm23"}, {"r": 12}, {"r": 13}, {"r": 14}, {"r": 15}, {"r": 16}], "players": [{"n": "Dylan Sampson", "pos": "RB", "t": "CLE", "el": true, "r": 14, "k26": 4, "k27": 5}, {"n": "Quinshon Judkins", "pos": "RB", "t": "CLE", "el": true, "r": 11, "k26": 7, "k27": 8}, {"n": "Brock Bowers", "pos": "TE", "t": "LV", "el": true, "r": 10, "k26": 8, "k27": 10}, {"n": "Josh Allen", "pos": "QB", "t": "BUF", "el": true, "r": 7, "k26": 14, "k27": 16}, {"n": "Travis Etienne", "pos": "RB", "t": "NO", "el": true, "r": 7, "k26": 14, "k27": 16}, {"n": "CeeDee Lamb", "pos": "WR", "t": "DAL", "el": true, "r": 6, "k26": 16, "k27": 19}, {"n": "Jaylen Warren", "pos": "RB", "t": "PIT", "el": true, "r": 6, "k26": 16, "k27": 19}, {"n": "Matthew Golden", "pos": "WR", "t": "GB", "el": true, "r": 6, "k26": 16, "k27": 19}, {"n": "Terry McLaurin", "pos": "WR", "t": "WAS", "el": true, "r": 3, "k26": 26, "k27": 30}, {"n": "Jonathan Taylor", "pos": "RB", "t": "IND", "el": true, "r": 2, "k26": 30, "k27": 36}, {"n": "Amon-Ra St. Brown", "pos": "WR", "t": "DET", "el": true, "r": 1, "k26": 36, "k27": 42}, {"n": "Josh Jacobs", "pos": "RB", "t": "GB", "el": true, "r": 1, "k26": 36, "k27": 42}, {"n": "Adonai Mitchell", "pos": "WR", "t": "NYJ", "el": false}, {"n": "Alec Pierce", "pos": "WR", "t": "IND", "el": false}, {"n": "Darren Waller", "pos": "TE", "t": "", "el": false}, {"n": "Drake Maye", "pos": "QB", "t": "NE", "el": false}, {"n": "Los Angeles Rams", "pos": "DEF", "t": "LAR", "el": false}]}, {"name": "VEROVILLIANZ", "picks": [{"r": 1}, {"r": 2}, {"r": 3}, {"r": 4}, {"r": 5}, {"r": 6}, {"r": 7}, {"r": 8}, {"r": 9}, {"r": 10}, {"r": 11}, {"r": 12}, {"r": 13}, {"r": 14}, {"r": 15}, {"r": 16}], "players": [{"n": "Joe Burrow", "pos": "QB", "t": "CIN", "el": true, "r": 14, "k26": 4, "k27": 5}, {"n": "Cam Skattebo", "pos": "RB", "t": "NYG", "el": true, "r": 9, "k26": 10, "k27": 12}, {"n": "Javonte Williams", "pos": "RB", "t": "DAL", "el": true, "r": 9, "k26": 10, "k27": 12}, {"n": "Jordan Addison", "pos": "WR", "t": "MIN", "el": true, "r": 8, "k26": 12, "k27": 14}, {"n": "Tony Pollard", "pos": "RB", "t": "TEN", "el": true, "r": 5, "k26": 19, "k27": 22}, {"n": "Zay Flowers", "pos": "WR", "t": "BAL", "el": true, "r": 5, "k26": 19, "k27": 22}, {"n": "DeVonta Smith", "pos": "WR", "t": "PHI", "el": true, "r": 4, "k26": 22, "k27": 26}, {"n": "Malik Nabers", "pos": "WR", "t": "NYG", "el": true, "r": 4, "k26": 22, "k27": 26}, {"n": "Alvin Kamara", "pos": "RB", "t": "NO", "el": true, "r": 3, "k26": 26, "k27": 30}, {"n": "Xavier Worthy", "pos": "WR", "t": "KC", "el": true, "r": 3, "k26": 26, "k27": 30}, {"n": "Marvin Harrison", "pos": "WR", "t": "ARI", "el": true, "r": 2, "k26": 30, "k27": 36}, {"n": "Christian Watson", "pos": "WR", "t": "GB", "el": false}, {"n": "Green Bay Packers", "pos": "DEF", "t": "GB", "el": false}, {"n": "Jaxson Dart", "pos": "QB", "t": "NYG", "el": false}, {"n": "John Metchie", "pos": "WR", "t": "CAR", "el": false}, {"n": "Michael Carter", "pos": "RB", "t": "TEN", "el": false}, {"n": "Theo Johnson", "pos": "TE", "t": "NYG", "el": false}]}, {"name": "TommyHolland", "picks": [{"r": 1}, {"r": 2}, {"r": 3}, {"r": 4}, {"r": 6}, {"r": 7}, {"r": 8}, {"r": 9}, {"r": 9, "from": "HartManStan"}, {"r": 10}, {"r": 11}, {"r": 12}, {"r": 13}, {"r": 14}, {"r": 15}, {"r": 16}], "players": [{"n": "Pittsburgh Steelers", "pos": "DEF", "t": "PIT", "el": true, "r": 15, "k26": 3, "k27": 4}, {"n": "Jayden Reed", "pos": "WR", "t": "GB", "el": true, "r": 13, "k26": 5, "k27": 6}, {"n": "Nico Collins", "pos": "WR", "t": "HOU", "el": true, "r": 12, "k26": 6, "k27": 7}, {"n": "Tee Higgins", "pos": "WR", "t": "CIN", "el": true, "r": 11, "k26": 7, "k27": 8}, {"n": "Jakobi Meyers", "pos": "WR", "t": "JAX", "el": true, "r": 7, "k26": 14, "k27": 16}, {"n": "Chris Olave", "pos": "WR", "t": "NO", "el": true, "r": 6, "k26": 16, "k27": 19}, {"n": "Jalen Hurts", "pos": "QB", "t": "PHI", "el": true, "r": 3, "k26": 26, "k27": 30}, {"n": "Kenneth Walker", "pos": "RB", "t": "KC", "el": true, "r": 3, "k26": 26, "k27": 30}, {"n": "Kyren Williams", "pos": "RB", "t": "LAR", "el": true, "r": 2, "k26": 30, "k27": 36}, {"n": "Derrick Henry", "pos": "RB", "t": "BAL", "el": true, "r": 1, "k26": 36, "k27": 42}, {"n": "Puka Nacua", "pos": "WR", "t": "LAR", "el": true, "r": 1, "k26": 36, "k27": 42}, {"n": "Blake Corum", "pos": "RB", "t": "LAR", "el": false}, {"n": "Juwan Johnson", "pos": "TE", "t": "NO", "el": false}, {"n": "New England Patriots", "pos": "DEF", "t": "NE", "el": false}, {"n": "Taysom Hill", "pos": "TE", "t": "", "el": false}, {"n": "Troy Franklin", "pos": "WR", "t": "DEN", "el": false}]}], "steep": {"1": 34, "2": 28, "3": 23, "4": 19, "5": 16, "6": 13, "7": 11, "8": 9, "9": 7, "10": 5, "11": 4, "12": 3, "13": 2, "14": 2, "15": 1, "16": 1}, "adopted": {"1": 30, "2": 26, "3": 22, "4": 19, "5": 16, "6": 14, "7": 12, "8": 10, "9": 8, "10": 7, "11": 6, "12": 5, "13": 4, "14": 3, "15": 2, "16": 2}, "defaults": {"cap": 220, "budget": 45, "maxKeep": 5}};
+const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
+
+/* keeper selections shared with planner/home */
+let kstate={team:0,picks:{}};
+try{const s=JSON.parse(localStorage.getItem('ggg-keeper-v1'));if(s&&s.picks)kstate=s;}catch(e){}
+const sel=ti=>new Set(kstate.picks[ti]||[]);
+
+/* lab settings */
+const DEFAULTS={flat:null,preset:'adopted',cap:DATA.defaults.cap,budget:DATA.defaults.budget,
+  maxk:DATA.defaults.maxKeep,slot:'tail',bmode:'budget',fr:'on'};
+let S={...DEFAULTS};
+try{const s=JSON.parse(localStorage.getItem('ggg-lab-v1'));if(s)S={...DEFAULTS,...s};}catch(e){}
+const saveS=()=>{try{localStorage.setItem('ggg-lab-v1',JSON.stringify(S));}catch(e){}};
+
+function currentTable(){
+  if(S.preset==='old')return DATA.steep;
+  if(S.preset==='adopted')return DATA.adopted;
+  const t=S.flat/100,out={};
+  for(let r=1;r<=16;r++)out[r]=Math.max(1,Math.round(DATA.steep[r]*(1-t)+11*t));
+  return out;
+}
+function escal(table,r,steps){
+  const n=r-steps;
+  return n>=1?table[n]:table[1]+6*(1-n);
+}
+
+function evalLab(ti,table){
+  const tm=DATA.teams[ti],chosen=sel(ti);
+  let keepSpend=0,maxSel=0;
+  chosen.forEach(pi=>{const p=tm.players[pi];if(!p.el)return;
+    const c=escal(table,p.r,1);keepSpend+=c;if(c>maxSel)maxSel=c;});
+  const k=chosen.size;
+  const budgetSpend=(S.fr==='on'&&k)?keepSpend-maxSel:keepSpend;
+  let opening,draftSpend=0;
+  if(S.slot==='round'){
+    const picks=tm.picks.slice(0,16);
+    picks.forEach(p=>draftSpend+=table[p.r]);
+    opening=draftSpend;           // keepers occupy their round's pick at the same price
+  }else{
+    const picks=tm.picks.slice();
+    picks.splice(Math.max(0,picks.length-k),k);
+    const used=picks.slice(0,16-k);
+    used.forEach(p=>draftSpend+=table[p.r]);
+    opening=keepSpend+draftSpend;
+  }
+  const overBudget=S.bmode==='guaranteed3'
+    ? (k>3 && budgetSpend>S.budget)
+    : budgetSpend>S.budget;
+  return {k,keepSpend,budgetSpend,draftSpend,opening,overBudget,overCount:k>S.maxk};
+}
+
+/* ---- controls ---- */
+function pillGroup(hostId,options,get,set){
+  const host=document.getElementById(hostId);host.textContent='';
+  options.forEach(([key,lab])=>{
+    const b=$('button','tpill sm'+(get()===key?' active':''),lab);b.type='button';
+    b.addEventListener('click',()=>{set(key);saveS();render();});
+    host.appendChild(b);
+  });
+}
+const sliders=[['flat',v=>v+'%'],['cap',v=>'$'+v],['budget',v=>'$'+v],['maxk',v=>v+' keepers']];
+sliders.forEach(([id])=>{
+  document.getElementById(id).addEventListener('input',e=>{
+    S[id]=parseInt(e.target.value);
+    if(id==='flat')S.preset='custom';
+    saveS();render();
+  });
+});
+document.getElementById('labReset').addEventListener('click',()=>{S={...DEFAULTS};saveS();render();});
+
+function render(){
+  const table=currentTable();
+  pillGroup('tablePresets',[['old','Old steep'],['adopted','Adopted 2026'],['custom','Custom']],
+    ()=>S.preset,k=>{S.preset=k;if(k==='custom'&&S.flat===null)S.flat=30;});
+  pillGroup('slotMode',[['tail','Off the board (tail picks)'],['round','Keepers take their round’s pick']],
+    ()=>S.slot,k=>S.slot=k);
+  pillGroup('budgetMode',[['budget','Budget governs all keeps'],['guaranteed3','3 keeps guaranteed, budget only for extras']],
+    ()=>S.bmode,k=>S.bmode=k);
+  pillGroup('franchiseMode',[['on','On'],['off','Off']],()=>S.fr,k=>S.fr=k);
+
+  sliders.forEach(([id,fmt])=>{
+    const el=document.getElementById(id);
+    el.value=S[id]===null?30:S[id];
+    el.disabled=(id==='flat'&&S.preset!=='custom');
+    document.getElementById(id+'V').textContent=id==='flat'?(S.preset==='custom'?fmt(S.flat??30):'preset'):fmt(S[id]);
+  });
+
+  const strip=document.getElementById('tableStrip');strip.textContent='';
+  for(let r=1;r<=16;r++){
+    const c=$('span','tmini');c.appendChild($('b',null,'$'+table[r]));c.appendChild($('i',null,'R'+r));
+    strip.appendChild(c);
+  }
+
+  const rows=DATA.teams.map((tm,ti)=>({name:tm.name,ev:evalLab(ti,table)})).sort((a,b)=>b.ev.opening-a.ev.opening);
+  const overCap=rows.filter(r=>r.ev.opening>S.cap).length;
+  const overB=rows.filter(r=>r.ev.overBudget).length;
+  const sum=document.getElementById('labSummary');sum.textContent='';
+  [[overCap?'fire':'even',overCap+' team'+(overCap===1?'':'s')+' in cap jail'],
+   [overB?'fire':'even',overB+' over budget'],
+   ['even','avg opening $'+Math.round(rows.reduce((a,r)=>a+r.ev.opening,0)/rows.length)]]
+    .forEach(([cls,txt])=>sum.appendChild($('span','chip '+cls,txt)));
+
+  const board=document.getElementById('labBoard');board.textContent='';
+  const scale=Math.max(280,S.cap+40);
+  rows.forEach(r=>{
+    const row=$('div','cbrow');
+    const nm=$('div','cbname');
+    nm.appendChild($('span','cbteam',r.name));
+    nm.appendChild($('span','chip mini',r.ev.k+' K'));
+    if(r.ev.overBudget)nm.appendChild($('span','chip fire','BUDGET'));
+    row.appendChild(nm);
+    const track=$('div','cbtrack');
+    let x=0;
+    [['k',S.slot==='round'?0:r.ev.keepSpend],['d',r.ev.draftSpend]].forEach(([cls,v])=>{
+      if(v<=0)return;
+      const seg=$('div','cbseg '+cls);
+      seg.style.left=(x/scale*100)+'%';seg.style.width=(Math.min(v,scale-x)/scale*100)+'%';
+      track.appendChild(seg);x+=v;
+    });
+    const cap=$('div','cbcap');cap.style.left=(S.cap/scale*100)+'%';track.appendChild(cap);
+    row.appendChild(track);
+    const val=$('div','cbval');
+    val.appendChild($('b',r.ev.opening>S.cap?'bad':'','$'+r.ev.opening));
+    val.appendChild($('span','mut small','budget $'+r.ev.budgetSpend+'/$'+S.budget));
+    row.appendChild(val);
+    board.appendChild(row);
+  });
+}
+render();
+</script>

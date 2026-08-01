@@ -145,7 +145,7 @@ h1{font-size:clamp(30px,5.5vw,44px);font-weight:800;line-height:1.1;margin:8px 0
   </div>
 
   <div class="fineprint">
-    <b>How the math works.</b> A player's keep cost is his 2025 draft round moved up one step on the salary table (immediate escalation); "if kept again" shows the following year's step. Round-1 players escalate past the table at +$6 per step. Only players drafted in 2025 are keeper-eligible &mdash; undrafted pickups are rental-only. Projected opening cap = keeper salaries + the salaries of the draft rounds you still hold (your latest-round picks are removed, one per keeper, and any acquired picks beyond your roster space are ignored) + $1 waiver fills for any empty slots. Rosters are final 2025; the planner refreshes when the 2026 league renews on Sleeper. Selections save in your browser only.
+    <b>How the math works.</b> A player's keep cost is his 2025 draft round moved up one step on the salary table (immediate escalation); "if kept again" shows the following year's step. Round-1 players escalate past the table at +$6 per step. Only players drafted in 2025 are keeper-eligible &mdash; undrafted pickups are rental-only. Projected opening cap = keeper salaries + the salaries of the draft rounds you still hold (your latest-round picks are removed, one per keeper, and any acquired picks beyond your roster space are ignored); empty roster slots fill from waivers at $0. Your single most expensive keeper is your franchise keep — exempt from the keeper budget but fully counted against the cap. Rosters are final 2025; the planner refreshes when the 2026 league renews on Sleeper. Selections save in your browser only.
   </div>
 </div>
 
@@ -164,8 +164,13 @@ const sel = ti => new Set(state.picks[ti] || []);
 /* ---- math ---- */
 function evalTeam(ti) {
   const tm = DATA.teams[ti], chosen = sel(ti);
-  let keepSpend = 0;
-  chosen.forEach(pi => { keepSpend += tm.players[pi].k26; });
+  let keepSpend = 0, maxSel = 0, franchiseName = null;
+  chosen.forEach(pi => {
+    const p = tm.players[pi];
+    keepSpend += p.k26;
+    if (p.k26 > maxSel) { maxSel = p.k26; franchiseName = p.n; }
+  });
+  const budgetSpend = (CFG.franchise && chosen.size) ? keepSpend - maxSel : keepSpend;
   const k = chosen.size;
   const picks = tm.picks.slice();                 // sorted by round asc
   const removed = picks.splice(Math.max(0, picks.length - k), k);
@@ -176,15 +181,16 @@ function evalTeam(ti) {
   used.forEach(p => { draftSpend += TABLE[p.r]; });
   const fills = Math.max(0, slots - used.length);
   const opening = keepSpend + draftSpend + fills * CFG.waiver;
-  return { keepSpend, k, removed, used, extra, draftSpend, fills, opening,
-           overBudget: keepSpend > CFG.budget, overCount: k > CFG.maxKeep };
+  return { keepSpend, budgetSpend, franchiseName, k, removed, used, extra, draftSpend, fills, opening,
+           overBudget: budgetSpend > CFG.budget, overCount: k > CFG.maxKeep };
 }
 
 /* ---- header chips ---- */
 (function(){
   const host = document.getElementById('rulechips');
   [['$' + CFG.cap, ' season cap'], ['$' + CFG.budget, ' keeper budget'], [CFG.maxKeep, ' keepers max'],
-   ['+1', ' round-step per year kept'], ['drafted', '-only keeps']].forEach(([b, rest]) => {
+   ['1', ' franchise keep (budget-exempt)'], ['+1', ' round-step per year kept'],
+   ['drafted', '-only keeps'], ['$0', ' waivers']].forEach(([b, rest]) => {
     const c = $('span','rulechip'); c.appendChild($('b', null, String(b))); c.appendChild(document.createTextNode(rest)); host.appendChild(c);
   });
 })();
@@ -210,16 +216,17 @@ function renderPanel() {
   const bc = $('div','card');
   bc.appendChild($('h3', null, 'Keeper budget — ' + tm.name));
   const bn = $('div','bignum' + (ev.overBudget ? ' over' : ''));
-  bn.appendChild(document.createTextNode('$' + ev.keepSpend));
+  bn.appendChild(document.createTextNode('$' + ev.budgetSpend));
   bn.appendChild($('small', null, ' / $' + CFG.budget));
   bc.appendChild(bn);
-  bc.appendChild($('div','subnum', ev.k + ' of ' + CFG.maxKeep + ' keeper slots used'));
+  bc.appendChild($('div','subnum', ev.k + ' of ' + CFG.maxKeep + ' keeper slots used'
+    + (CFG.franchise && ev.franchiseName ? ' · franchise (budget-exempt): ' + ev.franchiseName : '')));
   const meter = $('div','meter');
   const fb = $('div','fillbar' + (ev.overBudget ? ' over' : ''));
-  fb.style.width = Math.min(100, ev.keepSpend / CFG.budget * 100) + '%';
+  fb.style.width = Math.min(100, ev.budgetSpend / CFG.budget * 100) + '%';
   meter.appendChild(fb); bc.appendChild(meter);
   const flags = [];
-  if (ev.overBudget) flags.push('over budget by $' + (ev.keepSpend - CFG.budget));
+  if (ev.overBudget) flags.push('over budget by $' + (ev.budgetSpend - CFG.budget));
   if (ev.overCount) flags.push('too many keepers (max ' + CFG.maxKeep + ')');
   bc.appendChild($('div','flagline', flags.join(' · ')));
   duo.appendChild(bc);

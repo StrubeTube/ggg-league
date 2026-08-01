@@ -5,9 +5,9 @@ import os
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "data")
 
-CFG = {"cap": 220, "budget": 45, "maxKeep": 5, "waiver": 1,
-       "table": {1: 34, 2: 28, 3: 23, 4: 19, 5: 16, 6: 13, 7: 11, 8: 9,
-                 9: 7, 10: 5, 11: 4, 12: 3, 13: 2, 14: 2, 15: 1, 16: 1}}
+CFG = {"cap": 220, "budget": 45, "maxKeep": 5, "waiver": 0, "franchise": True,
+       "table": {1: 30, 2: 26, 3: 22, 4: 19, 5: 16, 6: 14, 7: 12, 8: 10,
+                 9: 8, 10: 7, 11: 6, 12: 5, 13: 4, 14: 3, 15: 2, 16: 2}}
 
 
 def load(name):

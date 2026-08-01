@@ -1,0 +1,183 @@
+<meta charset="utf-8">
+<title>GGG Commissioner's Lab</title>
+<link rel="stylesheet" href="ggg.css">
+__NAV__
+<div class="wrap wide">
+  <header class="hero">
+    <div class="eyebrow">GGG League &middot; Commissioner's Lab &middot; not league policy</div>
+    <h1>The rule simulator</h1>
+    <p class="lede">Every slider recomputes all ten teams instantly, using the keeper selections saved on this device. Nothing here changes the real rules — it's a sandbox for arguing with Tommy. Settings save locally.</p>
+  </header>
+
+  <div class="dash" style="margin-top:22px">
+    <div class="dcard c5">
+      <div class="dcard-head"><h3 class="cardh">The sliders</h3><button class="resetbtn" id="labReset" type="button">Reset to adopted rules</button></div>
+
+      <div class="ctl"><div class="mlabel">Salary table</div>
+        <div class="filterrow tight" id="tablePresets"></div>
+        <div class="ctlrow"><span class="ctlname">Flatness</span>
+          <input type="range" id="flat" min="0" max="100" step="5">
+          <span class="ctlval" id="flatV"></span></div>
+        <div class="salary-mini" id="tableStrip"></div>
+      </div>
+
+      <div class="ctl"><div class="ctlrow"><span class="ctlname">Team cap</span>
+        <input type="range" id="cap" min="180" max="260" step="5"><span class="ctlval" id="capV"></span></div></div>
+
+      <div class="ctl"><div class="ctlrow"><span class="ctlname">Keeper budget</span>
+        <input type="range" id="budget" min="20" max="80" step="5"><span class="ctlval" id="budgetV"></span></div></div>
+
+      <div class="ctl"><div class="ctlrow"><span class="ctlname">Max keepers</span>
+        <input type="range" id="maxk" min="3" max="8" step="1"><span class="ctlval" id="maxkV"></span></div></div>
+
+      <div class="ctl"><div class="mlabel">Keeper slotting</div>
+        <div class="filterrow tight" id="slotMode"></div></div>
+
+      <div class="ctl"><div class="mlabel">Budget mode</div>
+        <div class="filterrow tight" id="budgetMode"></div></div>
+
+      <div class="ctl"><div class="mlabel">Franchise keep (budget-exempt star)</div>
+        <div class="filterrow tight" id="franchiseMode"></div></div>
+    </div>
+
+    <div class="dcard c7">
+      <div class="dcard-head"><h3 class="cardh">League under these rules</h3></div>
+      <div class="chiprow" id="labSummary"></div>
+      <div id="labBoard"></div>
+      <p class="cardnote">Bars: solid = keeper salary, faded = draft-pick salary. Dashed red line = team cap. Uses keeper picks saved on this device — set them on the Home page or the Planner.</p>
+    </div>
+  </div>
+</div>
+__FOOT__
+<script>
+const DATA = /*__DATA__*/{};
+const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
+
+/* keeper selections shared with planner/home */
+let kstate={team:0,picks:{}};
+try{const s=JSON.parse(localStorage.getItem('ggg-keeper-v1'));if(s&&s.picks)kstate=s;}catch(e){}
+const sel=ti=>new Set(kstate.picks[ti]||[]);
+
+/* lab settings */
+const DEFAULTS={flat:null,preset:'adopted',cap:DATA.defaults.cap,budget:DATA.defaults.budget,
+  maxk:DATA.defaults.maxKeep,slot:'tail',bmode:'budget',fr:'on'};
+let S={...DEFAULTS};
+try{const s=JSON.parse(localStorage.getItem('ggg-lab-v1'));if(s)S={...DEFAULTS,...s};}catch(e){}
+const saveS=()=>{try{localStorage.setItem('ggg-lab-v1',JSON.stringify(S));}catch(e){}};
+
+function currentTable(){
+  if(S.preset==='old')return DATA.steep;
+  if(S.preset==='adopted')return DATA.adopted;
+  const t=S.flat/100,out={};
+  for(let r=1;r<=16;r++)out[r]=Math.max(1,Math.round(DATA.steep[r]*(1-t)+11*t));
+  return out;
+}
+function escal(table,r,steps){
+  const n=r-steps;
+  return n>=1?table[n]:table[1]+6*(1-n);
+}
+
+function evalLab(ti,table){
+  const tm=DATA.teams[ti],chosen=sel(ti);
+  let keepSpend=0,maxSel=0;
+  chosen.forEach(pi=>{const p=tm.players[pi];if(!p.el)return;
+    const c=escal(table,p.r,1);keepSpend+=c;if(c>maxSel)maxSel=c;});
+  const k=chosen.size;
+  const budgetSpend=(S.fr==='on'&&k)?keepSpend-maxSel:keepSpend;
+  let opening,draftSpend=0;
+  if(S.slot==='round'){
+    const picks=tm.picks.slice(0,16);
+    picks.forEach(p=>draftSpend+=table[p.r]);
+    opening=draftSpend;           // keepers occupy their round's pick at the same price
+  }else{
+    const picks=tm.picks.slice();
+    picks.splice(Math.max(0,picks.length-k),k);
+    const used=picks.slice(0,16-k);
+    used.forEach(p=>draftSpend+=table[p.r]);
+    opening=keepSpend+draftSpend;
+  }
+  const overBudget=S.bmode==='guaranteed3'
+    ? (k>3 && budgetSpend>S.budget)
+    : budgetSpend>S.budget;
+  return {k,keepSpend,budgetSpend,draftSpend,opening,overBudget,overCount:k>S.maxk};
+}
+
+/* ---- controls ---- */
+function pillGroup(hostId,options,get,set){
+  const host=document.getElementById(hostId);host.textContent='';
+  options.forEach(([key,lab])=>{
+    const b=$('button','tpill sm'+(get()===key?' active':''),lab);b.type='button';
+    b.addEventListener('click',()=>{set(key);saveS();render();});
+    host.appendChild(b);
+  });
+}
+const sliders=[['flat',v=>v+'%'],['cap',v=>'$'+v],['budget',v=>'$'+v],['maxk',v=>v+' keepers']];
+sliders.forEach(([id])=>{
+  document.getElementById(id).addEventListener('input',e=>{
+    S[id]=parseInt(e.target.value);
+    if(id==='flat')S.preset='custom';
+    saveS();render();
+  });
+});
+document.getElementById('labReset').addEventListener('click',()=>{S={...DEFAULTS};saveS();render();});
+
+function render(){
+  const table=currentTable();
+  pillGroup('tablePresets',[['old','Old steep'],['adopted','Adopted 2026'],['custom','Custom']],
+    ()=>S.preset,k=>{S.preset=k;if(k==='custom'&&S.flat===null)S.flat=30;});
+  pillGroup('slotMode',[['tail','Off the board (tail picks)'],['round','Keepers take their round’s pick']],
+    ()=>S.slot,k=>S.slot=k);
+  pillGroup('budgetMode',[['budget','Budget governs all keeps'],['guaranteed3','3 keeps guaranteed, budget only for extras']],
+    ()=>S.bmode,k=>S.bmode=k);
+  pillGroup('franchiseMode',[['on','On'],['off','Off']],()=>S.fr,k=>S.fr=k);
+
+  sliders.forEach(([id,fmt])=>{
+    const el=document.getElementById(id);
+    el.value=S[id]===null?30:S[id];
+    el.disabled=(id==='flat'&&S.preset!=='custom');
+    document.getElementById(id+'V').textContent=id==='flat'?(S.preset==='custom'?fmt(S.flat??30):'preset'):fmt(S[id]);
+  });
+
+  const strip=document.getElementById('tableStrip');strip.textContent='';
+  for(let r=1;r<=16;r++){
+    const c=$('span','tmini');c.appendChild($('b',null,'$'+table[r]));c.appendChild($('i',null,'R'+r));
+    strip.appendChild(c);
+  }
+
+  const rows=DATA.teams.map((tm,ti)=>({name:tm.name,ev:evalLab(ti,table)})).sort((a,b)=>b.ev.opening-a.ev.opening);
+  const overCap=rows.filter(r=>r.ev.opening>S.cap).length;
+  const overB=rows.filter(r=>r.ev.overBudget).length;
+  const sum=document.getElementById('labSummary');sum.textContent='';
+  [[overCap?'fire':'even',overCap+' team'+(overCap===1?'':'s')+' in cap jail'],
+   [overB?'fire':'even',overB+' over budget'],
+   ['even','avg opening $'+Math.round(rows.reduce((a,r)=>a+r.ev.opening,0)/rows.length)]]
+    .forEach(([cls,txt])=>sum.appendChild($('span','chip '+cls,txt)));
+
+  const board=document.getElementById('labBoard');board.textContent='';
+  const scale=Math.max(280,S.cap+40);
+  rows.forEach(r=>{
+    const row=$('div','cbrow');
+    const nm=$('div','cbname');
+    nm.appendChild($('span','cbteam',r.name));
+    nm.appendChild($('span','chip mini',r.ev.k+' K'));
+    if(r.ev.overBudget)nm.appendChild($('span','chip fire','BUDGET'));
+    row.appendChild(nm);
+    const track=$('div','cbtrack');
+    let x=0;
+    [['k',S.slot==='round'?0:r.ev.keepSpend],['d',r.ev.draftSpend]].forEach(([cls,v])=>{
+      if(v<=0)return;
+      const seg=$('div','cbseg '+cls);
+      seg.style.left=(x/scale*100)+'%';seg.style.width=(Math.min(v,scale-x)/scale*100)+'%';
+      track.appendChild(seg);x+=v;
+    });
+    const cap=$('div','cbcap');cap.style.left=(S.cap/scale*100)+'%';track.appendChild(cap);
+    row.appendChild(track);
+    const val=$('div','cbval');
+    val.appendChild($('b',r.ev.opening>S.cap?'bad':'','$'+r.ev.opening));
+    val.appendChild($('span','mut small','budget $'+r.ev.budgetSpend+'/$'+S.budget));
+    row.appendChild(val);
+    board.appendChild(row);
+  });
+}
+render();
+</script>

@@ -234,6 +234,17 @@ details.histbox{grid-column:1 / -1;background:var(--card);border:1px solid var(-
 details.histbox summary{cursor:pointer;font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2)}
 details.histbox summary:hover{color:var(--mint)}
 details.histbox .dash{margin-top:14px}
+.ctl{padding:10px 0;border-bottom:1px solid var(--line)}
+.ctl:last-of-type{border-bottom:none}
+.ctlrow{display:grid;grid-template-columns:110px 1fr 84px;align-items:center;gap:10px}
+.ctlname{font-size:12.5px;font-weight:600;color:var(--ink2)}
+.ctlval{font-size:12.5px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--mint);background:transparent}
+input[type=range]:disabled{opacity:.35}
+.salary-mini{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.tmini{display:flex;flex-direction:column;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:6px;padding:3px 6px;min-width:34px}
+.tmini b{font-size:11.5px;font-weight:800;font-variant-numeric:tabular-nums}
+.tmini i{font-style:normal;font-size:9px;color:var(--ink3);letter-spacing:.04em}
 """
 CSS = CSS.replace("F400", fonts["400"]).replace("F600", fonts["600"]).replace("F800", fonts["800"])
 with open(os.path.join(OUT, "ggg.css"), "w", encoding="utf-8") as f:
@@ -256,9 +267,11 @@ FOOT = ('<footer class="ggg"><div class="in">GGG League · data from the Sleeper
         'grudges update automatically</div></footer>')
 
 # ---------------- keeper-planner team data (same order/sort as cap-planner) ----------------
-CFG = {"cap": 220, "budget": 45, "maxKeep": 5, "waiver": 1,
-       "table": {1: 34, 2: 28, 3: 23, 4: 19, 5: 16, 6: 13, 7: 11, 8: 9,
-                 9: 7, 10: 5, 11: 4, 12: 3, 13: 2, 14: 2, 15: 1, 16: 1}}
+CFG = {"cap": 220, "budget": 45, "maxKeep": 5, "waiver": 0, "franchise": True,
+       "table": {1: 30, 2: 26, 3: 22, 4: 19, 5: 16, 6: 14, 7: 12, 8: 10,
+                 9: 8, 10: 7, 11: 6, 12: 5, 13: 4, 14: 3, 15: 2, 16: 2}}
+STEEP_TABLE = {1: 34, 2: 28, 3: 23, 4: 19, 5: 16, 6: 13, 7: 11, 8: 9,
+               9: 7, 10: 5, 11: 4, 12: 3, 13: 2, 14: 2, 15: 1, 16: 1}
 
 
 def escalate(round_2025, steps):
@@ -321,6 +334,8 @@ slices = {
     "records.html": {"records": site["records"], "career": career},
     "drafts.html": {"drafts": site["drafts"]},
     "trades.html": {"trades": site["trades"]},
+    "lab.html": {"teams": planner_teams(), "steep": STEEP_TABLE, "adopted": CFG["table"],
+                 "defaults": {"cap": CFG["cap"], "budget": CFG["budget"], "maxKeep": CFG["maxKeep"]}},
 }
 
 for page, data in slices.items():
@@ -333,10 +348,10 @@ for page, data in slices.items():
         f.write(html)
     print(f"built {page} ({os.path.getsize(os.path.join(OUT, page))//1024} KB)")
 
-# cap tools: copy the built artifacts in
-SCRATCH = r"C:\Users\Strubes\AppData\Local\Temp\claude\C--Users-Strubes--claude\5652e97f-048a-4002-a583-3fb28db3a0b2\scratchpad"
+# cap tools: copy the built artifacts in (generated in this directory by
+# build_planner.py / build_report.py)
 for src, dst in (("planner.html", "cap-planner.html"), ("report.html", "cap-report.html")):
-    sp = os.path.join(SCRATCH, src)
+    sp = os.path.join(HERE, src)
     if os.path.exists(sp):
         shutil.copy(sp, os.path.join(OUT, dst))
         print(f"copied {dst}")

@@ -31,16 +31,19 @@ const sel=ti=>new Set(kstate.picks[ti]||[]);
 
 function evalTeam(ti){
   const tm=DATA.teams[ti],chosen=sel(ti);
-  let keepSpend=0;chosen.forEach(pi=>keepSpend+=tm.players[pi].k26);
+  let keepSpend=0,maxSel=0,franchiseName=null;
+  chosen.forEach(pi=>{const p=tm.players[pi];keepSpend+=p.k26;
+    if(p.k26>maxSel){maxSel=p.k26;franchiseName=p.n;}});
+  const budgetSpend=(CFG.franchise&&chosen.size)?keepSpend-maxSel:keepSpend;
   let next27=0;chosen.forEach(pi=>next27+=tm.players[pi].k27);
   const k=chosen.size,picks=tm.picks.slice();
   picks.splice(Math.max(0,picks.length-k),k);
   const slots=16-k,used=picks.slice(0,slots);
   let draftSpend=0;used.forEach(p=>draftSpend+=TABLE[p.r]);
   const fills=Math.max(0,slots-used.length);
-  return {keepSpend,next27,k,draftSpend,fills,usedPicks:used.length,
+  return {keepSpend,budgetSpend,franchiseName,next27,k,draftSpend,fills,usedPicks:used.length,
           opening:keepSpend+draftSpend+fills*CFG.waiver,
-          overBudget:keepSpend>CFG.budget,overCount:k>CFG.maxKeep};
+          overBudget:budgetSpend>CFG.budget,overCount:k>CFG.maxKeep};
 }
 const capital=ti=>DATA.teams[ti].picks.reduce((a,p)=>a+TABLE[p.r],0);
 
@@ -115,9 +118,10 @@ function renderDash(){
   kc.appendChild($('p','cardnote','Synced with the full planner. Tap to keep.'));
   const meters=$('div','kmeters');
   const m1=$('div');
-  m1.appendChild($('div','mlabel','Budget $'+ev.keepSpend+' / $'+CFG.budget+' · '+ev.k+'/'+CFG.maxKeep+' slots'+(ev.overCount?' — TOO MANY':'')));
+  m1.appendChild($('div','mlabel','Budget $'+ev.budgetSpend+' / $'+CFG.budget+' · '+ev.k+'/'+CFG.maxKeep+' slots'
+    +(CFG.franchise&&ev.franchiseName?' · franchise: '+ev.franchiseName:'')+(ev.overCount?' — TOO MANY':'')));
   const met=$('div','meter');const fb=$('div','fillbar'+(ev.overBudget?' over':''));
-  fb.style.width=Math.min(100,ev.keepSpend/CFG.budget*100)+'%';met.appendChild(fb);m1.appendChild(met);
+  fb.style.width=Math.min(100,ev.budgetSpend/CFG.budget*100)+'%';met.appendChild(fb);m1.appendChild(met);
   meters.appendChild(m1);
   const m2=$('div');
   const d=CFG.cap-ev.opening;
