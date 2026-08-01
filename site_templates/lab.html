@@ -150,13 +150,13 @@ function render(){
   const table=currentTable();
   pillGroup('tablePresets',[['old','Old steep'],['adopted','Adopted 2026'],['custom','Custom']],
     ()=>S.preset,k=>{S.preset=k;if(k==='custom'&&S.flat===null)S.flat=30;});
-  pillGroup('slotMode',[['tail','Off the board (tail picks)'],['round','Keepers take their round’s pick']],
+  pillGroup('slotMode',[['tail','Off the board (adopted)'],['round','Keepers take their round’s pick']],
     ()=>S.slot,k=>S.slot=k);
-  pillGroup('budgetMode',[['budget','Budget governs all keeps'],['guaranteed3','3 keeps guaranteed, budget only for extras']],
+  pillGroup('budgetMode',[['budget','Budget governs all keeps (adopted)'],['guaranteed3','3 keeps guaranteed, budget only for extras']],
     ()=>S.bmode,k=>S.bmode=k);
-  pillGroup('franchiseMode',[['on','On'],['off','Off']],()=>S.fr,k=>S.fr=k);
+  pillGroup('franchiseMode',[['on','On (adopted)'],['off','Off']],()=>S.fr,k=>S.fr=k);
   pillGroup('applyMode',[['off','Off — Home uses adopted rules'],['on','On — Home mirrors the Lab']],()=>S.apply,k=>S.apply=k);
-  pillGroup('kcapMode',[['on','Count against cap'],['off','Exempt (adopted)']],()=>S.kcap,k=>S.kcap=k);
+  pillGroup('kcapMode',[['on','Count (adopted)'],['off','Exempt — budget only']],()=>S.kcap,k=>S.kcap=k);
 
   sliders.forEach(([id,fmt])=>{
     const el=document.getElementById(id);
@@ -164,6 +164,17 @@ function render(){
     el.disabled=(id==='flat'&&S.preset!=='custom');
     document.getElementById(id+'V').textContent=id==='flat'?(S.preset==='custom'?fmt(S.flat??30):'preset'):fmt(S[id]);
   });
+
+  /* highlight any control that departs from the adopted rules */
+  [['cap',S.cap!==DEFAULTS.cap],['floor',S.floor!==DEFAULTS.floor],
+   ['budget',S.budget!==DEFAULTS.budget],['maxk',S.maxk!==DEFAULTS.maxk],
+   ['tablePresets',S.preset!=='adopted'],['slotMode',S.slot!==DEFAULTS.slot],
+   ['budgetMode',S.bmode!==DEFAULTS.bmode],['franchiseMode',S.fr!==DEFAULTS.fr],
+   ['kcapMode',S.kcap!==DEFAULTS.kcap]]
+    .forEach(([id,mod])=>{
+      const c=document.getElementById(id)?.closest('.ctl');
+      if(c)c.classList.toggle('modded',mod);
+    });
 
   const strip=document.getElementById('tableStrip');strip.textContent='';
   for(let r=1;r<=16;r++){

@@ -355,8 +355,8 @@ function capBoardCard(span){
   });
   cb.appendChild(fr);
   const notes={all:KCAP==='off'
-                 ?'Cap total (keepers are cap-exempt — governed by the budget). Dashed line = $'+CFG.cap+' cap; trades also can’t drop a roster below the $'+(CFG.floor||130)+' floor.'
-                 :'Opening cap by source — solid = keepers, faded = draft picks. Dashed line = $'+CFG.cap+' cap.',
+                 ?'Cap total (keepers are cap-exempt — governed by the budget). Dashed line = $'+CFG.cap+' cap; trades also can’t drop a roster below the $'+(CFG.floor||135)+' floor.'
+                 :'Opening cap by source — solid = keepers, faded = draft picks. Dashed line = $'+CFG.cap+' cap; trades can’t leave a roster above it or below the $'+(CFG.floor||135)+' floor.',
                k:'Keeper salary only. Dashed line = $'+CFG.budget+' keeper budget.',
                d:'Draft-round salary only, from the picks each team holds for 2026.'};
   cb.appendChild($('p','cardnote2',notes[cbFilter]));

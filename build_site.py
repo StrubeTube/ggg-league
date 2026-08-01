@@ -262,6 +262,8 @@ nav.ggg a.labtab.on{background:var(--card);color:var(--gold)}
 .rtrade.rblocked{border-color:var(--coral)}
 .rtrade .trade-head{margin-bottom:6px}
 .rline{display:flex;justify-content:space-between;gap:12px;padding:2px 0;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.ctl.modded{border:1px dashed var(--gold);border-radius:10px;padding:10px 12px;margin:8px 0;background:color-mix(in srgb,var(--gold) 6%,transparent)}
+.ctl.modded::before{content:'⚗ NOT THE ADOPTED RULE — experimenting';display:block;font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--gold);margin-bottom:6px}
 """
 CSS = CSS.replace("F400", fonts["400"]).replace("F600", fonts["600"]).replace("F800", fonts["800"])
 with open(os.path.join(OUT, "ggg.css"), "w", encoding="utf-8") as f:
@@ -285,8 +287,8 @@ FOOT = ('<footer class="ggg"><div class="in">GGG League · data from the Sleeper
         'grudges update automatically</div></footer>')
 
 # ---------------- keeper-planner team data (same order/sort as cap-planner) ----------------
-CFG = {"cap": 200, "floor": 130, "budget": 45, "maxKeep": 5, "waiver": 0,
-       "franchise": True, "kcap": "off",
+CFG = {"cap": 220, "floor": 135, "budget": 45, "maxKeep": 5, "waiver": 0,
+       "franchise": True, "kcap": "on",
        "table": {1: 30, 2: 26, 3: 22, 4: 19, 5: 16, 6: 14, 7: 12, 8: 10,
                  9: 8, 10: 7, 11: 6, 12: 5, 13: 4, 14: 3, 15: 2, 16: 2}}
 STEEP_TABLE = {1: 34, 2: 28, 3: 23, 4: 19, 5: 16, 6: 13, 7: 11, 8: 9,
