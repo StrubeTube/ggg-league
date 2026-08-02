@@ -23,7 +23,7 @@ const CFG = DATA.cfg;
 let TABLE = CFG.table, KCAP = (CFG.kcap === 'off' ? 'off' : 'on'), BMODE = 'budget',
     SLOT = 'tail', LAB = null;
 try{
-  const L = JSON.parse(localStorage.getItem('ggg-lab-v3'));
+  const L = JSON.parse(localStorage.getItem('ggg-lab-v4'));
   if(L && L.apply === 'on'){
     LAB = L;
     if(L.preset === 'old') TABLE = DATA.steep;

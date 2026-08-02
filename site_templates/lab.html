@@ -6,7 +6,7 @@ __NAV__
   <header class="hero">
     <div class="eyebrow">GGG League &middot; Commissioner's Lab &middot; not league policy</div>
     <h1>The rule simulator</h1>
-    <p class="lede">Every slider recomputes all ten teams instantly, using the keeper selections saved on this device. Defaults are the minimal fire-sale fix — salaries, a cap, and a floor on top of the keeper league you already know. The default lines ($230 cap / $150 floor) are fitted to history: the pair that blocks every tagged fire sale since 2020 while blocking the fewest normal trades. <b>Gold boxes mark what's net new versus the old rules</b> — flip a control back to the old way and its box disappears. Settings save locally.</p>
+    <p class="lede">Every slider recomputes all ten teams instantly, using the keeper selections saved on this device. Defaults are the minimal fire-sale fix — salaries, a cap, and a floor on top of the keeper league you already know. The default lines ($230 cap / $160 floor) are fitted to history: they block 15 of the 16 tagged fire sales since 2020 at the least damage to normal trading — the one escapee sold a $10 keeper star for a pile of bodies, which no salary rule can see. <b>Gold boxes mark what's net new versus the old rules</b> — flip a control back to the old way and its box disappears. Settings save locally.</p>
   </header>
 
   <div class="dash" style="margin-top:22px">
@@ -85,8 +85,8 @@ const DEFAULTS={flat:null,preset:'adopted',cap:DATA.defaults.cap,budget:DATA.def
   fr:DATA.defaults.fr,kcap:DATA.defaults.kcap||'on',
   apply:'on',season:'2026',floor:DATA.defaults.floor||0,view:'all'};
 let S={...DEFAULTS};
-try{const s=JSON.parse(localStorage.getItem('ggg-lab-v3'));if(s)S={...DEFAULTS,...s};}catch(e){}
-const saveS=()=>{try{localStorage.setItem('ggg-lab-v3',JSON.stringify(S));}catch(e){}};
+try{const s=JSON.parse(localStorage.getItem('ggg-lab-v4'));if(s)S={...DEFAULTS,...s};}catch(e){}
+const saveS=()=>{try{localStorage.setItem('ggg-lab-v4',JSON.stringify(S));}catch(e){}};
 const capOn=()=>S.cap>=180, budgetOn=()=>S.budget>0;
 const capVal=()=>capOn()?S.cap:Infinity;
 
@@ -329,7 +329,7 @@ function simSeason(sn,table,cap,kcapOff,floor){
       const over=(after>cap&&after>before[rid])||(floor&&after<floor&&after<before[rid]);
       if(over)blocked=true;
       return {name:nameOf[rid],before:before[rid],after,over,
-              gets:gets[rid]||[],picks:(ev.pk&&ev.pk[String(rid)])||0};
+              gets:gets[rid]||[],picks:(ev.pk&&ev.pk[String(rid)])||[]};
     });
     trades.push({w:ev.w,f:ev.f,blocked,sides:srows});
   });
@@ -404,7 +404,7 @@ function renderRetro(sim,cap,sum,board){
       const left=$('span');
       left.appendChild($('b',null,sd.name+': '));
       const bits=sd.gets.map(g=>g.n+' ($'+Math.round(g.s)+')');
-      if(sd.picks)bits.push(sd.picks+' pick'+(sd.picks>1?'s':''));
+      sd.picks.forEach(l=>bits.push(l+' pick'));
       left.appendChild(document.createTextNode(bits.length?('gets '+bits.join(', ')):'sends only'));
       line.appendChild(left);
       const right=$('span','mut');

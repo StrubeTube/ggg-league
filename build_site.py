@@ -292,7 +292,7 @@ FOOT = ('<footer class="ggg"><div class="in">GGG League · data from the Sleeper
         'grudges update automatically</div></footer>')
 
 # ---------------- keeper-planner team data (same order/sort as cap-planner) ----------------
-CFG = {"cap": 230, "floor": 150, "budget": 45, "maxKeep": 5, "waiver": 0,
+CFG = {"cap": 230, "floor": 160, "budget": 45, "maxKeep": 5, "waiver": 0,
        "franchise": True, "kcap": "on",
        "table": {1: 30, 2: 26, 3: 22, 4: 19, 5: 16, 6: 14, 7: 12, 8: 10,
                  9: 8, 10: 7, 11: 6, 12: 5, 13: 4, 14: 3, 15: 2, 16: 2}}
@@ -349,6 +349,17 @@ def planner_teams():
         teams.append({"name": name_of[r["roster_id"]], "picks": picks_of[r["roster_id"]],
                       "p27": picks_27[r["roster_id"]], "players": plist})
     return teams
+
+
+# League-confirmed corrections to the fire-sale heuristic (Alex, 2026-08-02).
+# The heuristic works off draft rounds, which misses stars kept cheap (Josh Allen
+# at R8) and mislabels early-season player swaps. Keyed (season, week, a moved
+# player) -> corrected tag.
+FIRE_FIXES = {
+    ("2025", 11, "Derrick Henry"): 1,       # VERO sold Henry+Olave for injured $0 stashes
+    ("2024", 7, "Josh Allen"): 1,           # swinglejt sold Allen for lottery tickets + pick
+    ("2023", 4, "Amon-Ra St. Brown"): 0,    # real players both ways — a swap, not a sale
+}
 
 
 def build_replay():
@@ -412,7 +423,10 @@ def build_replay():
                     names[pid] = (players_db.get(pid) or {}).get("name") or "?"
                 pk = {}
                 for dp in t.get("draft_picks") or []:
-                    pk[str(dp["owner_id"])] = pk.get(str(dp["owner_id"]), 0) + 1
+                    pk.setdefault(str(dp["owner_id"]), []).append(
+                        f"{dp['season']} R{dp['round']}")
+                for labs in pk.values():
+                    labs.sort()
                 fire = 0
                 rids = t.get("roster_ids") or []
                 if len(rids) == 2:
@@ -423,6 +437,10 @@ def build_replay():
                         got = [dround.get(p, 16) for p, _, to in mv if to == rid]
                         if sent and min(sent) <= 7 and (not got or min(got) >= 8):
                             fire = 1
+                moved = {names[p] for p, _, _ in mv}
+                for (fs, fw, fname), tag in FIRE_FIXES.items():
+                    if fs == s and fw == wk and fname in moved:
+                        fire = tag
                 ev = {"w": wk, "t": 1, "mv": mv, "f": fire}
                 if pk:
                     ev["pk"] = pk
@@ -452,10 +470,13 @@ slices = {
     "drafts.html": {"drafts": site["drafts"]},
     "trades.html": {"trades": site["trades"], "pickValues": site["pick_values"]},
     "lab.html": {"teams": planner_teams(), "steep": STEEP_TABLE, "adopted": CFG["table"],
-                 # cap/floor optimized over the 2020-25 replays: $230/$150 blocks all 15
-                 # tagged fire sales at the minimum normal-trade collateral (11/41);
-                 # the cap never binds above $230, the floor does the blocking.
-                 "defaults": {"cap": 230, "floor": 150, "budget": 0, "maxKeep": 3,
+                 # cap/floor optimized over the 2020-25 replays (fire tags include
+                 # Alex's corrections): $230/$160 blocks 15 of 16 fire sales at
+                 # 15/40 normal-trade collateral. The 16th (2024 Josh Allen, a $10
+                 # keeper sold for bodies) is invisible to salary accounting — a
+                 # $170 floor "catches" it only via the buyer and blocks 27/40.
+                 # The cap never binds above $230; the floor does the blocking.
+                 "defaults": {"cap": 230, "floor": 160, "budget": 0, "maxKeep": 3,
                               "kcap": "on", "slot": "round", "bmode": "guaranteed3", "fr": "off"},
                  "replay": build_replay()},
 }
