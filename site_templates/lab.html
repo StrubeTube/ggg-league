@@ -82,7 +82,7 @@ const sel=ti=>new Set(kstate.picks[ti]||[]);
 const DEFAULTS={flat:null,preset:'adopted',cap:DATA.defaults.cap,budget:DATA.defaults.budget,
   maxk:DATA.defaults.maxKeep,slot:DATA.defaults.slot,bmode:DATA.defaults.bmode,
   fr:DATA.defaults.fr,kcap:DATA.defaults.kcap||'on',
-  apply:'off',season:'2026',floor:DATA.defaults.floor||0};
+  apply:'on',season:'2026',floor:DATA.defaults.floor||0};
 let S={...DEFAULTS};
 try{const s=JSON.parse(localStorage.getItem('ggg-lab-v2'));if(s)S={...DEFAULTS,...s};}catch(e){}
 const saveS=()=>{try{localStorage.setItem('ggg-lab-v2',JSON.stringify(S));}catch(e){}};
@@ -158,7 +158,7 @@ function render(){
   pillGroup('budgetMode',[['guaranteed3','3 keeps guaranteed, budget only for extras'],['budget','Budget governs all keeps']],
     ()=>S.bmode,k=>S.bmode=k);
   pillGroup('franchiseMode',[['off','Off'],['on','On']],()=>S.fr,k=>S.fr=k);
-  pillGroup('applyMode',[['off','Off — Home uses the real rules'],['on','On — Home mirrors the Lab']],()=>S.apply,k=>S.apply=k);
+  pillGroup('applyMode',[['on','On — Home mirrors the Lab'],['off','Off — Home uses the real rules']],()=>S.apply,k=>S.apply=k);
   pillGroup('kcapMode',[['on','Count'],['off','Exempt — budget only']],()=>S.kcap,k=>S.kcap=k);
 
   sliders.forEach(([id,fmt])=>{
