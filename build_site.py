@@ -262,7 +262,7 @@ nav.ggg a.labtab.on{background:var(--card);color:var(--gold)}
 .rtrade.rblocked{border-color:var(--coral)}
 .rtrade .trade-head{margin-bottom:6px}
 .rline{display:flex;justify-content:space-between;gap:12px;padding:2px 0;flex-wrap:wrap;font-variant-numeric:tabular-nums}
-.ctl.modded{border:1px dashed var(--gold);border-radius:10px;padding:10px 12px;margin:8px 0;background:color-mix(in srgb,var(--gold) 6%,transparent)}
+.ctl.modded{border:1px dashed var(--gold);border-radius:10px;padding:10px 12px;margin:8px 0;background:color-mix(in srgb,var(--gold) 14%,transparent)}
 .ctl.modded::before{content:'🆕 NET NEW vs the old league rules';display:block;font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--gold);margin-bottom:6px}
 """
 CSS = CSS.replace("F400", fonts["400"]).replace("F600", fonts["600"]).replace("F800", fonts["800"])

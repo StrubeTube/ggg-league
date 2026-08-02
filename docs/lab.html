@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <title>GGG Commissioner's Lab</title>
-<link rel="stylesheet" href="ggg.css?v=c070103a">
+<link rel="stylesheet" href="ggg.css?v=caa2b602">
 <nav class="ggg"><div class="in"><span class="logo">GGG</span><a href="index.html" class="">Home</a><a href="history.html" class="">History</a><a href="records.html" class="">Records</a><a href="drafts.html" class="">Drafts</a><a href="trades.html" class="">Trades</a><a href="lab.html" class="labtab on">🧪 Lab</a></div></nav>
 <div class="wrap wide">
   <header class="hero">
@@ -151,7 +151,7 @@ document.getElementById('labReset').addEventListener('click',()=>{S={...DEFAULTS
 
 function render(){
   const table=currentTable();
-  pillGroup('tablePresets',[['old','Old steep'],['adopted','Flattened 2026'],['custom','Custom']],
+  pillGroup('tablePresets',[['adopted','Flattened 2026'],['old','Old steep'],['custom','Custom']],
     ()=>S.preset,k=>{S.preset=k;if(k==='custom'&&S.flat===null)S.flat=30;});
   pillGroup('slotMode',[['round','Keepers take their round’s pick'],['tail','Off the board — tail picks']],
     ()=>S.slot,k=>S.slot=k);
@@ -176,7 +176,7 @@ function render(){
    ['budget',budgetOn()],                    // old league: keeps had no dollar budget
    ['maxk',S.maxk!==3],
    ['slotMode',S.slot!=='round'],
-   ['budgetMode',S.bmode!=='guaranteed3'],
+   ['budgetMode',budgetOn()||S.bmode!=='guaranteed3'],   // any budget at all is net new
    ['franchiseMode',S.fr!=='off'],
    ['kcapMode',S.kcap!=='on']]
     .forEach(([id,mod])=>{
