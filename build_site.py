@@ -447,8 +447,8 @@ slices = {
     "drafts.html": {"drafts": site["drafts"]},
     "trades.html": {"trades": site["trades"], "pickValues": site["pick_values"]},
     "lab.html": {"teams": planner_teams(), "steep": STEEP_TABLE, "adopted": CFG["table"],
-                 "defaults": {"cap": CFG["cap"], "floor": CFG["floor"], "budget": CFG["budget"],
-                              "maxKeep": CFG["maxKeep"], "kcap": CFG["kcap"]},
+                 "defaults": {"cap": 220, "floor": 135, "budget": 0, "maxKeep": 3,
+                              "kcap": "on", "slot": "round", "bmode": "guaranteed3", "fr": "off"},
                  "replay": build_replay()},
 }
 

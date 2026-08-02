@@ -6,12 +6,12 @@ __NAV__
   <header class="hero">
     <div class="eyebrow">GGG League &middot; Commissioner's Lab &middot; not league policy</div>
     <h1>The rule simulator</h1>
-    <p class="lede">Every slider recomputes all ten teams instantly, using the keeper selections saved on this device. Defaults are the adopted fire-sale-stopping rules; <b>gold boxes mark what's net new compared to the old league setup</b> — flip a control back to the old way and its box disappears. Settings save locally.</p>
+    <p class="lede">Every slider recomputes all ten teams instantly, using the keeper selections saved on this device. Defaults are the minimal fire-sale fix — salaries, a cap, and a floor on top of the keeper league you already know. <b>Gold boxes mark what's net new versus the old rules</b> — flip a control back to the old way and its box disappears. Settings save locally.</p>
   </header>
 
   <div class="dash" style="margin-top:22px">
     <div class="dcard c5">
-      <div class="dcard-head"><h3 class="cardh">The sliders</h3><button class="resetbtn" id="labReset" type="button">Reset to adopted rules</button></div>
+      <div class="dcard-head"><h3 class="cardh">The sliders</h3><button class="resetbtn" id="labReset" type="button">Reset to defaults</button></div>
 
       <div class="ctl"><div class="mlabel">Salary table</div>
         <div class="filterrow tight" id="tablePresets"></div>
@@ -23,7 +23,7 @@ __NAV__
       </div>
 
       <div class="ctl"><div class="ctlrow"><span class="ctlname">Team cap</span>
-        <input type="range" id="cap" min="180" max="260" step="5"><span class="ctlval" id="capV"></span></div>
+        <input type="range" id="cap" min="175" max="260" step="5"><span class="ctlval" id="capV"></span></div>
         <div class="ctlnote"><b>Lower → tighter market:</b> fire-sale hauls impossible to absorb, more cap jail, fewer blockbusters. <b>Higher → looser market:</b> easier star-stacking, deadline arms races return.</div></div>
 
       <div class="ctl"><div class="ctlrow"><span class="ctlname">Team floor</span>
@@ -31,7 +31,7 @@ __NAV__
         <div class="ctlnote"><b>Higher → fire sales die:</b> sellers must take real salary back ("field a real team"). <b>Lower/off → liquidations return.</b> Too high and rebuilders can't sell at all. Waivers never trip it.</div></div>
 
       <div class="ctl"><div class="ctlrow"><span class="ctlname">Keeper budget</span>
-        <input type="range" id="budget" min="20" max="80" step="5"><span class="ctlval" id="budgetV"></span></div>
+        <input type="range" id="budget" min="0" max="80" step="5"><span class="ctlval" id="budgetV"></span></div>
         <div class="ctlnote">The master redraft↔dynasty dial. <b>Higher → dynasty:</b> better players kept, thinner draft, slower turnover. <b>Lower → redraft:</b> harsh keep-or-release choices, richer draft night.</div></div>
 
       <div class="ctl"><div class="ctlrow"><span class="ctlname">Max keepers</span>
@@ -42,21 +42,21 @@ __NAV__
         <div class="filterrow tight" id="slotMode"></div>
         <div class="ctlnote"><b>Off the board → keeping stars gets easier</b> (costs dollars + a tail pick, draft stays clean). <b>Round-slot → keeping stars gets brutal</b> (costs your actual early pick; the old way).</div></div>
 
-      <div class="ctl"><div class="mlabel">Budget mode</div>
+      <div class="ctl"><div class="mlabel">Budget mode <span class="mut small">— pairs with the next control: together they set the true cost of keeping</span></div>
         <div class="filterrow tight" id="budgetMode"></div>
-        <div class="ctlnote"><b>Guaranteed-3 → superteams:</b> stud cores never re-enter the draft and loaded teams shrug off cap jail. <b>Budget-governs-all → stars circulate</b> and every keep is a real decision.</div></div>
+        <div class="ctlnote">Decides <b>which keeps must fit the keeper budget</b>. <b>3-guaranteed (old way) → your top three are always free of the budget;</b> only extras need it. <b>Budget-governs-all → every keep is a budget decision</b> and stars circulate more.</div></div>
+
+      <div class="ctl"><div class="mlabel">Keeper salaries count against the team cap <span class="mut small">— the other half of the pair</span></div>
+        <div class="filterrow tight" id="kcapMode"></div>
+        <div class="ctlnote">Decides <b>whether keeper salaries also consume your season cap</b>. <b>Count (old-style accounting) → good keepers cost season flexibility</b>, and with 3-guaranteed the cap is what stops stud hoarding. <b>Exempt → keeping is never punished</b>, but then the budget above must do all the limiting.</div></div>
 
       <div class="ctl"><div class="mlabel">Franchise keep (budget-exempt star)</div>
         <div class="filterrow tight" id="franchiseMode"></div>
-        <div class="ctlnote"><b>On → star retention up, fire-sale pressure down</b> (everyone always keeps their one guy; bounded to a single player). <b>Off → tighter budgets, more stars back in the draft.</b></div></div>
-
-      <div class="ctl"><div class="mlabel">Keeper salaries count against the team cap</div>
-        <div class="filterrow tight" id="kcapMode"></div>
-        <div class="ctlnote"><b>Count → good keepers cost season flexibility</b> (heavy classes have less deadline ammo). <b>Exempt → keeping is never punished;</b> the cap polices only the draft + trade market — kept players re-attach at full salary when traded, so fire sales stay priced.</div></div>
+        <div class="ctlnote"><b>On → star retention up, fire-sale pressure down</b> (everyone always keeps their one guy; bounded to a single player). <b>Off → tighter keeping, more stars back in the draft.</b></div></div>
 
       <div class="ctl"><div class="mlabel">Apply these rules to the Home page</div>
         <div class="filterrow tight" id="applyMode"></div>
-        <div class="ctlnote">While on, the Home page keeper corner and cap board use these Lab settings instead of the adopted rules, with a banner so nobody mistakes the sandbox for policy. Per device.</div></div>
+        <div class="ctlnote">While on, the Home page keeper corner and cap board use these Lab settings instead of the real rules, with a banner so nobody mistakes the sandbox for policy. Per device.</div></div>
     </div>
 
     <div class="dcard c7">
@@ -80,11 +80,14 @@ const sel=ti=>new Set(kstate.picks[ti]||[]);
 
 /* lab settings */
 const DEFAULTS={flat:null,preset:'adopted',cap:DATA.defaults.cap,budget:DATA.defaults.budget,
-  maxk:DATA.defaults.maxKeep,slot:'tail',bmode:'budget',fr:'on',kcap:DATA.defaults.kcap||'on',
+  maxk:DATA.defaults.maxKeep,slot:DATA.defaults.slot,bmode:DATA.defaults.bmode,
+  fr:DATA.defaults.fr,kcap:DATA.defaults.kcap||'on',
   apply:'off',season:'2026',floor:DATA.defaults.floor||0};
 let S={...DEFAULTS};
-try{const s=JSON.parse(localStorage.getItem('ggg-lab-v1'));if(s)S={...DEFAULTS,...s};}catch(e){}
-const saveS=()=>{try{localStorage.setItem('ggg-lab-v1',JSON.stringify(S));}catch(e){}};
+try{const s=JSON.parse(localStorage.getItem('ggg-lab-v2'));if(s)S={...DEFAULTS,...s};}catch(e){}
+const saveS=()=>{try{localStorage.setItem('ggg-lab-v2',JSON.stringify(S));}catch(e){}};
+const capOn=()=>S.cap>=180, budgetOn=()=>S.budget>0;
+const capVal=()=>capOn()?S.cap:Infinity;
 
 function currentTable(){
   if(S.preset==='old')return DATA.steep;
@@ -121,9 +124,9 @@ function evalLab(ti,table){
     if(S.kcap!=='off')capKeep=keepSpend;
   }
   const opening=capKeep+capDraft;
-  const overBudget=S.bmode==='guaranteed3'
+  const overBudget=budgetOn() && (S.bmode==='guaranteed3'
     ? (k>3 && budgetSpend>S.budget)
-    : budgetSpend>S.budget;
+    : budgetSpend>S.budget);
   return {k,keepSpend,budgetSpend,capKeep,capDraft,opening,overBudget,overCount:k>S.maxk};
 }
 
@@ -136,7 +139,7 @@ function pillGroup(hostId,options,get,set){
     host.appendChild(b);
   });
 }
-const sliders=[['flat',v=>v+'%'],['cap',v=>'$'+v],['floor',v=>v?('$'+v):'off'],['budget',v=>'$'+v],['maxk',v=>v+' keepers']];
+const sliders=[['flat',v=>v+'%'],['cap',v=>v>=180?('$'+v):'off'],['floor',v=>v?('$'+v):'off'],['budget',v=>v>0?('$'+v):'off'],['maxk',v=>v+' keepers']];
 sliders.forEach(([id])=>{
   document.getElementById(id).addEventListener('input',e=>{
     S[id]=parseInt(e.target.value);
@@ -148,15 +151,15 @@ document.getElementById('labReset').addEventListener('click',()=>{S={...DEFAULTS
 
 function render(){
   const table=currentTable();
-  pillGroup('tablePresets',[['old','Old steep'],['adopted','Adopted 2026'],['custom','Custom']],
+  pillGroup('tablePresets',[['old','Old steep'],['adopted','Flattened 2026'],['custom','Custom']],
     ()=>S.preset,k=>{S.preset=k;if(k==='custom'&&S.flat===null)S.flat=30;});
-  pillGroup('slotMode',[['tail','Off the board (adopted)'],['round','Keepers take their round’s pick']],
+  pillGroup('slotMode',[['round','Keepers take their round’s pick'],['tail','Off the board — tail picks']],
     ()=>S.slot,k=>S.slot=k);
-  pillGroup('budgetMode',[['budget','Budget governs all keeps (adopted)'],['guaranteed3','3 keeps guaranteed, budget only for extras']],
+  pillGroup('budgetMode',[['guaranteed3','3 keeps guaranteed, budget only for extras'],['budget','Budget governs all keeps']],
     ()=>S.bmode,k=>S.bmode=k);
-  pillGroup('franchiseMode',[['on','On (adopted)'],['off','Off']],()=>S.fr,k=>S.fr=k);
-  pillGroup('applyMode',[['off','Off — Home uses adopted rules'],['on','On — Home mirrors the Lab']],()=>S.apply,k=>S.apply=k);
-  pillGroup('kcapMode',[['on','Count (adopted)'],['off','Exempt — budget only']],()=>S.kcap,k=>S.kcap=k);
+  pillGroup('franchiseMode',[['off','Off'],['on','On']],()=>S.fr,k=>S.fr=k);
+  pillGroup('applyMode',[['off','Off — Home uses the real rules'],['on','On — Home mirrors the Lab']],()=>S.apply,k=>S.apply=k);
+  pillGroup('kcapMode',[['on','Count'],['off','Exempt — budget only']],()=>S.kcap,k=>S.kcap=k);
 
   sliders.forEach(([id,fmt])=>{
     const el=document.getElementById(id);
@@ -168,9 +171,9 @@ function render(){
   /* highlight controls that are NET NEW vs the old base Sleeper rules
      (3 keepers at their drafted round, no salaries/cap/floor/budget/franchise) */
   [['tablePresets',true],                    // salaries didn't exist before
-   ['cap',true],                             // no team cap existed
+   ['cap',capOn()],
    ['floor',S.floor>0],
-   ['budget',S.bmode!=='guaranteed3'],       // old league: keeps had no dollar budget
+   ['budget',budgetOn()],                    // old league: keeps had no dollar budget
    ['maxk',S.maxk!==3],
    ['slotMode',S.slot!=='round'],
    ['budgetMode',S.bmode!=='guaranteed3'],
@@ -197,7 +200,7 @@ function render(){
   if(S.season==='2026'){
     note.textContent='Bars: solid = keeper salary, faded = draft-pick salary. Dashed red line = team cap. Uses keeper picks saved on this device — set them on the Home page.';
     const rows=DATA.teams.map((tm,ti)=>({name:tm.name,ev:evalLab(ti,table)})).sort((a,b)=>b.ev.opening-a.ev.opening);
-    const overCap=rows.filter(r=>r.ev.opening>S.cap).length;
+    const overCap=rows.filter(r=>r.ev.opening>capVal()).length;
     const overB=rows.filter(r=>r.ev.overBudget).length;
     [[overCap?'fire':'even',overCap+' team'+(overCap===1?'':'s')+' in cap jail'],
      [overB?'fire':'even',overB+' over budget'],
@@ -219,19 +222,19 @@ function render(){
         seg.style.left=(x/scale*100)+'%';seg.style.width=(Math.min(v,scale-x)/scale*100)+'%';
         track.appendChild(seg);x+=v;
       });
-      const cap=$('div','cbcap');cap.style.left=(S.cap/scale*100)+'%';track.appendChild(cap);
+      if(capOn()){const cap=$('div','cbcap');cap.style.left=(S.cap/scale*100)+'%';track.appendChild(cap);}
       row.appendChild(track);
       const val=$('div','cbval');
-      val.appendChild($('b',r.ev.opening>S.cap?'bad':'','$'+r.ev.opening));
-      val.appendChild($('span','mut small','budget $'+r.ev.budgetSpend+'/$'+S.budget));
+      val.appendChild($('b',r.ev.opening>capVal()?'bad':'','$'+r.ev.opening));
+      val.appendChild($('span','mut small','budget $'+r.ev.budgetSpend+(budgetOn()?('/$'+S.budget):' (no budget)')));
       row.appendChild(val);
       board.appendChild(row);
     });
   }else{
     note.textContent='Historical replay: that season’s real draft priced by your table, every real transaction re-run under your cap. Keeper-flagged picks go $0 for their original team when keepers are exempt, and re-attach at full salary when traded. Budget, count, slotting, and franchise dials shape only the 2026 projection.';
     const sn=DATA.replay.find(r=>r.s===S.season);
-    const sim=simSeason(sn,table,S.cap,S.kcap==='off',S.floor);
-    renderRetro(sim,S.cap,sum,board);
+    const sim=simSeason(sn,table,capVal(),S.kcap==='off',S.floor);
+    renderRetro(sim,capVal(),sum,board);
   }
 }
 
@@ -288,14 +291,14 @@ function renderRetro(sim,cap,sum,board){
    [fires.length?'fire':'even',fires.filter(t=>t.blocked).length+' of '+fires.length+' fire sales blocked']]
     .forEach(([cls,txt])=>sum.appendChild($('span','chip '+cls,txt)));
 
-  const scale=Math.max(280,cap+50,...sim.openings.map(o=>o.open+10));
+  const scale=Math.max(280,isFinite(cap)?cap+50:0,...sim.openings.map(o=>o.open+10));
   [...sim.openings].sort((a,b)=>b.open-a.open).forEach(o=>{
     const row=$('div','cbrow');
     const nm=$('div','cbname');nm.appendChild($('span','cbteam',o.name));row.appendChild(nm);
     const track=$('div','cbtrack');
     const seg=$('div','cbseg d');seg.style.left='0';seg.style.width=(Math.min(o.open,scale)/scale*100)+'%';
     track.appendChild(seg);
-    const cl=$('div','cbcap');cl.style.left=(cap/scale*100)+'%';track.appendChild(cl);
+    if(isFinite(cap)){const cl=$('div','cbcap');cl.style.left=(cap/scale*100)+'%';track.appendChild(cl);}
     row.appendChild(track);
     const val=$('div','cbval');
     val.appendChild($('b',o.open>cap?'bad':'','$'+Math.round(o.open)));

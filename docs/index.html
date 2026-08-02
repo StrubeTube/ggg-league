@@ -22,7 +22,7 @@ const DATA = {"cfg": {"cap": 220, "floor": 135, "budget": 45, "maxKeep": 5, "wai
 const CFG = DATA.cfg;
 let TABLE = CFG.table, KCAP = (CFG.kcap === 'off' ? 'off' : 'on'), BMODE = 'budget', LAB = null;
 try{
-  const L = JSON.parse(localStorage.getItem('ggg-lab-v1'));
+  const L = JSON.parse(localStorage.getItem('ggg-lab-v2'));
   if(L && L.apply === 'on'){
     LAB = L;
     if(L.preset === 'old') TABLE = DATA.steep;
@@ -32,7 +32,7 @@ try{
       TABLE = tb;
     }
     CFG.table = TABLE;
-    if(L.cap) CFG.cap = L.cap;
+    if(L.cap && L.cap >= 180) CFG.cap = L.cap;
     if(L.budget) CFG.budget = L.budget;
     if(L.maxk) CFG.maxKeep = L.maxk;
     CFG.franchise = L.fr !== 'off';
@@ -89,7 +89,7 @@ if(LAB){
   const b=document.getElementById('labbanner');
   const wrap=$('div','labbanner');
   wrap.appendChild($('span',null,'⚗️ Lab rules active on this device: cap $'+CFG.cap+' · budget $'+CFG.budget+' · '
-    +(LAB.preset==='old'?'old steep table':(LAB.preset==='custom'?'custom table':'adopted table'))
+    +(LAB.preset==='old'?'old steep table':(LAB.preset==='custom'?'custom table':'flattened table'))
     +' · keepers '+(KCAP==='off'?'cap-exempt':'cap-counted')
     +(BMODE==='guaranteed3'?' · 3 keeps guaranteed':'')+(CFG.franchise?'':' · no franchise keep')+' — '));
   const a=document.createElement('a');a.href='lab.html';a.textContent='adjust or turn off in the Lab';
