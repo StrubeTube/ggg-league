@@ -14,6 +14,8 @@ __NAV__
 
   <section>
     <div class="filterrow" id="typefilters"></div>
+    <div class="filterrow" id="injfilters"></div>
+    <div class="filterrow" id="sorters"></div>
     <div class="filterrow" id="filters"></div>
     <div class="filterrow" id="teamfilters"></div>
   </section>
@@ -34,7 +36,9 @@ __FOOT__
 const DATA = /*__DATA__*/{};
 const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
 
-let sfilter='all', tfilter='all', yfilter='all';
+let sfilter='all', tfilter='all', yfilter='all', ifilter='all', sorter='new';
+const sideTotal=t=>t.sides[0].total+t.sides[1].total;
+const sidePts=t=>t.sides.reduce((a,sd)=>a+sd.players.reduce((b,p)=>b+p.pts,0),0);
 const seasons=[...new Set(DATA.trades.map(t=>t.s))].sort().reverse();
 const teams=[...new Set(DATA.trades.flatMap(t=>t.sides.map(sd=>sd.name)))].sort();
 
@@ -89,21 +93,34 @@ function pills(hostId,options,get,set){
 function render(){
   const nPl=DATA.trades.filter(t=>t.type==='players').length;
   const nPk=DATA.trades.filter(t=>t.type==='picks').length;
+  const nInj=DATA.trades.filter(t=>t.inj&&t.inj.length).length;
   pills('typefilters',[['all','All deals ('+DATA.trades.length+')'],['players','Player-for-player ('+nPl+')'],['picks','Pick deals ('+nPk+')']],()=>yfilter,k=>yfilter=k);
+  pills('injfilters',[['all','Any injury status'],['inj','🚑 Injury-affected ('+nInj+')'],['clean','Clean deals']],()=>ifilter,k=>ifilter=k);
+  pills('sorters',[['new','Newest first'],['old','Oldest first'],['gap','Biggest value gap'],['value','Most total value'],['points','Most points moved']],()=>sorter,k=>sorter=k);
   pills('filters',[['all','All seasons'],...seasons.map(s=>[s,s])],()=>sfilter,k=>sfilter=k);
   pills('teamfilters',[['all','All teams'],...teams.map(n=>[n,n])],()=>tfilter,k=>tfilter=k);
 
   const host=document.getElementById('trades');
   host.textContent='';
-  const rows=DATA.trades.filter(t=>(yfilter==='all'||t.type===yfilter)
+  let rows=DATA.trades.filter(t=>(yfilter==='all'||t.type===yfilter)
     &&(sfilter==='all'||t.s===sfilter)
-    &&(tfilter==='all'||t.sides.some(sd=>sd.name===tfilter)));
+    &&(tfilter==='all'||t.sides.some(sd=>sd.name===tfilter))
+    &&(ifilter==='all'||(ifilter==='inj'?(t.inj&&t.inj.length):!(t.inj&&t.inj.length))));
   renderStats(rows);
-  [...rows].reverse().forEach(t=>{
+  if(sorter==='new')rows=[...rows].reverse();
+  else if(sorter==='gap')rows=[...rows].sort((a,b)=>b.diff-a.diff);
+  else if(sorter==='value')rows=[...rows].sort((a,b)=>sideTotal(b)-sideTotal(a));
+  else if(sorter==='points')rows=[...rows].sort((a,b)=>sidePts(b)-sidePts(a));
+  rows.forEach(t=>{
     const card=$('article','trade');
     const th=$('div','trade-head');
     th.appendChild($('span','chip wk',t.s+' · WK '+t.wk));
     th.appendChild($('span','chip even',t.type==='picks'?'PICK DEAL':'PLAYER DEAL'));
+    if(t.inj&&t.inj.length){
+      const ic=$('span','chip inj','🚑 LIKELY INJURY-AFFECTED');
+      ic.title=t.inj.join(', ');
+      th.appendChild(ic);
+    }
     if(t.loser){
       th.appendChild($('span','chip flag','FLEECED: '+t.loser+' (−'+t.diff.toFixed(0)+' value)'));
     }else{
@@ -122,7 +139,7 @@ function render(){
       const g=$('div','gets');
       sd.players.forEach(p=>{
         const pc=$('span','pchip');
-        pc.appendChild(document.createTextNode(p.p));
+        pc.appendChild(document.createTextNode((p.inj?'🚑 ':'')+p.p));
         pc.appendChild($('span','s',p.val.toFixed(0)+' val · '+p.pts.toFixed(0)+' pts'));
         g.appendChild(pc);
       });

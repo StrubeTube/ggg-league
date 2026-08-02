@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <title>GGG Commissioner's Lab</title>
-<link rel="stylesheet" href="ggg.css?v=caa2b602">
+<link rel="stylesheet" href="ggg.css?v=845ba541">
 <nav class="ggg"><div class="in"><span class="logo">GGG</span><a href="index.html" class="">Home</a><a href="history.html" class="">History</a><a href="records.html" class="">Records</a><a href="drafts.html" class="">Drafts</a><a href="trades.html" class="">Trades</a><a href="lab.html" class="labtab on">🧪 Lab</a></div></nav>
 <div class="wrap wide">
   <header class="hero">
@@ -62,6 +62,7 @@
     <div class="dcard c7">
       <div class="dcard-head"><h3 class="cardh">League under these rules</h3></div>
       <div class="filterrow tight" id="seasonPills"></div>
+      <div class="filterrow tight" id="viewPills"></div>
       <div class="chiprow" id="labSummary"></div>
       <div id="labBoard"></div>
       <p class="cardnote" id="labNote"></p>
@@ -82,7 +83,7 @@ const sel=ti=>new Set(kstate.picks[ti]||[]);
 const DEFAULTS={flat:null,preset:'adopted',cap:DATA.defaults.cap,budget:DATA.defaults.budget,
   maxk:DATA.defaults.maxKeep,slot:DATA.defaults.slot,bmode:DATA.defaults.bmode,
   fr:DATA.defaults.fr,kcap:DATA.defaults.kcap||'on',
-  apply:'on',season:'2026',floor:DATA.defaults.floor||0};
+  apply:'on',season:'2026',floor:DATA.defaults.floor||0,view:'all'};
 let S={...DEFAULTS};
 try{const s=JSON.parse(localStorage.getItem('ggg-lab-v2'));if(s)S={...DEFAULTS,...s};}catch(e){}
 const saveS=()=>{try{localStorage.setItem('ggg-lab-v2',JSON.stringify(S));}catch(e){}};
@@ -192,49 +193,103 @@ function render(){
 
   pillGroup('seasonPills',[['2026','2026 projection'],...DATA.replay.map(r=>[r.s,r.s+' replay'])],
     ()=>S.season,k=>S.season=k);
+  pillGroup('viewPills',[['all','Total'],['k','Keepers'],['d','Draft picks']],()=>S.view,k=>S.view=k);
 
   const sum=document.getElementById('labSummary');sum.textContent='';
   const board=document.getElementById('labBoard');board.textContent='';
   const note=document.getElementById('labNote');
 
+  function brow(name,kchip,segs,scale,lines,valTxt,bad,sub){
+    const r=$('div','cbrow');
+    const nm=$('div','cbname');
+    nm.appendChild($('span','cbteam',name));
+    if(kchip!=null)nm.appendChild($('span','chip mini',kchip));
+    r.appendChild(nm);
+    const tr=$('div','cbtrack');
+    let x=0;
+    segs.forEach(([cls,v])=>{if(v<=0)return;const sg=$('div','cbseg '+cls);
+      sg.style.left=(x/scale*100)+'%';sg.style.width=(Math.min(v,scale-x)/scale*100)+'%';
+      tr.appendChild(sg);x+=v;});
+    lines.forEach(([cls,v])=>{if(v==null||!isFinite(v))return;const l=$('div',cls);
+      l.style.left=(v/scale*100)+'%';tr.appendChild(l);});
+    r.appendChild(tr);
+    const val=$('div','cbval');
+    val.appendChild($('b',bad?'bad':'',valTxt));
+    if(sub)val.appendChild($('span','mut small',sub));
+    r.appendChild(val);
+    return r;
+  }
+
   if(S.season==='2026'){
-    note.textContent='Bars: solid = keeper salary, faded = draft-pick salary. Dashed red line = team cap. Uses keeper picks saved on this device — set them on the Home page.';
-    const rows=DATA.teams.map((tm,ti)=>({name:tm.name,ev:evalLab(ti,table)})).sort((a,b)=>b.ev.opening-a.ev.opening);
-    const overCap=rows.filter(r=>r.ev.opening>capVal()).length;
-    const overB=rows.filter(r=>r.ev.overBudget).length;
-    [[overCap?'fire':'even',overCap+' team'+(overCap===1?'':'s')+' in cap jail'],
-     [overB?'fire':'even',overB+' over budget'],
-     ['even','avg opening $'+Math.round(rows.reduce((a,r)=>a+r.ev.opening,0)/rows.length)]]
-      .forEach(([cls,txt])=>sum.appendChild($('span','chip '+cls,txt)));
-    const scale=Math.max(280,S.cap+40);
-    rows.forEach(r=>{
-      const row=$('div','cbrow');
-      const nm=$('div','cbname');
-      nm.appendChild($('span','cbteam',r.name));
-      nm.appendChild($('span','chip mini',r.ev.k+' K'));
-      if(r.ev.overBudget)nm.appendChild($('span','chip fire','BUDGET'));
-      row.appendChild(nm);
-      const track=$('div','cbtrack');
-      let x=0;
-      [['k',r.ev.capKeep],['d',r.ev.capDraft]].forEach(([cls,v])=>{
-        if(v<=0)return;
-        const seg=$('div','cbseg '+cls);
-        seg.style.left=(x/scale*100)+'%';seg.style.width=(Math.min(v,scale-x)/scale*100)+'%';
-        track.appendChild(seg);x+=v;
-      });
-      if(capOn()){const cap=$('div','cbcap');cap.style.left=(S.cap/scale*100)+'%';track.appendChild(cap);}
-      row.appendChild(track);
-      const val=$('div','cbval');
-      val.appendChild($('b',r.ev.opening>capVal()?'bad':'','$'+r.ev.opening));
-      val.appendChild($('span','mut small','budget $'+r.ev.budgetSpend+(budgetOn()?('/$'+S.budget):' (no budget)')));
-      row.appendChild(val);
-      board.appendChild(row);
-    });
+    const rows=DATA.teams.map((tm,ti)=>({name:tm.name,ev:evalLab(ti,table)}));
+    if(S.view==='k'){
+      note.textContent='Keeper salaries per team from the keeps selected on this device. Gold line = keeper budget.';
+      rows.sort((a,b)=>b.ev.keepSpend-a.ev.keepSpend);
+      const overB=rows.filter(r=>r.ev.overBudget).length;
+      [[overB?'fire':'even',overB+' over budget'],
+       ['even',rows.reduce((a,r)=>a+r.ev.k,0)+' keepers selected league-wide'],
+       ['even',budgetOn()?('budget $'+S.budget):'no budget set']]
+        .forEach(([c2,t2])=>sum.appendChild($('span','chip '+c2,t2)));
+      const scale=Math.max(60,(budgetOn()?S.budget:45)+20,...rows.map(r=>r.ev.keepSpend+5));
+      rows.forEach(r=>board.appendChild(brow(r.name,r.ev.k+' K',[['k',r.ev.keepSpend]],scale,
+        [['cbfloor',budgetOn()?S.budget:null]],'$'+r.ev.keepSpend,r.ev.overBudget,
+        budgetOn()&&r.ev.keepSpend?(Math.round(r.ev.budgetSpend/S.budget*100)+'% of budget'):'')));
+    }else if(S.view==='d'){
+      note.textContent='Draft-pick salary each team carries into 2026 from the picks they hold.';
+      rows.sort((a,b)=>b.ev.capDraft-a.ev.capDraft);
+      sum.appendChild($('span','chip even','avg draft spend $'+Math.round(rows.reduce((a,r)=>a+r.ev.capDraft,0)/rows.length)));
+      const scale=Math.max(280,capOn()?S.cap+40:0);
+      rows.forEach(r=>board.appendChild(brow(r.name,null,[['d',r.ev.capDraft]],scale,
+        [['cbcap',capOn()?S.cap:null]],'$'+r.ev.capDraft,capOn()&&r.ev.capDraft>S.cap,'')));
+    }else{
+      note.textContent='Bars: solid = keeper salary, faded = draft-pick salary. Red line = cap, gold = floor. Uses keeper picks saved on this device — set them on the Home page.';
+      rows.sort((a,b)=>b.ev.opening-a.ev.opening);
+      const overCap=rows.filter(r=>r.ev.opening>capVal()).length;
+      const overB=rows.filter(r=>r.ev.overBudget).length;
+      [[overCap?'fire':'even',overCap+' team'+(overCap===1?'':'s')+' in cap jail'],
+       [overB?'fire':'even',overB+' over budget'],
+       ['even','avg opening $'+Math.round(rows.reduce((a,r)=>a+r.ev.opening,0)/rows.length)]]
+        .forEach(([c2,t2])=>sum.appendChild($('span','chip '+c2,t2)));
+      const scale=Math.max(280,capOn()?S.cap+40:0);
+      rows.forEach(r=>board.appendChild(brow(r.name,r.ev.k+' K',
+        [['k',r.ev.capKeep],['d',r.ev.capDraft]],scale,
+        [['cbcap',capOn()?S.cap:null],['cbfloor',S.floor>0?S.floor:null]],
+        '$'+r.ev.opening,r.ev.opening>capVal(),
+        'budget $'+r.ev.budgetSpend+(budgetOn()?('/$'+S.budget):' (no budget)'))));
+    }
   }else{
-    note.textContent='Historical replay: that season’s real draft priced by your table, every real transaction re-run under your cap. Keeper-flagged picks go $0 for their original team when keepers are exempt, and re-attach at full salary when traded. Budget, count, slotting, and franchise dials shape only the 2026 projection.';
     const sn=DATA.replay.find(r=>r.s===S.season);
-    const sim=simSeason(sn,table,capVal(),S.kcap==='off',S.floor);
-    renderRetro(sim,capVal(),sum,board);
+    if(S.view==='k'){
+      note.textContent='That season’s actual keeper classes priced by your table. Gold line = keeper budget — who would have been over it back then.';
+      const teams=sn.teams.map(t=>{
+        let ksum=0,n=0;
+        sn.draft.forEach(d2=>{if(d2.rid===t.rid&&d2.k){ksum+=table[d2.r];n++;}});
+        return {name:t.name,ksum,n};
+      }).sort((a,b)=>b.ksum-a.ksum);
+      const overB=budgetOn()?teams.filter(t=>t.ksum>S.budget).length:0;
+      [[overB?'fire':'even',budgetOn()?(overB+' would have been over budget'):'no budget set'],
+       ['even',teams.reduce((a,t)=>a+t.n,0)+' keepers that year']]
+        .forEach(([c2,t2])=>sum.appendChild($('span','chip '+c2,t2)));
+      const scale=Math.max(60,(budgetOn()?S.budget:45)+20,...teams.map(t=>t.ksum+5));
+      teams.forEach(t=>board.appendChild(brow(t.name,t.n+' K',[['k',t.ksum]],scale,
+        [['cbfloor',budgetOn()?S.budget:null]],'$'+t.ksum,budgetOn()&&t.ksum>S.budget,
+        budgetOn()?(Math.round(t.ksum/S.budget*100)+'% of budget'):'')));
+    }else if(S.view==='d'){
+      note.textContent='Non-keeper draft salary per team that season, priced by your table.';
+      const teams=sn.teams.map(t=>{
+        let dsum=0;
+        sn.draft.forEach(d2=>{if(d2.rid===t.rid&&!d2.k)dsum+=table[d2.r];});
+        return {name:t.name,dsum};
+      }).sort((a,b)=>b.dsum-a.dsum);
+      sum.appendChild($('span','chip even','avg draft spend $'+Math.round(teams.reduce((a,t)=>a+t.dsum,0)/teams.length)));
+      const scale=Math.max(280,capOn()?S.cap+40:0);
+      teams.forEach(t=>board.appendChild(brow(t.name,null,[['d',t.dsum]],scale,
+        [['cbcap',capOn()?S.cap:null]],'$'+t.dsum,false,'')));
+    }else{
+      note.textContent='Historical replay: that season’s real draft priced by your table, every real transaction re-run under your cap band. Keeper-flagged picks honor the exempt toggle and re-attach at full salary when traded.';
+      const sim=simSeason(sn,table,capVal(),S.kcap==='off',S.floor);
+      renderRetro(sim,capVal(),sum,board);
+    }
   }
 }
 
@@ -299,6 +354,7 @@ function renderRetro(sim,cap,sum,board){
     const seg=$('div','cbseg d');seg.style.left='0';seg.style.width=(Math.min(o.open,scale)/scale*100)+'%';
     track.appendChild(seg);
     if(isFinite(cap)){const cl=$('div','cbcap');cl.style.left=(cap/scale*100)+'%';track.appendChild(cl);}
+    if(S.floor>0&&S.floor<scale){const fl=$('div','cbfloor');fl.style.left=(S.floor/scale*100)+'%';track.appendChild(fl);}
     row.appendChild(track);
     const val=$('div','cbval');
     val.appendChild($('b',o.open>cap?'bad':'','$'+Math.round(o.open)));

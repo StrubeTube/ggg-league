@@ -342,13 +342,18 @@ for s in SEASONS:
                     p_val = max(0.0, ros - repl.get((s, ppos(pid)), 0) * remain_frac)
                     a_val = 0.0
                     rnd = draft_round_by.get((s, str(pid)))
+                    season_pts = player_season_pts.get((s, str(pid)), 0)
                     if rnd is not None:
-                        season_pts = player_season_pts.get((s, str(pid)), 0)
                         a_val = 0.3 * max(0.0, season_pts - med[rnd])
+                    pre = season_pts - ros
+                    # injury heuristic: produced before the trade then vanished after,
+                    # or an early-round pick with almost nothing before a mid-season trade
+                    inj = (pre >= 60 and ros <= 15) or \
+                          (rnd is not None and rnd <= 6 and wk >= 5 and pre <= 30)
                     P += p_val
                     A += a_val
                     players.append({"p": pname(pid), "pts": round(ros, 1),
-                                    "val": round(p_val + a_val, 1)})
+                                    "val": round(p_val + a_val, 1), "inj": bool(inj)})
                 for dp in t.get("draft_picks") or []:
                     if dp["owner_id"] != rid:
                         continue
@@ -364,9 +369,11 @@ for s in SEASONS:
                 loser = None
                 if abs(diff) >= 50:
                     loser = sides[0]["name"] if diff < 0 else sides[1]["name"]
+                inj_names = [p["p"] for sd in sides for p in sd["players"] if p.get("inj")]
                 trades_out.append({"s": s, "wk": wk,
                                    "type": "picks" if any(sd["picks"] for sd in sides) else "players",
-                                   "sides": sides, "diff": round(abs(diff), 1), "loser": loser})
+                                   "sides": sides, "diff": round(abs(diff), 1), "loser": loser,
+                                   "inj": inj_names})
 trades_out.sort(key=lambda x: (x["s"], x["wk"]))
 
 # fleece tallies + draft resume onto career rows
