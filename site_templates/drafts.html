@@ -13,13 +13,19 @@ __NAV__
   <section>
     <div class="sec-head"><div class="eyebrow">The pantheon</div><h2 id="stealsTitle"></h2>
     <p class="sec-note" id="stealsNote"></p></div>
-    <div class="card" id="steals"></div>
+    <div class="duo-cards">
+      <div class="card"><h3 class="cardh">🎯 Drafted — found on draft night</h3><div id="stealsN"></div></div>
+      <div class="card"><h3 class="cardh">🔁 Kept — bargain keeps that hit</h3><div id="stealsK"></div></div>
+    </div>
   </section>
 
   <section>
     <div class="sec-head"><div class="eyebrow">The graveyard</div><h2 id="bustsTitle"></h2>
     <p class="sec-note" id="bustsNote"></p></div>
-    <div class="card" id="busts"></div>
+    <div class="duo-cards">
+      <div class="card"><h3 class="cardh">🎯 Drafted — the reaches</h3><div id="bustsN"></div></div>
+      <div class="card"><h3 class="cardh">🔁 Kept — keeps that flopped</h3><div id="bustsK"></div></div>
+    </div>
   </section>
 
   <section>
@@ -66,17 +72,17 @@ function render(){
   const mine = tf==='all' ? null : allRows.filter(r=>r.by===tf);
 
   document.getElementById('stealsTitle').textContent = tf==='all' ? '💎 Greatest steals in league history' : '💎 Best picks — ' + tf;
-  document.getElementById('stealsNote').textContent = tf==='all' ? 'Round 6 or later only — where legends are made.' : 'Round 6 or later, ranked by value over round expectation.';
+  document.getElementById('stealsNote').textContent = 'Round 6 or later only, ranked by value over round expectation — split by how the player arrived: drafted fresh, or kept at a bargain slot.';
   document.getElementById('bustsTitle').textContent = tf==='all' ? '🪦 Biggest busts in league history' : '🪦 Worst picks — ' + tf;
-  document.getElementById('bustsNote').textContent = tf==='all' ? 'First two rounds only, keepers excluded. Someone said these names out loud with confidence.' : 'Rounds 1–4, keepers excluded. We all saw you reach.';
+  document.getElementById('bustsNote').textContent = 'Draft side: early rounds only — someone said these names out loud with confidence. Keeper side: any keep that fell short of its slot.';
 
-  if(tf==='all'){
-    bigList('steals', DATA.drafts.steals, 'good');
-    bigList('busts', DATA.drafts.busts, 'bad');
-  }else{
-    bigList('steals', mine.filter(r=>r.round>=6).sort((a,b)=>b.voe-a.voe).slice(0,10), 'good');
-    bigList('busts', mine.filter(r=>r.round<=4&&!r.keeper).sort((a,b)=>a.voe-b.voe).slice(0,10), 'bad');
-  }
+  const pool = tf==='all' ? allRows : mine;
+  const lim = tf==='all' ? 12 : 8;
+  const bustR = tf==='all' ? 2 : 4;
+  bigList('stealsN', pool.filter(r=>r.round>=6&&!r.keeper).sort((a,b)=>b.voe-a.voe).slice(0,lim), 'good');
+  bigList('stealsK', pool.filter(r=>r.round>=6&&r.keeper).sort((a,b)=>b.voe-a.voe).slice(0,lim), 'good');
+  bigList('bustsN', pool.filter(r=>r.round<=bustR&&!r.keeper).sort((a,b)=>a.voe-b.voe).slice(0,lim), 'bad');
+  bigList('bustsK', pool.filter(r=>r.keeper&&r.voe<0).sort((a,b)=>a.voe-b.voe).slice(0,lim), 'bad');
 
   document.getElementById('boardsTitle').textContent = tf==='all' ? 'Every draft, every pick' : 'Every ' + tf + ' pick, every year';
   const host = document.getElementById('boards');

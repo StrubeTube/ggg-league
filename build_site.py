@@ -260,6 +260,9 @@ nav.ggg a.labtab.on{background:var(--card);color:var(--gold)}
 .chip.ok{color:var(--mint);border:1px solid var(--mint);letter-spacing:.04em}
 .chip.inj{color:var(--gold);border:1px dashed var(--gold);letter-spacing:.04em}
 .cbfloor{position:absolute;top:0;bottom:0;width:0;border-left:2px dashed var(--gold);opacity:.8}
+.cbrange{position:absolute;top:6px;height:4px;background:var(--gold);opacity:.6;border-radius:2px;pointer-events:none}
+.cbtick{position:absolute;top:1px;bottom:1px;width:3px;background:var(--mint);border-radius:2px}
+.cbtick.bad{background:var(--coral)}
 .rtrade{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:12px}
 .rtrade.rblocked{border-color:var(--coral)}
 .rtrade .trade-head{margin-bottom:6px}
@@ -289,7 +292,7 @@ FOOT = ('<footer class="ggg"><div class="in">GGG League · data from the Sleeper
         'grudges update automatically</div></footer>')
 
 # ---------------- keeper-planner team data (same order/sort as cap-planner) ----------------
-CFG = {"cap": 220, "floor": 135, "budget": 45, "maxKeep": 5, "waiver": 0,
+CFG = {"cap": 230, "floor": 150, "budget": 45, "maxKeep": 5, "waiver": 0,
        "franchise": True, "kcap": "on",
        "table": {1: 30, 2: 26, 3: 22, 4: 19, 5: 16, 6: 14, 7: 12, 8: 10,
                  9: 8, 10: 7, 11: 6, 12: 5, 13: 4, 14: 3, 15: 2, 16: 2}}
@@ -449,7 +452,10 @@ slices = {
     "drafts.html": {"drafts": site["drafts"]},
     "trades.html": {"trades": site["trades"], "pickValues": site["pick_values"]},
     "lab.html": {"teams": planner_teams(), "steep": STEEP_TABLE, "adopted": CFG["table"],
-                 "defaults": {"cap": 220, "floor": 135, "budget": 0, "maxKeep": 3,
+                 # cap/floor optimized over the 2020-25 replays: $230/$150 blocks all 15
+                 # tagged fire sales at the minimum normal-trade collateral (11/41);
+                 # the cap never binds above $230, the floor does the blocking.
+                 "defaults": {"cap": 230, "floor": 150, "budget": 0, "maxKeep": 3,
                               "kcap": "on", "slot": "round", "bmode": "guaranteed3", "fr": "off"},
                  "replay": build_replay()},
 }

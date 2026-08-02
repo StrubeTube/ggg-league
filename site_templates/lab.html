@@ -6,7 +6,7 @@ __NAV__
   <header class="hero">
     <div class="eyebrow">GGG League &middot; Commissioner's Lab &middot; not league policy</div>
     <h1>The rule simulator</h1>
-    <p class="lede">Every slider recomputes all ten teams instantly, using the keeper selections saved on this device. Defaults are the minimal fire-sale fix — salaries, a cap, and a floor on top of the keeper league you already know. <b>Gold boxes mark what's net new versus the old rules</b> — flip a control back to the old way and its box disappears. Settings save locally.</p>
+    <p class="lede">Every slider recomputes all ten teams instantly, using the keeper selections saved on this device. Defaults are the minimal fire-sale fix — salaries, a cap, and a floor on top of the keeper league you already know. The default lines ($230 cap / $150 floor) are fitted to history: the pair that blocks every tagged fire sale since 2020 while blocking the fewest normal trades. <b>Gold boxes mark what's net new versus the old rules</b> — flip a control back to the old way and its box disappears. Settings save locally.</p>
   </header>
 
   <div class="dash" style="margin-top:22px">
@@ -85,8 +85,8 @@ const DEFAULTS={flat:null,preset:'adopted',cap:DATA.defaults.cap,budget:DATA.def
   fr:DATA.defaults.fr,kcap:DATA.defaults.kcap||'on',
   apply:'on',season:'2026',floor:DATA.defaults.floor||0,view:'all'};
 let S={...DEFAULTS};
-try{const s=JSON.parse(localStorage.getItem('ggg-lab-v2'));if(s)S={...DEFAULTS,...s};}catch(e){}
-const saveS=()=>{try{localStorage.setItem('ggg-lab-v2',JSON.stringify(S));}catch(e){}};
+try{const s=JSON.parse(localStorage.getItem('ggg-lab-v3'));if(s)S={...DEFAULTS,...s};}catch(e){}
+const saveS=()=>{try{localStorage.setItem('ggg-lab-v3',JSON.stringify(S));}catch(e){}};
 const capOn=()=>S.cap>=180, budgetOn=()=>S.budget>0;
 const capVal=()=>capOn()?S.cap:Infinity;
 
@@ -286,7 +286,7 @@ function render(){
       teams.forEach(t=>board.appendChild(brow(t.name,null,[['d',t.dsum]],scale,
         [['cbcap',capOn()?S.cap:null]],'$'+t.dsum,false,'')));
     }else{
-      note.textContent='Historical replay: that season’s real draft priced by your table, every real transaction re-run under your cap band. Keeper-flagged picks honor the exempt toggle and re-attach at full salary when traded.';
+      note.textContent='Historical replay: that season’s real draft priced by your table, every real transaction re-run under your cap band. Bar = draft-day salary; gold band = the team’s trading range that season (low → peak); tick = where their last trade landed them, red when outside the lines. Keeper-flagged picks honor the exempt toggle and re-attach at full salary when traded.';
       const sim=simSeason(sn,table,capVal(),S.kcap==='off',S.floor);
       renderRetro(sim,capVal(),sum,board);
     }
@@ -299,8 +299,7 @@ function simSeason(sn,table,cap,kcapOff,floor){
   const nameOf={};sn.teams.forEach(t=>nameOf[t.rid]=t.name);
   sn.draft.forEach(d=>{if(cur[d.rid])cur[d.rid][d.pid]={s:table[d.r],k:d.k,home:d.rid};});
   const tot=rid=>Object.values(cur[rid]).reduce((a,p)=>a+((kcapOff&&p.k&&p.home===rid)?0:p.s),0);
-  const openings=sn.teams.map(t=>({name:t.name,open:tot(t.rid)}));
-  const peak={};sn.teams.forEach(t=>peak[t.rid]=tot(t.rid));
+  const traj={};sn.teams.forEach(t=>{const v=tot(t.rid);traj[t.rid]={open:v,peak:v,low:v,land:v,n:0};});
   const trades=[];
   sn.events.forEach(ev=>{
     if(ev.t===0){
@@ -325,7 +324,8 @@ function simSeason(sn,table,cap,kcapOff,floor){
     let blocked=false;
     const srows=rids.map(rid=>{
       const after=tot(rid);
-      peak[rid]=Math.max(peak[rid]||0,after);
+      const tj=traj[rid];
+      if(tj){tj.n++;tj.land=after;if(after>tj.peak)tj.peak=after;if(after<tj.low)tj.low=after;}
       const over=(after>cap&&after>before[rid])||(floor&&after<floor&&after<before[rid]);
       if(over)blocked=true;
       return {name:nameOf[rid],before:before[rid],after,over,
@@ -333,32 +333,58 @@ function simSeason(sn,table,cap,kcapOff,floor){
     });
     trades.push({w:ev.w,f:ev.f,blocked,sides:srows});
   });
-  const peakByName={};sn.teams.forEach(t=>peakByName[t.name]=Math.round(peak[t.rid]));
-  return {openings,peakByName,trades};
+  const teams=sn.teams.map(t=>{const tj=traj[t.rid];
+    return {name:t.name,open:tj.open,peak:Math.round(tj.peak),low:Math.round(tj.low),
+            land:Math.round(tj.land),n:tj.n};});
+  return {teams,trades};
 }
 
 function renderRetro(sim,cap,sum,board){
-  const overOpen=sim.openings.filter(o=>o.open>cap);
+  const overOpen=sim.teams.filter(o=>o.open>cap);
   const fires=sim.trades.filter(t=>t.f);
   const blockedN=sim.trades.filter(t=>t.blocked).length;
+  const peaked=sim.teams.filter(o=>o.n&&o.peak>cap).length;
+  const sank=S.floor>0?sim.teams.filter(o=>o.n&&o.low<S.floor).length:0;
   [[overOpen.length?'fire':'even',overOpen.length+' team'+(overOpen.length===1?'':'s')+' open over the cap'],
+   [peaked?'fire':'even',peaked+' traded over the cap'],
+   [sank?'fire':'even',S.floor>0?(sank+' traded below the floor'):'no floor set'],
    [blockedN?'fire':'even',blockedN+' of '+sim.trades.length+' trades blocked'],
    [fires.length?'fire':'even',fires.filter(t=>t.blocked).length+' of '+fires.length+' fire sales blocked']]
     .forEach(([cls,txt])=>sum.appendChild($('span','chip '+cls,txt)));
 
-  const scale=Math.max(280,isFinite(cap)?cap+50:0,...sim.openings.map(o=>o.open+10));
-  [...sim.openings].sort((a,b)=>b.open-a.open).forEach(o=>{
+  const scale=Math.max(280,isFinite(cap)?cap+50:0,...sim.teams.map(o=>Math.max(o.open,o.peak)+10));
+  [...sim.teams].sort((a,b)=>b.open-a.open).forEach(o=>{
     const row=$('div','cbrow');
     const nm=$('div','cbname');nm.appendChild($('span','cbteam',o.name));row.appendChild(nm);
     const track=$('div','cbtrack');
     const seg=$('div','cbseg d');seg.style.left='0';seg.style.width=(Math.min(o.open,scale)/scale*100)+'%';
     track.appendChild(seg);
+    if(o.n){
+      const lo=Math.min(o.low,o.open),hi=Math.max(o.peak,o.open);
+      const band=$('div','cbrange');band.style.left=(lo/scale*100)+'%';
+      band.style.width=(Math.max(hi-lo,2)/scale*100)+'%';track.appendChild(band);
+      const tick=$('div','cbtick'+((o.land>cap)||(S.floor>0&&o.land<S.floor)?' bad':''));
+      tick.style.left=(o.land/scale*100)+'%';tick.title='landed $'+o.land;track.appendChild(tick);
+    }
     if(isFinite(cap)){const cl=$('div','cbcap');cl.style.left=(cap/scale*100)+'%';track.appendChild(cl);}
     if(S.floor>0&&S.floor<scale){const fl=$('div','cbfloor');fl.style.left=(S.floor/scale*100)+'%';track.appendChild(fl);}
     row.appendChild(track);
     const val=$('div','cbval');
-    val.appendChild($('b',o.open>cap?'bad':'','$'+Math.round(o.open)));
-    val.appendChild($('span','mut small','peak $'+sim.peakByName[o.name]));
+    val.appendChild($('b',o.open>cap?'bad':'','open $'+Math.round(o.open)));
+    const sub=$('span','mut small');
+    if(o.n){
+      sub.appendChild(document.createTextNode('landed '));
+      sub.appendChild($('b',(o.land>cap)||(S.floor>0&&o.land<S.floor)?'bad':'','$'+o.land));
+      sub.appendChild(document.createTextNode(' · peak '));
+      sub.appendChild($('b',o.peak>cap?'bad':'','$'+o.peak));
+      if(S.floor>0&&o.low<S.floor&&o.low!==o.land){
+        sub.appendChild(document.createTextNode(' · low '));
+        sub.appendChild($('b','bad','$'+o.low));
+      }
+    }else{
+      sub.appendChild(document.createTextNode('no trades'));
+    }
+    val.appendChild(sub);
     row.appendChild(val);
     board.appendChild(row);
   });
