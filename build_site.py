@@ -263,6 +263,21 @@ nav.ggg a.labtab.on{background:var(--card);color:var(--gold)}
 .cbrange{position:absolute;top:6px;height:4px;background:var(--gold);opacity:.6;border-radius:2px;pointer-events:none}
 .cbtick{position:absolute;top:1px;bottom:1px;width:3px;background:var(--mint);border-radius:2px}
 .cbtick.bad{background:var(--coral)}
+.newpop{position:fixed;left:16px;top:64px;z-index:60;background:linear-gradient(180deg,var(--card),var(--card2));
+border:1px dashed var(--gold);border-radius:12px;padding:10px 34px 10px 14px;
+box-shadow:0 10px 26px rgba(0,0,0,.35);max-width:255px;animation:npin .5s ease .7s backwards}
+.newpop a{text-decoration:none;display:grid;gap:2px}
+.newpop .npeyebrow{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.newpop .npmain{font-size:13px;font-weight:800;color:var(--ink);line-height:1.3}
+.newpop .npx{position:absolute;top:3px;right:5px;background:none;border:none;color:var(--ink3);font-size:16px;cursor:pointer;font-family:inherit;padding:2px 5px}
+.newpop .npx:hover{color:var(--ink)}
+@keyframes npin{from{transform:translateX(-130%);opacity:0}}
+@media(max-width:680px){.newpop{top:auto;bottom:16px;left:12px;right:12px;max-width:none;animation-name:npup}
+@keyframes npup{from{transform:translateY(130%);opacity:0}}}
+.bigsteps{counter-reset:s;list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.bigsteps li{counter-increment:s;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px 14px 56px;position:relative;font-size:14px}
+.bigsteps li::before{content:counter(s);position:absolute;left:16px;top:13px;width:26px;height:26px;border-radius:50%;
+background:var(--mint);color:var(--mint-ink);font-weight:800;display:grid;place-items:center;font-size:14px}
 .rtrade{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:12px}
 .rtrade.rblocked{border-color:var(--coral)}
 .rtrade .trade-head{margin-bottom:6px}
@@ -290,6 +305,16 @@ def nav(active):
 FOOT = ('<footer class="ggg"><div class="in">GGG League · data from the Sleeper API · '
         f'stats computed {site["generated"]} · regular-season records unless noted · '
         'grudges update automatically</div></footer>')
+
+# floating top-left pop-up pointing at the pitch page (every page except the pitch itself)
+POPUP = """<div class="newpop" id="newpop" hidden>
+<button class="npx" id="npx" type="button" aria-label="dismiss">×</button>
+<a href="pitch.html"><span class="npeyebrow">🧨 New for 2026</span>
+<span class="npmain">The Cap Keeper format — read the pitch →</span></a></div>
+<script>(function(){var k='ggg-pitch-pop-v1';try{if(!localStorage.getItem(k)){
+var n=document.getElementById('newpop');n.hidden=false;
+document.getElementById('npx').addEventListener('click',function(){n.hidden=true;
+try{localStorage.setItem(k,'1')}catch(_){}});}}catch(e){}})();</script>"""
 
 # ---------------- keeper-planner team data (same order/sort as cap-planner) ----------------
 CFG = {"cap": 230, "floor": 160, "budget": 45, "maxKeep": 5, "waiver": 0,
@@ -479,12 +504,15 @@ slices = {
                  "defaults": {"cap": 230, "floor": 160, "budget": 0, "maxKeep": 3,
                               "kcap": "on", "slot": "round", "bmode": "guaranteed3", "fr": "off"},
                  "replay": build_replay()},
+    "pitch.html": {"cfg": {"cap": CFG["cap"], "floor": CFG["floor"], "table": CFG["table"]}},
 }
 
 for page, data in slices.items():
     with open(os.path.join(TPL, page), encoding="utf-8") as f:
         html = f.read()
     html = html.replace("__NAV__", nav(page)).replace("__FOOT__", FOOT)
+    if page != "pitch.html":
+        html = html.replace("</nav>", "</nav>" + POPUP, 1)
     html = html.replace('href="ggg.css"', f'href="ggg.css?v={css_v}"')
     html = html.replace("/*__DATA__*/{}", json.dumps(data, ensure_ascii=False))
     with open(os.path.join(OUT, page), "w", encoding="utf-8") as f:
