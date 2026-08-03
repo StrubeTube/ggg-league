@@ -240,13 +240,14 @@ nav.ggg a.labtab.on{background:var(--card);color:var(--gold)}
 .cbrange{position:absolute;top:6px;height:4px;background:var(--gold);opacity:.6;border-radius:2px;pointer-events:none}
 .cbtick{position:absolute;top:1px;bottom:1px;width:3px;background:var(--mint);border-radius:2px}
 .cbtick.bad{background:var(--coral)}
-.newpop{position:fixed;left:16px;top:64px;z-index:60;background:linear-gradient(180deg,var(--card),var(--card2));
-border:1px dashed var(--gold);border-radius:12px;padding:10px 34px 10px 14px;
-box-shadow:0 10px 26px rgba(0,0,0,.35);max-width:255px;animation:npin .5s ease .7s backwards}
-.newpop a{text-decoration:none;display:grid;gap:2px}
-.newpop .npeyebrow{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
-.newpop .npmain{font-size:13px;font-weight:800;color:var(--ink);line-height:1.3}
-.newpop .npx{position:absolute;top:3px;right:5px;background:none;border:none;color:var(--ink3);font-size:16px;cursor:pointer;font-family:inherit;padding:2px 5px}
+.newpop{position:fixed;left:18px;top:66px;z-index:60;background:linear-gradient(180deg,var(--card),var(--card2));
+border:2px dashed var(--gold);border-radius:16px;padding:16px 46px 16px 20px;
+box-shadow:0 14px 34px rgba(0,0,0,.45);max-width:360px;animation:npin .5s ease .7s backwards}
+.newpop a{text-decoration:none;display:grid;gap:4px}
+.newpop .npeyebrow{font-size:12px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--gold)}
+.newpop .npmain{font-size:17px;font-weight:800;color:var(--ink);line-height:1.25}
+.newpop .npsub{font-size:12.5px;color:var(--ink2)}
+.newpop .npx{position:absolute;top:6px;right:8px;background:none;border:none;color:var(--ink3);font-size:20px;cursor:pointer;font-family:inherit;padding:2px 6px}
 .newpop .npx:hover{color:var(--ink)}
 @keyframes npin{from{transform:translateX(-130%);opacity:0}}
 @media(max-width:680px){.newpop{top:auto;bottom:16px;left:12px;right:12px;max-width:none;animation-name:npup}
@@ -255,6 +256,13 @@ box-shadow:0 10px 26px rgba(0,0,0,.35);max-width:255px;animation:npin .5s ease .
 .bigsteps li{counter-increment:s;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px 14px 56px;position:relative;font-size:14px}
 .bigsteps li::before{content:counter(s);position:absolute;left:16px;top:13px;width:26px;height:26px;border-radius:50%;
 background:var(--mint);color:var(--mint-ink);font-weight:800;display:grid;place-items:center;font-size:14px}
+.tradebox{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tradep{background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600;color:var(--ink2);cursor:pointer;font-family:inherit;transition:border-color .1s}
+.tradep b{color:var(--ink);font-weight:700}
+.tradep .pp{color:var(--ink3)}
+.tradep:hover{border-color:var(--mint)}
+.tradep.out{border-color:var(--coral);background:var(--coral-soft)}
+.tradep.out b{color:var(--coral)}
 .rtrade{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:12px}
 .rtrade.rblocked{border-color:var(--coral)}
 .rtrade .trade-head{margin-bottom:6px}
