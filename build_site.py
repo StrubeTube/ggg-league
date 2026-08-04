@@ -527,23 +527,25 @@ slices = {
                  # The cap never binds above $230; the floor does the blocking.
                  "defaults": {"cap": 230, "floor": 160, "budget": 0, "maxKeep": 3,
                               "kcap": "on", "slot": "round", "bmode": "guaranteed3", "fr": "off"},
-                 # each preset's cap/floor re-fitted over the 2020-25 replays to block
-                 # 15/16 fire sales. Tail slotting inflates openings ~$20 (keeper slots
-                 # return to the board as real picks), so its band shifts to $220/$170;
-                 # franchise keep is budget-only, so it inherits its base config's lines.
+                 # each preset's cap/floor re-fitted over the 2020-25 replays. Tail
+                 # slotting inflates openings ~$20 (keeper slots return to the board as
+                 # real picks), so its band shifts UP to $250/$170: 14/16 fires at the
+                 # lowest collateral (12/40) with ~0 day-one cap jail (2/60 team-seasons).
+                 # A $220 cap buys the 15th fire but jails ~3 teams/yr at league start —
+                 # rejected. Franchise keep is budget-only: inherits its base's lines.
                  "presets": [
                      {"label": "Default 1: Minimal rules", "cap": 230, "floor": 160,
                       "slot": "round", "fr": "off",
                       "tip": "Round-slot keeping, no franchise. Cap $230 / floor $160 — blocks 15 of 16 fire sales."},
-                     {"label": "Default 2: Keeper slotting", "cap": 220, "floor": 170,
+                     {"label": "Default 2: Keeper slotting", "cap": 250, "floor": 170,
                       "slot": "tail", "fr": "off",
-                      "tip": "Keepers off the board (tail picks). Rosters run ~$20 richer, so the band re-fits to cap $220 / floor $170 — still blocks 15 of 16."},
+                      "tip": "Keepers off the board (tail picks). Rosters run ~$20 richer, so the band shifts up: cap $250 / floor $170 — blocks 14 of 16 with almost nobody opening in cap jail."},
                      {"label": "Default 3: Franchise keep", "cap": 230, "floor": 160,
                       "slot": "round", "fr": "on",
-                      "tip": "One budget-exempt star. Franchise keep never touches roster salary, so the lines stay $230 / $160 — still blocks 15 of 16."},
-                     {"label": "Default 4: Slotting + franchise", "cap": 220, "floor": 170,
+                      "tip": "One budget-exempt star. Franchise keep never touches roster salary, so the lines stay $230 / $160 — blocks 15 of 16."},
+                     {"label": "Default 4: Slotting + franchise", "cap": 250, "floor": 170,
                       "slot": "tail", "fr": "on",
-                      "tip": "Off-board keeping plus a franchise star. Uses the tail-slot band: cap $220 / floor $170 — still blocks 15 of 16."}],
+                      "tip": "Off-board keeping plus a franchise star. Uses the tail-slot band: cap $250 / floor $170 — blocks 14 of 16 with almost nobody opening in cap jail."}],
                  "replay": build_replay()},
     "pitch.html": {"cfg": {"cap": CFG["cap"], "floor": CFG["floor"], "table": CFG["table"]}},
     "analyzer.html": {"teams": planner_teams(), "steep": STEEP_TABLE,
