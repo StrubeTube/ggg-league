@@ -6,12 +6,14 @@ __NAV__
   <header class="hero">
     <div class="eyebrow">GGG League &middot; Commissioner's Lab &middot; not league policy</div>
     <h1>The rule simulator</h1>
-    <p class="lede">Every slider recomputes all ten teams instantly, using the keeper selections saved on this device. Defaults are the minimal fire-sale fix — salaries, a cap, and a floor on top of the keeper league you already know. The default lines ($230 cap / $160 floor) are fitted to history: they block 15 of the 16 tagged fire sales since 2020 at the least damage to normal trading — the one escapee sold a $10 keeper star for a pile of bodies, which no salary rule can see. <b>Gold boxes mark what's net new versus the old rules</b> — flip a control back to the old way and its box disappears. Settings save locally.</p>
+    <p class="lede">Every slider recomputes all ten teams instantly, using the keeper selections saved on this device. Defaults are the minimal fire-sale fix — salaries, a cap, and a floor on top of the keeper league you already know. Four tuned defaults sit above the sliders — minimal rules, keeper slotting, franchise keep, or both — each with its cap and floor re-fitted to six years of history to block 15 of the 16 tagged fire sales at the least damage to normal trading. (The one escapee sold a $10 keeper star for a pile of bodies, which no salary rule can see.) <b>Gold boxes mark what's net new versus the old rules</b> — flip a control back to the old way and its box disappears. Settings save locally.</p>
   </header>
 
   <div class="dash" style="margin-top:22px">
     <div class="dcard c5">
-      <div class="dcard-head"><h3 class="cardh">The sliders</h3><button class="resetbtn" id="labReset" type="button">Reset to defaults</button></div>
+      <div class="dcard-head"><h3 class="cardh">The sliders</h3></div>
+      <div class="mlabel">Start from a tuned default — cap &amp; floor re-fitted to history for each</div>
+      <div class="filterrow tight" id="presetRow"></div>
 
       <div class="ctl"><div class="mlabel">Salary table</div>
         <div class="filterrow tight" id="tablePresets"></div>
@@ -148,10 +150,19 @@ sliders.forEach(([id])=>{
     saveS();render();
   });
 });
-document.getElementById('labReset').addEventListener('click',()=>{S={...DEFAULTS};saveS();render();});
-
 function render(){
   const table=currentTable();
+
+  /* the four tuned defaults */
+  const pr=document.getElementById('presetRow');pr.textContent='';
+  DATA.presets.forEach(p=>{
+    const match=S.cap===p.cap&&S.floor===p.floor&&S.slot===p.slot&&S.fr===p.fr
+      &&S.budget===DEFAULTS.budget&&S.maxk===DEFAULTS.maxk&&S.bmode===DEFAULTS.bmode
+      &&S.kcap===DEFAULTS.kcap&&S.preset==='adopted';
+    const b=$('button','tpill sm'+(match?' active':''),p.label);b.type='button';b.title=p.tip;
+    b.addEventListener('click',()=>{S={...DEFAULTS,cap:p.cap,floor:p.floor,slot:p.slot,fr:p.fr};saveS();render();});
+    pr.appendChild(b);
+  });
   pillGroup('tablePresets',[['adopted','Flattened 2026'],['old','Old steep'],['custom','Custom']],
     ()=>S.preset,k=>{S.preset=k;if(k==='custom'&&S.flat===null)S.flat=30;});
   pillGroup('slotMode',[['round','Keepers take their round’s pick'],['tail','Off the board — tail picks']],
@@ -286,7 +297,8 @@ function render(){
       teams.forEach(t=>board.appendChild(brow(t.name,null,[['d',t.dsum]],scale,
         [['cbcap',capOn()?S.cap:null]],'$'+t.dsum,false,'')));
     }else{
-      note.textContent='Historical replay: that season’s real draft priced by your table, every real transaction re-run under your cap band. Bar = draft-day salary; gold band = the team’s trading range that season (low → peak); tick = where their last trade landed them, red when outside the lines. Keeper-flagged picks honor the exempt toggle and re-attach at full salary when traded.';
+      note.textContent='Historical replay: that season’s real draft priced by your table, every real transaction re-run under your cap band. Bar = draft-day salary; gold band = the team’s trading range that season (low → peak); tick = where their last trade landed them, red when outside the lines. Keeper-flagged picks honor the exempt toggle and re-attach at full salary when traded.'
+        +(S.slot==='tail'?' Off-board keeping modeled: each keeper’s vacated round returns to the board as a drafted player and the burned tail picks come off — rosters run richer.':'');
       const sim=simSeason(sn,table,capVal(),S.kcap==='off',S.floor);
       renderRetro(sim,capVal(),sum,board);
     }
@@ -298,6 +310,16 @@ function simSeason(sn,table,cap,kcapOff,floor){
   const cur={};sn.teams.forEach(t=>cur[t.rid]={});
   const nameOf={};sn.teams.forEach(t=>nameOf[t.rid]=t.name);
   sn.draft.forEach(d=>{if(cur[d.rid])cur[d.rid][d.pid]={s:table[d.r],k:d.k,home:d.rid};});
+  if(S.slot==='tail'){
+    /* off-board keeping: each keeper's vacated round returns to the board as a
+       drafted player, and the k cheapest picks burn as tail slots */
+    sn.teams.forEach(t=>{
+      const mine=sn.draft.filter(d=>d.rid===t.rid),ks=mine.filter(d=>d.k);
+      ks.forEach((d,i)=>{cur[t.rid]['ph'+i]={s:table[d.r],k:0,home:-1};});
+      mine.filter(d=>!d.k).sort((a,b)=>table[a.r]-table[b.r]).slice(0,ks.length)
+        .forEach(d=>{delete cur[t.rid][d.pid];});
+    });
+  }
   const tot=rid=>Object.values(cur[rid]).reduce((a,p)=>a+((kcapOff&&p.k&&p.home===rid)?0:p.s),0);
   const traj={};sn.teams.forEach(t=>{const v=tot(t.rid);traj[t.rid]={open:v,peak:v,low:v,land:v,n:0};});
   const trades=[];

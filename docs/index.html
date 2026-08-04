@@ -314,15 +314,22 @@ function renderDash(){
 
   /* --- countdown + vitals (span 3) --- */
   const cd=card(3,'Season countdown');
-  const kick=new Date('2026-09-10T20:20:00-04:00');
-  const days=Math.max(0,Math.ceil((kick-Date.now())/86400000));
-  const bn=$('div','bignum good');bn.appendChild(document.createTextNode(String(days)));
+  /* kickoff Sep 10 · draft 3 days before · keeper deadline 2 weeks before the draft */
+  const EVENTS=[['Keeper deadline',new Date('2026-08-24T23:59:00-04:00')],
+                ['Draft night',new Date('2026-09-07T20:00:00-04:00')],
+                ['NFL kickoff',new Date('2026-09-10T20:20:00-04:00')]];
+  const dTo=d3=>Math.max(0,Math.ceil((d3-Date.now())/86400000));
+  const fmt=d3=>d3.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const nxt=EVENTS.find(([,d3])=>d3>Date.now())||EVENTS[EVENTS.length-1];
+  const bn=$('div','bignum good');bn.appendChild(document.createTextNode(String(dTo(nxt[1]))));
   bn.appendChild($('small',null,' days'));
   cd.appendChild(bn);
-  cd.appendChild($('div','subnum','until NFL kickoff · Sep 10, 2026'));
+  cd.appendChild($('div','subnum','until the '+nxt[0].toLowerCase()+' · '+fmt(nxt[1])));
   cd.appendChild($('div','vitals'));
-  [['Keeper deadline','2 wks before draft'],['League renewal','waiting on Sleeper'],['Record','— starts wk 1'],['Rank','—']]
-    .forEach(([k2,v])=>{const r=$('div','vrow');r.appendChild($('span','mut',k2));r.appendChild($('span',null,v));cd.lastChild.appendChild(r);});
+  EVENTS.forEach(([n2,d3])=>{const r=$('div','vrow');r.appendChild($('span','mut',n2));
+    r.appendChild($('span',n2===nxt[0]?'good':null,fmt(d3)+' · '+dTo(d3)+'d'));cd.lastChild.appendChild(r);});
+  const rr=$('div','vrow');rr.appendChild($('span','mut','League renewal'));
+  rr.appendChild($('span',null,'waiting on Sleeper'));cd.lastChild.appendChild(rr);
   dash.appendChild(cd);
 
   /* --- draft capital (span 3) --- */
