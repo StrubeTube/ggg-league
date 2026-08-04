@@ -160,6 +160,92 @@ function renderIdentity(){
   host.appendChild(band);
 }
 
+function anatomyCard(tm,ev){
+  const c=card(12,'Cap anatomy — where every dollar sits');
+  const chosen=sel(myTeam);
+
+  /* franchise keep, called out above the bar */
+  let frName=null,frCost=0;
+  if(CFG.franchise&&chosen.size){
+    chosen.forEach(pi=>{const p=tm.players[pi];if(p.el&&p.k26>frCost){frCost=p.k26;frName=p.n;}});
+  }
+  if(frName){
+    const row=$('div','chiprow');row.style.margin='6px 0 0';
+    row.appendChild($('span','chip gold','⭐ FRANCHISE KEEP — budget-exempt: '+frName+' ($'+frCost+')'));
+    c.appendChild(row);
+  }
+
+  /* build the cap items: every keeper and every 2026 pick, priced */
+  const items=[];
+  if(SLOT==='round'){
+    const picks16=tm.picks.slice(0,16).map(p=>({type:'pick',r:p.r,from:p.from,cost:TABLE[p.r],name:null}));
+    const ks=[...chosen].map(pi=>tm.players[pi]).filter(p=>p.el).sort((a,b)=>b.k26-a.k26);
+    ks.forEach(p=>{
+      const kr=Math.max(1,p.r-1);   // escalated round = the pick the keeper occupies
+      const it=picks16.find(x=>!x.name&&x.r===kr)
+        ||[...picks16].reverse().find(x=>!x.name&&x.r<=kr)
+        ||picks16.find(x=>!x.name);
+      if(it){it.type='keeper';it.name=p.n;if(KCAP==='off'){it.cost=0;it.exempt=true;}}
+    });
+    items.push(...picks16);
+  }else{
+    [...chosen].map(pi=>tm.players[pi]).filter(p=>p.el).forEach(p=>
+      items.push({type:'keeper',name:p.n,r:p.r,cost:KCAP==='off'?0:p.k26,exempt:KCAP==='off'}));
+    const picks=tm.picks.slice();
+    picks.splice(Math.max(0,picks.length-chosen.size),chosen.size);
+    picks.slice(0,16-chosen.size).forEach(p=>items.push({type:'pick',r:p.r,from:p.from,cost:TABLE[p.r]}));
+  }
+  items.sort((a,b)=>b.cost-a.cost);
+  const frItem=frName?items.find(x=>x.type==='keeper'&&(x.name===frName)):null;
+
+  /* the bar */
+  const scale=Math.max(isFinite(CFG.cap)?CFG.cap+30:0,ev.opening+15,(CFG.floor||0)+40,280);
+  const wrap=$('div','anatwrap');
+  const bar=$('div','anatbar');
+  items.forEach(it=>{
+    if(it.cost<=0)return;
+    const seg=$('div','anatseg '+(it.type==='keeper'?'k':'d')+(it===frItem?' fr':''));
+    seg.style.width=(it.cost/scale*100)+'%';
+    const lab=(it===frItem?'⭐ ':'')+(it.type==='keeper'?it.name:'R'+it.r)+' · $'+it.cost;
+    seg.title=lab+(it.type==='pick'?(' pick'+(it.from?' via '+it.from:'')):' — keeper');
+    if(it.cost/scale>=0.022)seg.appendChild($('span',null,lab));
+    bar.appendChild(seg);
+  });
+  wrap.appendChild(bar);
+  if(isFinite(CFG.cap)){
+    const l=$('div','anatline');l.style.left=(CFG.cap/scale*100)+'%';wrap.appendChild(l);
+    const t=$('div','anattag','CAP $'+CFG.cap);t.style.left=(CFG.cap/scale*100)+'%';wrap.appendChild(t);
+  }
+  if(CFG.floor>0){
+    const l=$('div','anatline floor');l.style.left=(CFG.floor/scale*100)+'%';wrap.appendChild(l);
+    const t=$('div','anattag floor','FLOOR $'+CFG.floor);t.style.left=(CFG.floor/scale*100)+'%';wrap.appendChild(t);
+  }
+  c.appendChild(wrap);
+
+  /* the totals line */
+  const tot=$('div','anattotal');
+  const d2=CFG.cap-ev.opening;
+  tot.appendChild($('b',ev.opening>CFG.cap?'bad':'','Opening cap $'+ev.opening));
+  let txt=isFinite(CFG.cap)?(d2>=0?(' — $'+d2+' under the cap'):(' — $'+(-d2)+' OVER the cap')):' — no cap set';
+  if(CFG.floor>0)txt+=ev.opening>=CFG.floor?(' · $'+(ev.opening-CFG.floor)+' above the floor'):(' · $'+(CFG.floor-ev.opening)+' BELOW the floor');
+  tot.appendChild(document.createTextNode(txt));
+  c.appendChild(tot);
+
+  /* the legend: every item, largest to smallest */
+  const leg=$('div','anatlegend');
+  items.forEach(it=>{
+    const cls=it===frItem?'chip gold':(it.type==='keeper'?'chip mini':'chip even');
+    const lab=(it===frItem?'⭐ ':'')
+      +(it.type==='keeper'?it.name:('R'+it.r+(it.from?' via '+it.from:'')))
+      +(it.exempt?' — exempt':(' $'+it.cost));
+    leg.appendChild($('span',cls,lab));
+  });
+  c.appendChild(leg);
+  c.appendChild($('p','cardnote','Every 2026 cap dollar for '+tm.name+', largest hit first. Solid = keepers, faded = draft picks'
+    +(SLOT==='round'?' — each keeper sits in the round his escalated price occupies.':' — keepers priced at their keep cost, picks by round.')));
+  return c;
+}
+
 function renderDash(){
   const dash=document.getElementById('dash');dash.textContent='';
   if(myTeam<0){
@@ -214,6 +300,9 @@ function renderDash(){
 
   /* --- cap board (span 5) --- */
   dash.appendChild(capBoardCard(5));
+
+  /* --- cap anatomy (span 12): every keeper and pick as its own segment --- */
+  dash.appendChild(anatomyCard(tm,ev));
 
   /* --- countdown + vitals (span 3) --- */
   const cd=card(3,'Season countdown');

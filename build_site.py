@@ -286,6 +286,20 @@ background:var(--mint);color:var(--mint-ink);font-weight:800;display:grid;place-
 .tradep:hover{border-color:var(--mint)}
 .tradep.out{border-color:var(--coral);background:var(--coral-soft)}
 .tradep.out b{color:var(--coral)}
+.dcard.c12{grid-column:span 12}
+.anatwrap{position:relative;margin-top:30px;padding-top:2px}
+.anatbar{position:relative;height:78px;background:var(--card2);border:1px solid var(--line);border-radius:12px;display:flex;overflow:hidden}
+.anatseg{position:relative;height:100%;border-right:1.5px solid var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;min-width:0}
+.anatseg.k{background:var(--mark)}
+.anatseg.d{background:var(--mark);opacity:.38}
+.anatseg.fr{box-shadow:inset 0 0 0 2px var(--gold)}
+.anatseg span{writing-mode:vertical-rl;transform:rotate(180deg);font-size:10.5px;font-weight:600;color:#fff;white-space:nowrap;max-height:72px;overflow:hidden}
+.anatline{position:absolute;top:-8px;bottom:-8px;width:0;border-left:2px dashed var(--coral);z-index:2}
+.anatline.floor{border-color:var(--gold)}
+.anattag{position:absolute;top:-26px;transform:translateX(-50%);font-size:10.5px;font-weight:700;letter-spacing:.05em;color:var(--coral);white-space:nowrap;z-index:2}
+.anattag.floor{color:var(--gold)}
+.anatlegend{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.anattotal{margin-top:12px;font-size:13.5px;font-weight:600}
 .rtrade{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:12px}
 .rtrade.rblocked{border-color:var(--coral)}
 .rtrade .trade-head{margin-bottom:6px}
