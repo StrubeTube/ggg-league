@@ -300,6 +300,13 @@ background:var(--mint);color:var(--mint-ink);font-weight:800;display:grid;place-
 .anattag.floor{color:var(--gold)}
 .anatlegend{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
 .anattotal{margin-top:12px;font-size:13.5px;font-weight:600}
+.cdrows{display:grid;gap:9px;margin-top:6px}
+.cdrow{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.cdrow:last-child{border-bottom:none;padding-bottom:0}
+.cdlab{font-size:12.5px;font-weight:700}
+.cdnum{font-size:26px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.cdnum small{font-size:13px;font-weight:600;color:var(--ink3);margin-left:1px}
+.cdnum.good{color:var(--mint)}
 .rtrade{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:12px}
 .rtrade.rblocked{border-color:var(--coral)}
 .rtrade .trade-head{margin-bottom:6px}

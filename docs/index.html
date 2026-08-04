@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <title>GGG League</title>
-<link rel="stylesheet" href="ggg.css?v=77f64d10">
+<link rel="stylesheet" href="ggg.css?v=421e395a">
 <nav class="ggg"><div class="in"><span class="logo">GGG</span><a href="index.html" class="on">Home</a><a href="history.html" class="">History</a><a href="records.html" class="">Records</a><a href="drafts.html" class="">Drafts</a><a href="trades.html" class="">Trades</a><a href="analyzer.html" class="">Trade Test</a><a href="lab.html" class="labtab">🧪 Lab</a></div></nav><div class="newpop" id="newpop" hidden>
 <button class="npx" id="npx" type="button" aria-label="dismiss">×</button>
 <a href="pitch.html"><span class="npeyebrow">🧨 New for 2026</span>
@@ -314,20 +314,27 @@ function renderDash(){
 
   /* --- countdown + vitals (span 3) --- */
   const cd=card(3,'Season countdown');
-  /* kickoff Sep 10 · draft 3 days before · keeper deadline 2 weeks before the draft */
-  const EVENTS=[['Keeper deadline',new Date('2026-08-24T23:59:00-04:00')],
+  /* kickoff Sep 10 · draft 3 days before · keeper deadline 1 week before the draft */
+  const EVENTS=[['Keeper deadline',new Date('2026-08-31T23:59:00-04:00')],
                 ['Draft night',new Date('2026-09-07T20:00:00-04:00')],
                 ['NFL kickoff',new Date('2026-09-10T20:20:00-04:00')]];
   const dTo=d3=>Math.max(0,Math.ceil((d3-Date.now())/86400000));
   const fmt=d3=>d3.toLocaleDateString('en-US',{month:'short',day:'numeric'});
   const nxt=EVENTS.find(([,d3])=>d3>Date.now())||EVENTS[EVENTS.length-1];
-  const bn=$('div','bignum good');bn.appendChild(document.createTextNode(String(dTo(nxt[1]))));
-  bn.appendChild($('small',null,' days'));
-  cd.appendChild(bn);
-  cd.appendChild($('div','subnum','until the '+nxt[0].toLowerCase()+' · '+fmt(nxt[1])));
+  const rows=$('div','cdrows');
+  EVENTS.forEach(([n2,d3])=>{
+    const r=$('div','cdrow');
+    const left=$('div');
+    left.appendChild($('div','cdlab',n2));
+    left.appendChild($('div','mut small',fmt(d3)));
+    r.appendChild(left);
+    const num=$('div','cdnum'+(n2===nxt[0]?' good':''),String(dTo(d3)));
+    num.appendChild($('small',null,'d'));
+    r.appendChild(num);
+    rows.appendChild(r);
+  });
+  cd.appendChild(rows);
   cd.appendChild($('div','vitals'));
-  EVENTS.forEach(([n2,d3])=>{const r=$('div','vrow');r.appendChild($('span','mut',n2));
-    r.appendChild($('span',n2===nxt[0]?'good':null,fmt(d3)+' · '+dTo(d3)+'d'));cd.lastChild.appendChild(r);});
   const rr=$('div','vrow');rr.appendChild($('span','mut','League renewal'));
   rr.appendChild($('span',null,'waiting on Sleeper'));cd.lastChild.appendChild(rr);
   dash.appendChild(cd);
