@@ -73,7 +73,12 @@ let OFFICIAL={};
 DATA.teams.forEach((tm,ti)=>{if(tm.ok&&tm.ok.length)OFFICIAL[ti]=tm.ok;});
 try{const c=JSON.parse(localStorage.getItem('ggg-okeep-v1'));if(c&&c.map)OFFICIAL=c.map;}catch(e){}
 const isOfficial=ti=>Array.isArray(OFFICIAL[ti])&&OFFICIAL[ti].length>0;
-const sel=ti=>isOfficial(ti)?new Set(OFFICIAL[ti]):new Set(kstate.picks[ti]||[]);
+/* official keeps are locked in; local extras stack on top up to the 5-keep cap */
+const sel=ti=>{
+  const o=OFFICIAL[ti]||[];
+  const extra=(kstate.picks[ti]||[]).filter(i=>!o.includes(i));
+  return new Set([...o,...extra].slice(0,5));
+};
 async function syncSleeper(){
   if(!DATA.leagueId2026)return null;
   const rosters=await fetch('https://api.sleeper.app/v1/league/'+DATA.leagueId2026+'/rosters').then(r=>r.json());

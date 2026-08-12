@@ -45,13 +45,18 @@ let kstate={team:0,picks:{}};
 try{const s=JSON.parse(localStorage.getItem(LSKEY));if(s&&s.picks)kstate=s;}catch(e){}
 const saveK=()=>{try{localStorage.setItem(LSKEY,JSON.stringify(kstate));}catch(e){}};
 let myTeam=parseInt(localStorage.getItem(MYKEY) ?? '-1');
-/* official Sleeper keepers OVERRIDE device picks for that team (locked);
-   teams without official keepers keep whatever was tapped on this device */
+/* official Sleeper keepers are LOCKED IN for that team (can't be unticked),
+   but extra picks on top are allowed up to the 5-keep cap so anyone can
+   preview a fuller class; teams without official keepers are fully free */
 let OFFICIAL={};
 DATA.teams.forEach((tm,ti)=>{if(tm.ok&&tm.ok.length)OFFICIAL[ti]=tm.ok;});
 try{const c=JSON.parse(localStorage.getItem('ggg-okeep-v1'));if(c&&c.map)OFFICIAL=c.map;}catch(e){}
 const isOfficial=ti=>Array.isArray(OFFICIAL[ti])&&OFFICIAL[ti].length>0;
-const sel=ti=>isOfficial(ti)?new Set(OFFICIAL[ti]):new Set(kstate.picks[ti]||[]);
+const sel=ti=>{
+  const o=OFFICIAL[ti]||[];
+  const extra=(kstate.picks[ti]||[]).filter(i=>!o.includes(i));
+  return new Set([...o,...extra].slice(0,CFG.maxKeep));
+};
 async function syncSleeper(){
   if(!DATA.leagueId2026)return null;
   const rosters=await fetch('https://api.sleeper.app/v1/league/'+DATA.leagueId2026+'/rosters').then(r=>r.json());
@@ -281,15 +286,16 @@ function renderDash(){
   const kc=card(7,'Keeper corner — tap to keep');
   const meters=$('div','kmeters');
   const m1=$('div');
-  const locked=isOfficial(myTeam);
+  const off=OFFICIAL[myTeam]||[];
+  const locked=off.length>0;
   const fiveMode=ev.k>3;   // a 4th/5th keep flips the view into the 5-keeper-rule preview
   m1.appendChild($('div','mlabel',(fiveMode
       ?('5-KEEPER RULE PREVIEW · budget $'+ev.keepSpend+' / $'+BUD5)
       :('3-keeper rules · keeper salaries $'+ev.keepSpend+' · no budget'))
     +' · '+ev.k+'/'+(fiveMode?5:3)+' slots'
-    +(locked?' — 🔒 official, set in Sleeper'
-      :(fiveMode?(ev.overBudget?' — OVER BUDGET':'')
-        :(ev.k===3?' — tap a 4th to preview the 5-keeper rule':'')))));
+    +(locked?(' — 🔒 '+off.length+' official from Sleeper'):'')
+    +(fiveMode?(ev.overBudget?' — OVER BUDGET':'')
+      :(ev.k===3?' — tap a 4th to preview the 5-keeper rule':''))));
   if(fiveMode){
     const met=$('div','meter');const fb=$('div','fillbar'+(ev.overBudget?' over':''));
     fb.style.width=Math.min(100,ev.keepSpend/BUD5*100)+'%';met.appendChild(fb);m1.appendChild(met);
@@ -308,23 +314,25 @@ function renderDash(){
     .filter(x=>x.p.el && x.p.pos!=='DEF')
     .sort((a,b)=>b.p.k26-a.p.k26)
     .forEach(({p,pi})=>{
+    const isOff=off.includes(pi);
     const on=sel(myTeam).has(pi);
-    const atLimit=!on&&(locked||sel(myTeam).size>=CFG.maxKeep);
+    const atLimit=!on&&sel(myTeam).size>=CFG.maxKeep;
     const row=$('div','prow'+(on?' on':'')+(atLimit?' inel':''));
-    row.appendChild($('span','tick',on?'✓':''));
+    row.appendChild($('span','tick',on?(isOff?'🔒':'✓'):''));
     const nm=$('span','pname',p.n);nm.appendChild($('span','meta',p.pos+(p.t?' · '+p.t:'')
-      +(locked&&on?' · ✓ set in Sleeper':'')));
+      +(isOff?' · 🔒 set in Sleeper':'')));
     row.appendChild(nm);
     row.appendChild($('span','rnd','R'+p.r));
     row.appendChild($('span','cost','$'+p.k26));
     row.appendChild($('span','next','→ $'+p.k27));
     row.tabIndex=0;
     const tog=()=>{
-      if(locked)return;   // official keepers came from Sleeper — change them there
+      if(isOff)return;   // this keep is official in Sleeper — change it there
       const s2=sel(myTeam);
       if(!s2.has(pi)&&s2.size>=CFG.maxKeep)return;   // all slots used — untick one first
-      s2.has(pi)?s2.delete(pi):s2.add(pi);
-      kstate.picks[myTeam]=[...s2];saveK();render();};
+      const ex=new Set((kstate.picks[myTeam]||[]).filter(i=>!off.includes(i)));
+      ex.has(pi)?ex.delete(pi):ex.add(pi);
+      kstate.picks[myTeam]=[...ex];saveK();render();};
     row.addEventListener('click',tog);
     row.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();tog();}});
     list.appendChild(row);
