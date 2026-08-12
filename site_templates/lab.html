@@ -63,35 +63,10 @@ __FOOT__
 const DATA = /*__DATA__*/{};
 const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
 
-/* ---- door ---- */
-const KEYK='ggg-lab-key';
-const hash=s=>{let a=7;for(const ch of s)a=(a*31+ch.charCodeAt(0))>>>0;return a%100000;};
-function unlock(){
-  document.getElementById('lockView').hidden=true;
-  document.getElementById('labMain').hidden=false;
-  render();
-}
-(function(){
-  let ok=false;
-  try{ok=localStorage.getItem(KEYK)==='ok';}catch(e){}
-  if(ok){unlock();return;}
-  document.getElementById('lockView').hidden=false;
-  const inp=document.getElementById('codeIn'),err=document.getElementById('codeErr');
-  const tryCode=()=>{
-    if(inp.value.length===4&&hash(inp.value)===84575){
-      try{localStorage.setItem(KEYK,'ok');}catch(e){}
-      unlock();
-    }else{err.textContent='Nope. Ask the commissioner.';inp.value='';inp.focus();}
-  };
-  document.getElementById('codeGo').addEventListener('click',tryCode);
-  inp.addEventListener('keydown',e=>{if(e.key==='Enter')tryCode();});
-  inp.focus();
-})();
-
 /* keeper selections shared with planner/home */
 let kstate={team:0,picks:{}};
 try{const s=JSON.parse(localStorage.getItem('ggg-keeper-v1'));if(s&&s.picks)kstate=s;}catch(e){}
-const sel=ti=>new Set(kstate.picks[ti]||[]);
+const sel=ti=>new Set(kstate.picks[ti]!==undefined?kstate.picks[ti]:(DATA.teams[ti].ok||[]));
 
 /* lab settings */
 const DEFAULTS={plan:'three',cap:DATA.defaults.cap,floor:DATA.defaults.floor,
@@ -388,4 +363,29 @@ function renderRetro(sim,cap,sum,board){
     board.appendChild(card);
   });
 }
+
+/* ---- door (runs last so an already-unlocked visit can safely render()) ---- */
+const KEYK='ggg-lab-key';
+const hash=s=>{let a=7;for(const ch of s)a=(a*31+ch.charCodeAt(0))>>>0;return a%100000;};
+function unlock(){
+  document.getElementById('lockView').hidden=true;
+  document.getElementById('labMain').hidden=false;
+  render();
+}
+(function(){
+  let ok=false;
+  try{ok=localStorage.getItem(KEYK)==='ok';}catch(e){}
+  if(ok){unlock();return;}
+  document.getElementById('lockView').hidden=false;
+  const inp=document.getElementById('codeIn'),err=document.getElementById('codeErr');
+  const tryCode=()=>{
+    if(inp.value.length===4&&hash(inp.value)===84575){
+      try{localStorage.setItem(KEYK,'ok');}catch(e){}
+      unlock();
+    }else{err.textContent='Nope. Ask the commissioner.';inp.value='';inp.focus();}
+  };
+  document.getElementById('codeGo').addEventListener('click',tryCode);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')tryCode();});
+  inp.focus();
+})();
 </script>

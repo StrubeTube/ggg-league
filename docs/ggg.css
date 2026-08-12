@@ -306,6 +306,10 @@ background:var(--mint);color:var(--mint-ink);font-weight:800;display:grid;place-
 .anatline.floor{border-color:var(--gold)}
 .anattag{position:absolute;top:-26px;transform:translateX(-50%);font-size:10.5px;font-weight:700;letter-spacing:.05em;color:var(--coral);white-space:nowrap;z-index:2}
 .anattag.floor{color:var(--gold)}
+.anattip{position:absolute;top:88px;transform:translateX(-50%);background:var(--card);border:1px solid var(--mint);
+border-radius:8px;padding:5px 11px;font-size:12.5px;font-weight:600;white-space:nowrap;z-index:5;
+box-shadow:0 6px 18px rgba(0,0,0,.35);pointer-events:none}
+.anatseg:hover{filter:brightness(1.25)}
 .anatlegend{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
 .anattotal{margin-top:12px;font-size:13.5px;font-weight:600}
 .cdrows{display:grid;gap:9px;margin-top:6px}

@@ -329,6 +329,10 @@ background:var(--mint);color:var(--mint-ink);font-weight:800;display:grid;place-
 .anatline.floor{border-color:var(--gold)}
 .anattag{position:absolute;top:-26px;transform:translateX(-50%);font-size:10.5px;font-weight:700;letter-spacing:.05em;color:var(--coral);white-space:nowrap;z-index:2}
 .anattag.floor{color:var(--gold)}
+.anattip{position:absolute;top:88px;transform:translateX(-50%);background:var(--card);border:1px solid var(--mint);
+border-radius:8px;padding:5px 11px;font-size:12.5px;font-weight:600;white-space:nowrap;z-index:5;
+box-shadow:0 6px 18px rgba(0,0,0,.35);pointer-events:none}
+.anatseg:hover{filter:brightness(1.25)}
 .anatlegend{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
 .anattotal{margin-top:12px;font-size:13.5px;font-weight:600}
 .cdrows{display:grid;gap:9px;margin-top:6px}
@@ -418,22 +422,31 @@ def planner_teams():
 
     picks_of = picks_for("2026")
     picks_27 = picks_for("2027")
+    # official keepers from the renewed 2026 league (rosters carry a `keepers` field)
+    official = {}
+    try:
+        for r in load("rosters_2026.json"):
+            official[r["roster_id"]] = {str(p) for p in (r.get("keepers") or [])}
+    except FileNotFoundError:
+        pass
     teams = []
     for r in sorted(rosters, key=lambda x: x["roster_id"]):
         plist = []
         for pid in (r.get("players") or []):
             pdb = players_db.get(str(pid), {})
             rnd = draft_round.get(str(pid))
-            e = {"n": pdb.get("name") or f"?{pid}", "pos": pdb.get("pos") or "?",
-                 "t": pdb.get("team") or ""}
+            e = {"pid": str(pid), "n": pdb.get("name") or f"?{pid}",
+                 "pos": pdb.get("pos") or "?", "t": pdb.get("team") or ""}
             if rnd is not None:
                 e.update({"el": True, "r": rnd, "k26": escalate(rnd, 1), "k27": escalate(rnd, 2)})
             else:
                 e["el"] = False
             plist.append(e)
         plist.sort(key=lambda p: (not p["el"], p.get("k26", 999), p["n"]))
+        ok = official.get(r["roster_id"], set())
         teams.append({"name": name_of[r["roster_id"]], "picks": picks_of[r["roster_id"]],
-                      "p27": picks_27[r["roster_id"]], "players": plist})
+                      "p27": picks_27[r["roster_id"]], "players": plist,
+                      "ok": [i for i, e in enumerate(plist) if e["pid"] in ok]})
     return teams
 
 
@@ -540,6 +553,11 @@ def build_replay():
     return out
 
 
+try:
+    lg26 = load("league_2026.json")
+except FileNotFoundError:
+    lg26 = {}
+
 career = site["career"]
 finishes = {}
 for sn in site["seasons"]:
@@ -550,7 +568,8 @@ for sn in site["seasons"]:
 slices = {
     "index.html": {"cfg": CFG, "teams": planner_teams(), "career": career,
                    "h2h": site["h2h"], "finishes": finishes, "steep": STEEP_TABLE,
-                   "commishUserId": commish_uid, "leagueId2025": "1256797701320753152"},
+                   "commishUserId": commish_uid, "leagueId2025": "1256797701320753152",
+                   "leagueId2026": lg26.get("league_id"), "leagueName2026": lg26.get("name")},
     "history.html": {"seasons": site["seasons"], "career": career, "h2h": site["h2h"]},
     "records.html": {"records": site["records"], "career": career},
     "drafts.html": {"drafts": site["drafts"]},
