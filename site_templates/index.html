@@ -49,8 +49,31 @@ let kstate={team:0,picks:{}};
 try{const s=JSON.parse(localStorage.getItem(LSKEY));if(s&&s.picks)kstate=s;}catch(e){}
 const saveK=()=>{try{localStorage.setItem(LSKEY,JSON.stringify(kstate));}catch(e){}};
 let myTeam=parseInt(localStorage.getItem(MYKEY) ?? '-1');
-/* official Sleeper keepers are the default; picks made on this device override */
-const sel=ti=>new Set(kstate.picks[ti]!==undefined?kstate.picks[ti]:(DATA.teams[ti].ok||[]));
+/* official Sleeper keepers OVERRIDE device picks for that team (locked);
+   teams without official keepers keep whatever was tapped on this device */
+let OFFICIAL={};
+DATA.teams.forEach((tm,ti)=>{if(tm.ok&&tm.ok.length)OFFICIAL[ti]=tm.ok;});
+try{const c=JSON.parse(localStorage.getItem('ggg-okeep-v1'));if(c&&c.map)OFFICIAL=c.map;}catch(e){}
+const isOfficial=ti=>Array.isArray(OFFICIAL[ti])&&OFFICIAL[ti].length>0;
+const sel=ti=>isOfficial(ti)?new Set(OFFICIAL[ti]):new Set(kstate.picks[ti]||[]);
+async function syncSleeper(){
+  if(!DATA.leagueId2026)return null;
+  const rosters=await fetch('https://api.sleeper.app/v1/league/'+DATA.leagueId2026+'/rosters').then(r=>r.json());
+  const map={};
+  (rosters||[]).forEach(r=>{
+    const ti=DATA.teams.findIndex(t=>t.rid===r.roster_id);
+    if(ti<0)return;
+    const idx=[];
+    (r.keepers||[]).map(String).forEach(pid=>{
+      const i=DATA.teams[ti].players.findIndex(p=>p.pid===pid);
+      if(i>=0)idx.push(i);
+    });
+    if(idx.length)map[ti]=idx;
+  });
+  OFFICIAL=map;
+  try{localStorage.setItem('ggg-okeep-v1',JSON.stringify({ts:Date.now(),map}));}catch(e){}
+  return map;
+}
 
 function evalTeam(ti){
   const tm=DATA.teams[ti],chosen=sel(ti);
@@ -263,10 +286,11 @@ function renderDash(){
   const kc=card(7,'Keeper corner — tap to keep');
   const meters=$('div','kmeters');
   const m1=$('div');
+  const locked=isOfficial(myTeam);
   m1.appendChild($('div','mlabel',(BUDGETON?('Budget $'+ev.budgetSpend+' / $'+CFG.budget):('No keeper budget · keeper salaries $'+ev.keepSpend))
     +' · '+ev.k+'/'+CFG.maxKeep+' slots'
     +(CFG.franchise&&ev.franchiseName?' · franchise: '+ev.franchiseName:'')
-    +(ev.overCount?' — TOO MANY':(ev.k>=CFG.maxKeep?' — full, untick to swap':''))));
+    +(locked?' — 🔒 official, set in Sleeper':(ev.overCount?' — TOO MANY':(ev.k>=CFG.maxKeep?' — full, untick to swap':'')))));
   const met=$('div','meter');const fb=$('div','fillbar'+(ev.overBudget?' over':''));
   fb.style.width=(BUDGETON?Math.min(100,ev.budgetSpend/CFG.budget*100):0)+'%';met.appendChild(fb);m1.appendChild(met);
   meters.appendChild(m1);
@@ -284,17 +308,19 @@ function renderDash(){
     .sort((a,b)=>b.p.k26-a.p.k26)
     .forEach(({p,pi})=>{
     const on=sel(myTeam).has(pi);
-    const atLimit=!on&&sel(myTeam).size>=CFG.maxKeep;
+    const atLimit=!on&&(locked||sel(myTeam).size>=CFG.maxKeep);
     const row=$('div','prow'+(on?' on':'')+(atLimit?' inel':''));
     row.appendChild($('span','tick',on?'✓':''));
     const nm=$('span','pname',p.n);nm.appendChild($('span','meta',p.pos+(p.t?' · '+p.t:'')
-      +((tm.ok||[]).includes(pi)?' · ✓ set in Sleeper':'')));
+      +(locked&&on?' · ✓ set in Sleeper':'')));
     row.appendChild(nm);
     row.appendChild($('span','rnd','R'+p.r));
     row.appendChild($('span','cost','$'+p.k26));
     row.appendChild($('span','next','→ $'+p.k27));
     row.tabIndex=0;
-    const tog=()=>{const s2=sel(myTeam);
+    const tog=()=>{
+      if(locked)return;   // official keepers came from Sleeper — change them there
+      const s2=sel(myTeam);
       if(!s2.has(pi)&&s2.size>=CFG.maxKeep)return;   // all slots used — untick one first
       s2.has(pi)?s2.delete(pi):s2.add(pi);
       kstate.picks[myTeam]=[...s2];saveK();render();};
@@ -551,6 +577,9 @@ function capBoardCard(span){
 
 let liveSub=null;
 render();
+
+/* live keeper sync — official Sleeper keepers refresh on every visit */
+syncSleeper().then(m=>{if(m)render();}).catch(()=>{});
 
 /* live 2026 status check — the league is renewed; watch for the draft getting scheduled */
 (async function(){

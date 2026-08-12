@@ -406,7 +406,10 @@ def planner_teams():
 
     def picks_for(season):
         owner = {(rnd, rid): rid for rnd in range(1, 17) for rid in name_of}
-        for fname in ("tradedpicks_2024.json", "tradedpicks_2025.json"):
+        pick_files = ["tradedpicks_2024.json", "tradedpicks_2025.json"]
+        if os.path.exists(os.path.join(DATA, "tradedpicks_2026.json")):
+            pick_files.append("tradedpicks_2026.json")   # new trades in the renewed league
+        for fname in pick_files:
             for tp in load(fname):
                 if tp["season"] == season and (tp["round"], tp["roster_id"]) in owner:
                     owner[(tp["round"], tp["roster_id"])] = tp["owner_id"]
@@ -444,7 +447,8 @@ def planner_teams():
             plist.append(e)
         plist.sort(key=lambda p: (not p["el"], p.get("k26", 999), p["n"]))
         ok = official.get(r["roster_id"], set())
-        teams.append({"name": name_of[r["roster_id"]], "picks": picks_of[r["roster_id"]],
+        teams.append({"name": name_of[r["roster_id"]], "rid": r["roster_id"],
+                      "picks": picks_of[r["roster_id"]],
                       "p27": picks_27[r["roster_id"]], "players": plist,
                       "ok": [i for i, e in enumerate(plist) if e["pid"] in ok]})
     return teams
@@ -575,6 +579,8 @@ slices = {
     "drafts.html": {"drafts": site["drafts"]},
     "trades.html": {"trades": site["trades"], "pickValues": site["pick_values"]},
     "lab.html": {"teams": planner_teams(), "adopted": CFG["table"],
+                 "leagueId2026": lg26.get("league_id"),
+                 "repo": "https://github.com/StrubeTube/ggg-league",
                  # Rules locked 2026-08-12: flattened table, keepers count against
                  # team salary, keepers slot on the board at their escalated round.
                  # cap/floor fitted over the 2020-25 replays (with Alex's corrected

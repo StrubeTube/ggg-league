@@ -44,6 +44,10 @@ __NAV__
         <div class="filterrow tight" id="applyMode"></div>
         <div class="ctlnote">While on, the Home page keeper corner and cap board use these Lab settings instead of the shipped defaults, with a banner so nobody mistakes the sandbox for policy. Per device.</div></div>
 
+      <div class="ctl"><div class="mlabel">Sleeper sync</div>
+        <div class="filterrow tight"><button class="tpill sm" id="syncBtn" type="button">⟳ Refresh from Sleeper now</button></div>
+        <div class="ctlnote" id="syncNote">Pulls league status, draft schedule, and every team's official keepers straight from Sleeper — official keepers override local picks everywhere on the site. This also runs automatically on every page visit; for a full data rebuild (trades, rosters, picks) use <a href="https://github.com/StrubeTube/ggg-league/actions/workflows/refresh.yml" target="_blank" rel="noopener">Run workflow on GitHub</a> — it also runs itself daily.</div></div>
+
       <div class="ctl"><div class="mlabel">Locked rules (no longer options)</div>
         <div class="ctlnote">Flattened 2026 salary table · keeper salaries <b>count</b> against team salary · keepers <b>slot on the board</b> at their escalated round · $0 waivers · cap band checked on trades only, and only in the worsening direction.</div></div>
     </div>
@@ -66,7 +70,30 @@ const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==
 /* keeper selections shared with planner/home */
 let kstate={team:0,picks:{}};
 try{const s=JSON.parse(localStorage.getItem('ggg-keeper-v1'));if(s&&s.picks)kstate=s;}catch(e){}
-const sel=ti=>new Set(kstate.picks[ti]!==undefined?kstate.picks[ti]:(DATA.teams[ti].ok||[]));
+/* official Sleeper keepers override device picks (same rule as the Home page) */
+let OFFICIAL={};
+DATA.teams.forEach((tm,ti)=>{if(tm.ok&&tm.ok.length)OFFICIAL[ti]=tm.ok;});
+try{const c=JSON.parse(localStorage.getItem('ggg-okeep-v1'));if(c&&c.map)OFFICIAL=c.map;}catch(e){}
+const isOfficial=ti=>Array.isArray(OFFICIAL[ti])&&OFFICIAL[ti].length>0;
+const sel=ti=>isOfficial(ti)?new Set(OFFICIAL[ti]):new Set(kstate.picks[ti]||[]);
+async function syncSleeper(){
+  if(!DATA.leagueId2026)return null;
+  const rosters=await fetch('https://api.sleeper.app/v1/league/'+DATA.leagueId2026+'/rosters').then(r=>r.json());
+  const map={};
+  (rosters||[]).forEach(r=>{
+    const ti=DATA.teams.findIndex(t=>t.rid===r.roster_id);
+    if(ti<0)return;
+    const idx=[];
+    (r.keepers||[]).map(String).forEach(pid=>{
+      const i=DATA.teams[ti].players.findIndex(p=>p.pid===pid);
+      if(i>=0)idx.push(i);
+    });
+    if(idx.length)map[ti]=idx;
+  });
+  OFFICIAL=map;
+  try{localStorage.setItem('ggg-okeep-v1',JSON.stringify({ts:Date.now(),map}));}catch(e){}
+  return map;
+}
 
 /* lab settings */
 const DEFAULTS={plan:'three',cap:DATA.defaults.cap,floor:DATA.defaults.floor,
@@ -363,6 +390,34 @@ function renderRetro(sim,cap,sum,board){
     board.appendChild(card);
   });
 }
+
+/* ---- Sleeper sync button ---- */
+async function runSync(fromClick){
+  const note=document.getElementById('syncNote'),btn=document.getElementById('syncBtn');
+  if(fromClick){btn.disabled=true;btn.textContent='⟳ syncing…';}
+  try{
+    const map=await syncSleeper();
+    let status='';
+    if(fromClick&&DATA.leagueId2026){
+      const base='https://api.sleeper.app/v1/league/'+DATA.leagueId2026;
+      const [lg,drafts]=await Promise.all([
+        fetch(base).then(r=>r.json()),fetch(base+'/drafts').then(r=>r.json())]);
+      const d=(drafts||[])[0];
+      status=' · league '+String(lg.status||'').replace('_',' ')
+        +(d&&d.start_time?(' · draft '+new Date(d.start_time).toLocaleDateString('en-US',{month:'short',day:'numeric'})):' · draft not scheduled');
+    }
+    const n=map?Object.keys(map).length:0;
+    if(fromClick)note.textContent='Synced '+new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})
+      +' — '+n+' of 10 teams have official keepers'+status
+      +'. Official keepers override local picks everywhere; a full data rebuild runs daily on GitHub.';
+    render();
+  }catch(e){
+    if(fromClick)note.textContent='Sync failed — Sleeper unreachable. Try again in a minute.';
+  }
+  if(fromClick){btn.disabled=false;btn.textContent='⟳ Refresh from Sleeper now';}
+}
+document.getElementById('syncBtn').addEventListener('click',()=>runSync(true));
+runSync(false);
 
 /* ---- door (runs last so an already-unlocked visit can safely render()) ---- */
 const KEYK='ggg-lab-key';

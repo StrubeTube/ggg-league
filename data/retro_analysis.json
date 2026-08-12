@@ -1,0 +1,1318 @@
+{
+ "cap": 200,
+ "salary_table": {
+  "1": 34,
+  "2": 28,
+  "3": 23,
+  "4": 19,
+  "5": 16,
+  "6": 13,
+  "7": 11,
+  "8": 9,
+  "9": 7,
+  "10": 5,
+  "11": 4,
+  "12": 3,
+  "13": 2,
+  "14": 2,
+  "15": 1,
+  "16": 1
+ },
+ "seasons": [
+  {
+   "season": "2025",
+   "teams": [
+    {
+     "team": "Strubes",
+     "final": {
+      "w": 6,
+      "l": 8,
+      "pf": 1540
+     },
+     "opening": 191,
+     "peak": 191
+    },
+    {
+     "team": "lynnkm23",
+     "final": {
+      "w": 4,
+      "l": 10,
+      "pf": 1444
+     },
+     "opening": 184,
+     "peak": 184
+    },
+    {
+     "team": "PrezNix",
+     "final": {
+      "w": 7,
+      "l": 7,
+      "pf": 1621
+     },
+     "opening": 175,
+     "peak": 175
+    },
+    {
+     "team": "Philly000",
+     "final": {
+      "w": 6,
+      "l": 8,
+      "pf": 1377
+     },
+     "opening": 150,
+     "peak": 151
+    },
+    {
+     "team": "DaBlondest",
+     "final": {
+      "w": 7,
+      "l": 7,
+      "pf": 1564
+     },
+     "opening": 178,
+     "peak": 179
+    },
+    {
+     "team": "HartManStan",
+     "final": {
+      "w": 4,
+      "l": 10,
+      "pf": 1239
+     },
+     "opening": 167,
+     "peak": 168
+    },
+    {
+     "team": "BJohnson5",
+     "final": {
+      "w": 10,
+      "l": 4,
+      "pf": 1602
+     },
+     "opening": 169,
+     "peak": 203
+    },
+    {
+     "team": "EvanDeFilippis",
+     "final": {
+      "w": 10,
+      "l": 4,
+      "pf": 1764
+     },
+     "opening": 189,
+     "peak": 212
+    },
+    {
+     "team": "VEROVILLIANZ",
+     "final": {
+      "w": 6,
+      "l": 8,
+      "pf": 1368
+     },
+     "opening": 223,
+     "peak": 223
+    },
+    {
+     "team": "TommyHolland",
+     "final": {
+      "w": 10,
+      "l": 4,
+      "pf": 1564
+     },
+     "opening": 154,
+     "peak": 189
+    }
+   ],
+   "predraft_trades": [
+    {
+     "Philly000": {
+      "players": [
+       "Brian Thomas"
+      ],
+      "picks": 1
+     },
+     "EvanDeFilippis": {
+      "players": [],
+      "picks": 4
+     }
+    },
+    {
+     "EvanDeFilippis": {
+      "players": [],
+      "picks": 3
+     },
+     "VEROVILLIANZ": {
+      "players": [],
+      "picks": 2
+     }
+    },
+    {
+     "HartManStan": {
+      "players": [
+       "Drake London",
+       "Josh Downs"
+      ],
+      "picks": 1
+     },
+     "EvanDeFilippis": {
+      "players": [],
+      "picks": 1
+     }
+    },
+    {
+     "lynnkm23": {
+      "players": [],
+      "picks": 1
+     },
+     "PrezNix": {
+      "players": [
+       "Courtland Sutton",
+       "Jameson Williams"
+      ],
+      "picks": 1
+     }
+    },
+    {
+     "VEROVILLIANZ": {
+      "players": [],
+      "picks": 2
+     },
+     "TommyHolland": {
+      "players": [],
+      "picks": 3
+     }
+    },
+    {
+     "Strubes": {
+      "players": [],
+      "picks": 1
+     },
+     "BJohnson5": {
+      "players": [
+       "Jaxon Smith-Njigba"
+      ],
+      "picks": 0
+     }
+    }
+   ],
+   "trades": [
+    {
+     "week": 3,
+     "sides": [
+      {
+       "team": "PrezNix",
+       "record": "0-2",
+       "before": 166,
+       "after": 160,
+       "over": false,
+       "in": [
+        {
+         "name": "Emeka Egbuka",
+         "sal": 16
+        },
+        {
+         "name": "Juwan Johnson",
+         "sal": 1
+        }
+       ],
+       "out": [
+        {
+         "name": "Terry McLaurin",
+         "sal": 23
+        }
+       ],
+       "picks_in": [],
+       "is_fire_seller": false
+      },
+      {
+       "team": "EvanDeFilippis",
+       "record": "2-0",
+       "before": 191,
+       "after": 197,
+       "over": false,
+       "in": [
+        {
+         "name": "Terry McLaurin",
+         "sal": 23
+        }
+       ],
+       "out": [
+        {
+         "name": "Emeka Egbuka",
+         "sal": 16
+        },
+        {
+         "name": "Juwan Johnson",
+         "sal": 1
+        }
+       ],
+       "picks_in": [],
+       "is_fire_seller": false
+      }
+     ],
+     "fire_sale": false,
+     "violation": false
+    },
+    {
+     "week": 5,
+     "sides": [
+      {
+       "team": "HartManStan",
+       "record": "0-4",
+       "before": 152,
+       "after": 98,
+       "over": false,
+       "in": [
+        {
+         "name": "Kenny Gainwell",
+         "sal": 1
+        }
+       ],
+       "out": [
+        {
+         "name": "Saquon Barkley",
+         "sal": 34
+        },
+        {
+         "name": "Rico Dowdle",
+         "sal": 2
+        },
+        {
+         "name": "Drake London",
+         "sal": 19
+        }
+       ],
+       "picks_in": [
+        "2026 R2",
+        "2026 R5"
+       ],
+       "is_fire_seller": true
+      },
+      {
+       "team": "BJohnson5",
+       "record": "4-0",
+       "before": 149,
+       "after": 203,
+       "over": true,
+       "in": [
+        {
+         "name": "Saquon Barkley",
+         "sal": 34
+        },
+        {
+         "name": "Rico Dowdle",
+         "sal": 2
+        },
+        {
+         "name": "Drake London",
+         "sal": 19
+        }
+       ],
+       "out": [
+        {
+         "name": "Kenny Gainwell",
+         "sal": 1
+        }
+       ],
+       "picks_in": [],
+       "is_fire_seller": false
+      }
+     ],
+     "fire_sale": true,
+     "violation": true
+    },
+    {
+     "week": 5,
+     "sides": [
+      {
+       "team": "HartManStan",
+       "record": "0-4",
+       "before": 98,
+       "after": 76,
+       "over": false,
+       "in": [
+        {
+         "name": "Kyle Monangai",
+         "sal": 1
+        }
+       ],
+       "out": [
+        {
+         "name": "Kenneth Walker",
+         "sal": 23
+        }
+       ],
+       "picks_in": [
+        "2026 R5"
+       ],
+       "is_fire_seller": true
+      },
+      {
+       "team": "TommyHolland",
+       "record": "4-0",
+       "before": 135,
+       "after": 157,
+       "over": false,
+       "in": [
+        {
+         "name": "Kenneth Walker",
+         "sal": 23
+        }
+       ],
+       "out": [
+        {
+         "name": "Kyle Monangai",
+         "sal": 1
+        }
+       ],
+       "picks_in": [
+        "2026 R9"
+       ],
+       "is_fire_seller": false
+      }
+     ],
+     "fire_sale": true,
+     "violation": false
+    },
+    {
+     "week": 6,
+     "sides": [
+      {
+       "team": "lynnkm23",
+       "record": "1-4",
+       "before": 174,
+       "after": 129,
+       "over": false,
+       "in": [],
+       "out": [
+        {
+         "name": "Travis Etienne",
+         "sal": 11
+        },
+        {
+         "name": "Amon-Ra St. Brown",
+         "sal": 34
+        }
+       ],
+       "picks_in": [
+        "2026 R10",
+        "2026 R2",
+        "2026 R8"
+       ],
+       "is_fire_seller": true
+      },
+      {
+       "team": "EvanDeFilippis",
+       "record": "3-2",
+       "before": 167,
+       "after": 212,
+       "over": true,
+       "in": [
+        {
+         "name": "Travis Etienne",
+         "sal": 11
+        },
+        {
+         "name": "Amon-Ra St. Brown",
+         "sal": 34
+        }
+       ],
+       "out": [],
+       "picks_in": [
+        "2026 R11"
+       ],
+       "is_fire_seller": false
+      }
+     ],
+     "fire_sale": true,
+     "violation": true
+    },
+    {
+     "week": 6,
+     "sides": [
+      {
+       "team": "PrezNix",
+       "record": "1-4",
+       "before": 156,
+       "after": 165,
+       "over": false,
+       "in": [
+        {
+         "name": "Christian McCaffrey",
+         "sal": 34
+        },
+        {
+         "name": "DJ Moore",
+         "sal": 23
+        }
+       ],
+       "out": [
+        {
+         "name": "Davante Adams",
+         "sal": 28
+        },
+        {
+         "name": "Dak Prescott",
+         "sal": 1
+        },
+        {
+         "name": "D'Andre Swift",
+         "sal": 19
+        }
+       ],
+       "picks_in": [
+        "2026 R6"
+       ],
+       "is_fire_seller": false
+      },
+      {
+       "team": "DaBlondest",
+       "record": "2-3",
+       "before": 173,
+       "after": 164,
+       "over": false,
+       "in": [
+        {
+         "name": "Davante Adams",
+         "sal": 28
+        },
+        {
+         "name": "Dak Prescott",
+         "sal": 1
+        },
+        {
+         "name": "D'Andre Swift",
+         "sal": 19
+        }
+       ],
+       "out": [
+        {
+         "name": "Christian McCaffrey",
+         "sal": 34
+        },
+        {
+         "name": "DJ Moore",
+         "sal": 23
+        }
+       ],
+       "picks_in": [
+        "2026 R4"
+       ],
+       "is_fire_seller": false
+      }
+     ],
+     "fire_sale": false,
+     "violation": false
+    },
+    {
+     "week": 11,
+     "sides": [
+      {
+       "team": "VEROVILLIANZ",
+       "record": "4-6",
+       "before": 201,
+       "after": 167,
+       "over": false,
+       "in": [
+        {
+         "name": "Malik Nabers",
+         "sal": 1
+        },
+        {
+         "name": "Joe Burrow",
+         "sal": 1
+        },
+        {
+         "name": "Jordan Mason",
+         "sal": 11
+        }
+       ],
+       "out": [
+        {
+         "name": "Derrick Henry",
+         "sal": 34
+        },
+        {
+         "name": "Chris Olave",
+         "sal": 13
+        }
+       ],
+       "picks_in": [],
+       "is_fire_seller": false
+      },
+      {
+       "team": "TommyHolland",
+       "record": "8-2",
+       "before": 155,
+       "after": 189,
+       "over": false,
+       "in": [
+        {
+         "name": "Derrick Henry",
+         "sal": 34
+        },
+        {
+         "name": "Chris Olave",
+         "sal": 13
+        }
+       ],
+       "out": [
+        {
+         "name": "Malik Nabers",
+         "sal": 1
+        },
+        {
+         "name": "Joe Burrow",
+         "sal": 1
+        },
+        {
+         "name": "Jordan Mason",
+         "sal": 11
+        }
+       ],
+       "picks_in": [],
+       "is_fire_seller": false
+      }
+     ],
+     "fire_sale": false,
+     "violation": false
+    }
+   ]
+  },
+  {
+   "season": "2024",
+   "teams": [
+    {
+     "team": "Strubes",
+     "final": {
+      "w": 8,
+      "l": 6,
+      "pf": 1637
+     },
+     "opening": 202,
+     "peak": 202
+    },
+    {
+     "team": "lynnkm23",
+     "final": {
+      "w": 8,
+      "l": 6,
+      "pf": 1554
+     },
+     "opening": 178,
+     "peak": 179
+    },
+    {
+     "team": "departed-manager",
+     "final": {
+      "w": 4,
+      "l": 10,
+      "pf": 1326
+     },
+     "opening": 159,
+     "peak": 163
+    },
+    {
+     "team": "Philly000",
+     "final": {
+      "w": 8,
+      "l": 6,
+      "pf": 1540
+     },
+     "opening": 178,
+     "peak": 179
+    },
+    {
+     "team": "DaBlondest",
+     "final": {
+      "w": 6,
+      "l": 8,
+      "pf": 1500
+     },
+     "opening": 169,
+     "peak": 169
+    },
+    {
+     "team": "HartManStan",
+     "final": {
+      "w": 6,
+      "l": 8,
+      "pf": 1505
+     },
+     "opening": 176,
+     "peak": 189
+    },
+    {
+     "team": "BJohnson5",
+     "final": {
+      "w": 7,
+      "l": 7,
+      "pf": 1527
+     },
+     "opening": 159,
+     "peak": 176
+    },
+    {
+     "team": "EvanDeFilippis",
+     "final": {
+      "w": 11,
+      "l": 3,
+      "pf": 1760
+     },
+     "opening": 189,
+     "peak": 190
+    },
+    {
+     "team": "VEROVILLIANZ",
+     "final": {
+      "w": 4,
+      "l": 10,
+      "pf": 1357
+     },
+     "opening": 165,
+     "peak": 165
+    },
+    {
+     "team": "TommyHolland",
+     "final": {
+      "w": 8,
+      "l": 6,
+      "pf": 1716
+     },
+     "opening": 205,
+     "peak": 214
+    }
+   ],
+   "predraft_trades": [
+    {
+     "Strubes": {
+      "players": [],
+      "picks": 1
+     },
+     "BJohnson5": {
+      "players": [
+       "Chris Olave"
+      ],
+      "picks": 1
+     }
+    },
+    {
+     "Strubes": {
+      "players": [],
+      "picks": 1
+     },
+     "VEROVILLIANZ": {
+      "players": [
+       "Amon-Ra St. Brown"
+      ],
+      "picks": 1
+     }
+    },
+    {
+     "BJohnson5": {
+      "players": [
+       "Alvin Kamara"
+      ],
+      "picks": 1
+     },
+     "EvanDeFilippis": {
+      "players": [],
+      "picks": 2
+     }
+    },
+    {
+     "HartManStan": {
+      "players": [
+       "Amari Cooper"
+      ],
+      "picks": 1
+     },
+     "TommyHolland": {
+      "players": [],
+      "picks": 1
+     }
+    },
+    {
+     "lynnkm23": {
+      "players": [
+       "Rashee Rice"
+      ],
+      "picks": 0
+     },
+     "VEROVILLIANZ": {
+      "players": [
+       "Anthony Richardson"
+      ],
+      "picks": 0
+     }
+    },
+    {
+     "departed-manager": {
+      "players": [
+       "Josh Allen"
+      ],
+      "picks": 0
+     },
+     "EvanDeFilippis": {
+      "players": [
+       "Kyle Pitts"
+      ],
+      "picks": 1
+     }
+    },
+    {
+     "EvanDeFilippis": {
+      "players": [
+       "Drake London"
+      ],
+      "picks": 0
+     },
+     "VEROVILLIANZ": {
+      "players": [],
+      "picks": 2
+     }
+    }
+   ],
+   "trades": [
+    {
+     "week": 2,
+     "sides": [
+      {
+       "team": "HartManStan",
+       "record": "1-0",
+       "before": 170,
+       "after": 189,
+       "over": false,
+       "in": [
+        {
+         "name": "Travis Kelce",
+         "sal": 28
+        },
+        {
+         "name": "George Pickens",
+         "sal": 19
+        }
+       ],
+       "out": [
+        {
+         "name": "Mike Evans",
+         "sal": 28
+        }
+       ],
+       "picks_in": [],
+       "is_fire_seller": false
+      },
+      {
+       "team": "EvanDeFilippis",
+       "record": "1-0",
+       "before": 190,
+       "after": 171,
+       "over": false,
+       "in": [
+        {
+         "name": "Mike Evans",
+         "sal": 28
+        }
+       ],
+       "out": [
+        {
+         "name": "Travis Kelce",
+         "sal": 28
+        },
+        {
+         "name": "George Pickens",
+         "sal": 19
+        }
+       ],
+       "picks_in": [],
+       "is_fire_seller": false
+      }
+     ],
+     "fire_sale": false,
+     "violation": false
+    },
+    {
+     "week": 3,
+     "sides": [
+      {
+       "team": "DaBlondest",
+       "record": "1-1",
+       "before": 166,
+       "after": 164,
+       "over": false,
+       "in": [
+        {
+         "name": "Joe Mixon",
+         "sal": 23
+        },
+        {
+         "name": "Jaylen Waddle",
+         "sal": 13
+        },
+        {
+         "name": "Trey McBride",
+         "sal": 19
+        }
+       ],
+       "out": [
+        {
+         "name": "Saquon Barkley",
+         "sal": 34
+        },
+        {
+         "name": "Brandon Aiyuk",
+         "sal": 23
+        }
+       ],
+       "picks_in": [],
+       "is_fire_seller": false
+      },
+      {
+       "team": "HartManStan",
+       "record": "1-1",
+       "before": 186,
+       "after": 188,
+       "over": false,
+       "in": [
+        {
+         "name": "Saquon Barkley",
+         "sal": 34
+        },
+        {
+         "name": "Brandon Aiyuk",
+         "sal": 23
+        }
+       ],
+       "out": [
+        {
+         "name": "Joe Mixon",
+         "sal": 23
+        },
+        {
+         "name": "Jaylen Waddle",
+         "sal": 13
+        },
+        {
+         "name": "Trey McBride",
+         "sal": 19
+        }
+       ],
+       "picks_in": [],
+       "is_fire_seller": false
+      }
+     ],
+     "fire_sale": false,
+     "violation": false
+    },
+    {
+     "week": 7,
+     "sides": [
+      {
+       "team": "BJohnson5",
+       "record": "4-2",
+       "before": 154,
+       "after": 176,
+       "over": false,
+       "in": [
+        {
+         "name": "Xavier Worthy",
+         "sal": 13
+        },
+        {
+         "name": "Deebo Samuel",
+         "sal": 11
+        }
+       ],
+       "out": [
+        {
+         "name": "Nico Collins",
+         "sal": 2
+        }
+       ],
+       "picks_in": [
+        "2025 R6"
+       ],
+       "is_fire_seller": false
+      },
+      {
+       "team": "TommyHolland",
+       "record": "4-2",
+       "before": 189,
+       "after": 167,
+       "over": false,
+       "in": [
+        {
+         "name": "Nico Collins",
+         "sal": 2
+        }
+       ],
+       "out": [
+        {
+         "name": "Xavier Worthy",
+         "sal": 13
+        },
+        {
+         "name": "Deebo Samuel",
+         "sal": 11
+        }
+       ],
+       "picks_in": [
+        "2025 R8"
+       ],
+       "is_fire_seller": true
+      }
+     ],
+     "fire_sale": true,
+     "violation": false
+    },
+    {
+     "week": 7,
+     "sides": [
+      {
+       "team": "lynnkm23",
+       "record": "2-4",
+       "before": 165,
+       "after": 170,
+       "over": false,
+       "in": [
+        {
+         "name": "Courtland Sutton",
+         "sal": 1
+        },
+        {
+         "name": "Terry McLaurin",
+         "sal": 13
+        },
+        {
+         "name": "Alexander Mattison",
+         "sal": 1
+        },
+        {
+         "name": "Jahmyr Gibbs",
+         "sal": 34
+        }
+       ],
+       "out": [
+        {
+         "name": "Josh Jacobs",
+         "sal": 28
+        },
+        {
+         "name": "Najee Harris",
+         "sal": 13
+        },
+        {
+         "name": "Tank Dell",
+         "sal": 1
+        },
+        {
+         "name": "Quentin Johnston",
+         "sal": 2
+        }
+       ],
+       "picks_in": [],
+       "is_fire_seller": false
+      },
+      {
+       "team": "VEROVILLIANZ",
+       "record": "2-4",
+       "before": 160,
+       "after": 155,
+       "over": false,
+       "in": [
+        {
+         "name": "Josh Jacobs",
+         "sal": 28
+        },
+        {
+         "name": "Najee Harris",
+         "sal": 13
+        },
+        {
+         "name": "Tank Dell",
+         "sal": 1
+        },
+        {
+         "name": "Quentin Johnston",
+         "sal": 2
+        }
+       ],
+       "out": [
+        {
+         "name": "Courtland Sutton",
+         "sal": 1
+        },
+        {
+         "name": "Terry McLaurin",
+         "sal": 13
+        },
+        {
+         "name": "Alexander Mattison",
+         "sal": 1
+        },
+        {
+         "name": "Jahmyr Gibbs",
+         "sal": 34
+        }
+       ],
+       "picks_in": [],
+       "is_fire_seller": false
+      }
+     ],
+     "fire_sale": false,
+     "violation": false
+    },
+    {
+     "week": 7,
+     "sides": [
+      {
+       "team": "departed-manager",
+       "record": "2-4",
+       "before": 158,
+       "after": 155,
+       "over": false,
+       "in": [
+        {
+         "name": "Mike Evans",
+         "sal": 28
+        },
+        {
+         "name": "Travis Etienne",
+         "sal": 3
+        }
+       ],
+       "out": [
+        {
+         "name": "Christian McCaffrey",
+         "sal": 34
+        }
+       ],
+       "picks_in": [
+        "2025 R12"
+       ],
+       "is_fire_seller": false
+      },
+      {
+       "team": "EvanDeFilippis",
+       "record": "4-2",
+       "before": 151,
+       "after": 154,
+       "over": false,
+       "in": [
+        {
+         "name": "Christian McCaffrey",
+         "sal": 34
+        }
+       ],
+       "out": [
+        {
+         "name": "Mike Evans",
+         "sal": 28
+        },
+        {
+         "name": "Travis Etienne",
+         "sal": 3
+        }
+       ],
+       "picks_in": [
+        "2025 R13"
+       ],
+       "is_fire_seller": false
+      }
+     ],
+     "fire_sale": false,
+     "violation": false
+    },
+    {
+     "week": 7,
+     "sides": [
+      {
+       "team": "EvanDeFilippis",
+       "record": "4-2",
+       "before": 155,
+       "after": 182,
+       "over": false,
+       "in": [
+        {
+         "name": "Amon-Ra St. Brown",
+         "sal": 28
+        }
+       ],
+       "out": [
+        {
+         "name": "Jakobi Meyers",
+         "sal": 1
+        }
+       ],
+       "picks_in": [],
+       "is_fire_seller": false
+      },
+      {
+       "team": "VEROVILLIANZ",
+       "record": "2-4",
+       "before": 155,
+       "after": 128,
+       "over": false,
+       "in": [
+        {
+         "name": "Jakobi Meyers",
+         "sal": 1
+        }
+       ],
+       "out": [
+        {
+         "name": "Amon-Ra St. Brown",
+         "sal": 28
+        }
+       ],
+       "picks_in": [
+        "2025 R11",
+        "2025 R3"
+       ],
+       "is_fire_seller": true
+      }
+     ],
+     "fire_sale": true,
+     "violation": false
+    },
+    {
+     "week": 7,
+     "sides": [
+      {
+       "team": "VEROVILLIANZ",
+       "record": "2-4",
+       "before": 128,
+       "after": 82,
+       "over": false,
+       "in": [
+        {
+         "name": "T.J. Hockenson",
+         "sal": 1
+        }
+       ],
+       "out": [
+        {
+         "name": "Josh Jacobs",
+         "sal": 28
+        },
+        {
+         "name": "Kyle Pitts",
+         "sal": 19
+        }
+       ],
+       "picks_in": [
+        "2025 R10",
+        "2025 R5"
+       ],
+       "is_fire_seller": true
+      },
+      {
+       "team": "TommyHolland",
+       "record": "4-2",
+       "before": 168,
+       "after": 214,
+       "over": true,
+       "in": [
+        {
+         "name": "Josh Jacobs",
+         "sal": 28
+        },
+        {
+         "name": "Kyle Pitts",
+         "sal": 19
+        }
+       ],
+       "out": [
+        {
+         "name": "T.J. Hockenson",
+         "sal": 1
+        }
+       ],
+       "picks_in": [
+        "2025 R16"
+       ],
+       "is_fire_seller": false
+      }
+     ],
+     "fire_sale": true,
+     "violation": true
+    },
+    {
+     "week": 7,
+     "sides": [
+      {
+       "team": "departed-manager",
+       "record": "2-4",
+       "before": 154,
+       "after": 163,
+       "over": false,
+       "in": [
+        {
+         "name": "Jonathon Brooks",
+         "sal": 9
+        },
+        {
+         "name": "Trey Benson",
+         "sal": 7
+        },
+        {
+         "name": "Geno Smith",
+         "sal": 1
+        },
+        {
+         "name": "Tyler Allgeier",
+         "sal": 1
+        }
+       ],
+       "out": [
+        {
+         "name": "Josh Allen",
+         "sal": 9
+        }
+       ],
+       "picks_in": [
+        "2025 R13"
+       ],
+       "is_fire_seller": false
+      },
+      {
+       "team": "EvanDeFilippis",
+       "record": "4-2",
+       "before": 182,
+       "after": 173,
+       "over": false,
+       "in": [
+        {
+         "name": "Josh Allen",
+         "sal": 9
+        }
+       ],
+       "out": [
+        {
+         "name": "Jonathon Brooks",
+         "sal": 9
+        },
+        {
+         "name": "Trey Benson",
+         "sal": 7
+        },
+        {
+         "name": "Geno Smith",
+         "sal": 1
+        },
+        {
+         "name": "Tyler Allgeier",
+         "sal": 1
+        }
+       ],
+       "picks_in": [],
+       "is_fire_seller": false
+      }
+     ],
+     "fire_sale": false,
+     "violation": false
+    }
+   ]
+  }
+ ]
+}
