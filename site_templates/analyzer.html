@@ -39,16 +39,12 @@ const DATA = /*__DATA__*/{};
 const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
 
 /* rules — mirror the Lab when Apply-to-Home is on, same as the homepage */
-let TABLE={...DATA.cfg.table}, CAP=DATA.cfg.cap, FLOOR=DATA.cfg.floor, labOn=false;
+const TABLE={...DATA.cfg.table};
+let CAP=DATA.cfg.cap, FLOOR=DATA.cfg.floor, labOn=false;
 try{
-  const L=JSON.parse(localStorage.getItem('ggg-lab-v4'));
+  const L=JSON.parse(localStorage.getItem('ggg-lab-v5'));
   if(L&&L.apply==='on'){
     labOn=true;
-    if(L.preset==='old')TABLE={...DATA.steep};
-    else if(L.preset==='custom'&&typeof L.flat==='number'){
-      const t=L.flat/100;TABLE={};
-      for(let r=1;r<=16;r++)TABLE[r]=Math.max(1,Math.round(DATA.steep[r]*(1-t)+11*t));
-    }
     if(typeof L.cap==='number')CAP=L.cap>=180?L.cap:Infinity;
     if(typeof L.floor==='number')FLOOR=L.floor;
   }

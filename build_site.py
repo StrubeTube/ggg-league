@@ -263,18 +263,43 @@ nav.ggg a.labtab.on{background:var(--card);color:var(--gold)}
 .cbrange{position:absolute;top:6px;height:4px;background:var(--gold);opacity:.6;border-radius:2px;pointer-events:none}
 .cbtick{position:absolute;top:1px;bottom:1px;width:3px;background:var(--mint);border-radius:2px}
 .cbtick.bad{background:var(--coral)}
-.newpop{position:fixed;left:18px;top:66px;z-index:60;background:linear-gradient(180deg,var(--card),var(--card2));
-border:2px dashed var(--gold);border-radius:16px;padding:16px 46px 16px 20px;
-box-shadow:0 14px 34px rgba(0,0,0,.45);max-width:360px;animation:npin .5s ease .7s backwards}
-.newpop a{text-decoration:none;display:grid;gap:4px}
-.newpop .npeyebrow{font-size:12px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--gold)}
-.newpop .npmain{font-size:17px;font-weight:800;color:var(--ink);line-height:1.25}
-.newpop .npsub{font-size:12.5px;color:var(--ink2)}
-.newpop .npx{position:absolute;top:6px;right:8px;background:none;border:none;color:var(--ink3);font-size:20px;cursor:pointer;font-family:inherit;padding:2px 6px}
-.newpop .npx:hover{color:var(--ink)}
-@keyframes npin{from{transform:translateX(-130%);opacity:0}}
-@media(max-width:680px){.newpop{top:auto;bottom:16px;left:12px;right:12px;max-width:none;animation-name:npup}
-@keyframes npup{from{transform:translateY(130%);opacity:0}}}
+.navgrp{display:flex;align-items:center;gap:2px;border:1px solid var(--line);border-radius:12px;padding:3px 5px;margin-right:8px}
+.navgrp .navcap{font-size:9px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--ink3);padding:0 7px;white-space:nowrap}
+.navgrp.newg{border-color:var(--mint)}
+.navgrp.newg .navcap{color:var(--mint)}
+.navgrp.histg a{color:var(--ink3)}
+.navgrp.histg a:hover{color:var(--ink)}
+nav.ggg a.pitchtab{margin-left:auto;background:var(--gold);color:#1B1403;border-radius:999px;padding:5px 13px;font-weight:800}
+nav.ggg a.pitchtab:hover{color:#000}
+nav.ggg a.pitchtab.on{outline:2px solid var(--gold);outline-offset:2px}
+@media(max-width:680px){nav.ggg a.pitchtab{margin-left:0}}
+.lockwrap{max-width:380px;margin:80px auto;text-align:center}
+.lockwrap .lockemoji{font-size:44px}
+.lockcode{display:flex;gap:10px;justify-content:center;margin-top:18px}
+.lockcode input{width:200px;text-align:center;font-family:inherit;font-size:26px;font-weight:800;letter-spacing:.35em;
+background:var(--card);border:1px solid var(--line2);border-radius:12px;color:var(--ink);padding:10px 6px}
+.lockcode input:focus{outline:2px solid var(--mint);border-color:var(--mint)}
+.lockbtn{background:var(--mint);color:var(--mint-ink);border:none;border-radius:12px;padding:10px 20px;
+font-family:inherit;font-weight:800;font-size:15px;cursor:pointer}
+.lockerr{color:var(--coral);font-size:13px;font-weight:600;margin-top:12px;min-height:18px}
+.enterbtn{display:inline-block;background:var(--mint);color:var(--mint-ink);border-radius:14px;padding:15px 30px;
+font-weight:800;font-size:17px;text-decoration:none;transition:transform .1s}
+.enterbtn:hover{transform:translateY(-2px)}
+.probgrid{display:grid;gap:12px}
+@media(min-width:760px){.probgrid{grid-template-columns:1fr 1fr 1fr}}
+.probcard{background:var(--card);border:1px solid var(--coral);border-radius:14px;padding:16px 18px}
+.probcard .pemoji{font-size:26px}
+.probcard h3{font-size:15px;font-weight:800;margin:8px 0 6px}
+.probcard p{font-size:13px;color:var(--ink2)}
+.optcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.optcard.a{border-color:var(--mint)}
+.optcard.b{border-color:var(--gold)}
+.optcard .opttag{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.optcard.a .opttag{color:var(--mint)}
+.optcard.b .opttag{color:var(--gold)}
+.optcard h3{font-size:18px;font-weight:800;margin:6px 0 8px}
+.optcard p{font-size:13.5px;color:var(--ink2)}
+.optcard ul{margin:10px 0 0;padding-left:20px;font-size:13px;color:var(--ink2);display:grid;gap:5px}
 .bigsteps{counter-reset:s;list-style:none;margin:0;padding:0;display:grid;gap:10px}
 .bigsteps li{counter-increment:s;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px 14px 56px;position:relative;font-size:14px}
 .bigsteps li::before{content:counter(s);position:absolute;left:16px;top:13px;width:26px;height:26px;border-radius:50%;
@@ -320,36 +345,35 @@ with open(os.path.join(OUT, "ggg.css"), "w", encoding="utf-8") as f:
 import hashlib
 css_v = hashlib.md5(CSS.encode()).hexdigest()[:8]
 
-NAV_LINKS = [("index.html", "Home"), ("history.html", "History"), ("records.html", "Records"),
-             ("drafts.html", "Drafts"), ("trades.html", "Trades"),
-             ("analyzer.html", "Trade Test"), ("lab.html", "Lab")]
+NAV_NEW = [("index.html", "Home"), ("analyzer.html", "Trade Tester")]
+NAV_HIST = [("history.html", "History"), ("records.html", "Records"),
+            ("drafts.html", "Drafts"), ("trades.html", "Trades")]
 
 
 def nav(active):
-    links = "".join(f'<a href="{h}" class="{"on" if h == active else ""}">{t}</a>'
-                    for h, t in NAV_LINKS if h != "lab.html")
+    def links(pairs):
+        return "".join(f'<a href="{h}" class="{"on" if h == active else ""}">{t}</a>'
+                       for h, t in pairs)
+    new_g = ('<div class="navgrp newg"><span class="navcap">New · your team</span>'
+             + links(NAV_NEW) + '</div>')
+    hist_g = ('<div class="navgrp histg"><span class="navcap">League history</span>'
+              + links(NAV_HIST) + '</div>')
+    pitch = f'<a href="pitch.html" class="pitchtab{" on" if active == "pitch.html" else ""}">🧨 The Pitch</a>'
     lab = f'<a href="lab.html" class="labtab{" on" if active == "lab.html" else ""}">🧪 Lab</a>'
-    return f'<nav class="ggg"><div class="in"><span class="logo">GGG</span>{links}{lab}</div></nav>'
+    return f'<nav class="ggg"><div class="in"><span class="logo">GGG</span>{new_g}{hist_g}{pitch}{lab}</div></nav>'
 
 
 FOOT = ('<footer class="ggg"><div class="in">GGG League · data from the Sleeper API · '
         f'stats computed {site["generated"]} · regular-season records unless noted · '
         'grudges update automatically</div></footer>')
 
-# floating top-left pop-up pointing at the pitch page (every page except the pitch itself)
-POPUP = """<div class="newpop" id="newpop" hidden>
-<button class="npx" id="npx" type="button" aria-label="dismiss">×</button>
-<a href="pitch.html"><span class="npeyebrow">🧨 New for 2026</span>
-<span class="npmain">The Cap Keeper format — read the pitch →</span>
-<span class="npsub">Three numbers. Zero fire sales. Same league.</span></a></div>
-<script>(function(){var k='ggg-pitch-pop-v1';try{if(!localStorage.getItem(k)){
-var n=document.getElementById('newpop');n.hidden=false;
-document.getElementById('npx').addEventListener('click',function(){n.hidden=true;
-try{localStorage.setItem(k,'1')}catch(_){}});}}catch(e){}})();</script>"""
+# front-door gate: first visit on any page redirects to the pitch. The pitch
+# page sets the flag on load, so one read-through unlocks the whole site.
+GATE = """<script>try{if(!localStorage.getItem('ggg-pitch-v2'))location.replace('pitch.html');}catch(e){}</script>"""
 
 # ---------------- keeper-planner team data (same order/sort as cap-planner) ----------------
-CFG = {"cap": 230, "floor": 160, "budget": 45, "maxKeep": 5, "waiver": 0,
-       "franchise": True, "kcap": "on",
+CFG = {"cap": 230, "floor": 160, "budget": 0, "maxKeep": 3, "budget5": 70, "waiver": 0,
+       "franchise": False, "kcap": "on",
        "table": {1: 30, 2: 26, 3: 22, 4: 19, 5: 16, 6: 14, 7: 12, 8: 10,
                  9: 8, 10: 7, 11: 6, 12: 5, 13: 4, 14: 3, 15: 2, 16: 2}}
 STEEP_TABLE = {1: 34, 2: 28, 3: 23, 4: 19, 5: 16, 6: 13, 7: 11, 8: 9,
@@ -525,36 +549,26 @@ slices = {
     "records.html": {"records": site["records"], "career": career},
     "drafts.html": {"drafts": site["drafts"]},
     "trades.html": {"trades": site["trades"], "pickValues": site["pick_values"]},
-    "lab.html": {"teams": planner_teams(), "steep": STEEP_TABLE, "adopted": CFG["table"],
-                 # cap/floor optimized over the 2020-25 replays (fire tags include
-                 # Alex's corrections): $230/$160 blocks 15 of 16 fire sales at
-                 # 15/40 normal-trade collateral. The 16th (2024 Josh Allen, a $10
-                 # keeper sold for bodies) is invisible to salary accounting — a
-                 # $170 floor "catches" it only via the buyer and blocks 27/40.
-                 # The cap never binds above $230; the floor does the blocking.
-                 "defaults": {"cap": 230, "floor": 160, "budget": 0, "maxKeep": 3,
-                              "kcap": "on", "slot": "round", "bmode": "guaranteed3", "fr": "off"},
-                 # each preset's cap/floor re-fitted over the 2020-25 replays. Tail
-                 # slotting inflates openings ~$20 (keeper slots return to the board as
-                 # real picks), so its band shifts UP to $250/$170: 14/16 fires at the
-                 # lowest collateral (12/40) with ~0 day-one cap jail (2/60 team-seasons).
-                 # A $220 cap buys the 15th fire but jails ~3 teams/yr at league start —
-                 # rejected. Franchise keep is budget-only: inherits its base's lines.
-                 "presets": [
-                     {"label": "Default 1: Minimal rules", "cap": 230, "floor": 160,
-                      "slot": "round", "fr": "off",
-                      "tip": "Round-slot keeping, no franchise. Cap $230 / floor $160 — blocks 15 of 16 fire sales."},
-                     {"label": "Default 2: Keeper slotting", "cap": 250, "floor": 170,
-                      "slot": "tail", "fr": "off",
-                      "tip": "Keepers off the board (tail picks). Rosters run ~$20 richer, so the band shifts up: cap $250 / floor $170 — blocks 14 of 16 with almost nobody opening in cap jail."},
-                     {"label": "Default 3: Franchise keep", "cap": 230, "floor": 160,
-                      "slot": "round", "fr": "on",
-                      "tip": "One budget-exempt star. Franchise keep never touches roster salary, so the lines stay $230 / $160 — blocks 15 of 16."},
-                     {"label": "Default 4: Slotting + franchise", "cap": 250, "floor": 170,
-                      "slot": "tail", "fr": "on",
-                      "tip": "Off-board keeping plus a franchise star. Uses the tail-slot band: cap $250 / floor $170 — blocks 14 of 16 with almost nobody opening in cap jail."}],
+    "lab.html": {"teams": planner_teams(), "adopted": CFG["table"],
+                 # Rules locked 2026-08-12: flattened table, keepers count against
+                 # team salary, keepers slot on the board at their escalated round.
+                 # cap/floor fitted over the 2020-25 replays (with Alex's corrected
+                 # fire tags): $230/$160 blocks 15 of 16 fire sales at 15/40
+                 # normal-trade collateral. The 16th (2024 Josh Allen, a $10 keeper
+                 # sold for bodies) is invisible to salary accounting. The cap never
+                 # binds above $230; the floor does the blocking. Only open question:
+                 # keeper count — Plan A (exactly 3, no budget: round pricing is the
+                 # budget) vs Plan B (up to 5 under a $70 budget: a kept R1 star is
+                 # $36, two normal-ish mids ~$14-16 each -> $66, room for a flier).
+                 "defaults": {"cap": 230, "floor": 160, "budget5": 70},
+                 "plans": [
+                     {"key": "three", "label": "Plan A — exactly 3 keepers, no budget",
+                      "tip": "The classic. Round pricing is the budget: keeping a star occupies (and costs) an early-round pick."},
+                     {"key": "five", "label": "Plan B — up to 5 keepers, $70 budget",
+                      "tip": "Two extra keeper slots, but every keep must fit the budget. $70 fits one star ($36 max) plus two normal-ish keeps with room for a flier."}],
                  "replay": build_replay()},
-    "pitch.html": {"cfg": {"cap": CFG["cap"], "floor": CFG["floor"], "table": CFG["table"]}},
+    "pitch.html": {"cfg": {"cap": CFG["cap"], "floor": CFG["floor"], "table": CFG["table"],
+                           "budget5": CFG["budget5"]}},
     "analyzer.html": {"teams": planner_teams(), "steep": STEEP_TABLE,
                       "cfg": {"cap": CFG["cap"], "floor": CFG["floor"], "table": CFG["table"]}},
 }
@@ -564,7 +578,8 @@ for page, data in slices.items():
         html = f.read()
     html = html.replace("__NAV__", nav(page)).replace("__FOOT__", FOOT)
     if page != "pitch.html":
-        html = html.replace("</nav>", "</nav>" + POPUP, 1)
+        html = html.replace('<link rel="stylesheet" href="ggg.css">',
+                            GATE + '<link rel="stylesheet" href="ggg.css">', 1)
     html = html.replace('href="ggg.css"', f'href="ggg.css?v={css_v}"')
     html = html.replace("/*__DATA__*/{}", json.dumps(data, ensure_ascii=False))
     with open(os.path.join(OUT, page), "w", encoding="utf-8") as f:

@@ -20,27 +20,21 @@ __FOOT__
 <script>
 const DATA = /*__DATA__*/{};
 const CFG = DATA.cfg;
-let TABLE = CFG.table, KCAP = (CFG.kcap === 'off' ? 'off' : 'on'), BMODE = 'budget',
-    SLOT = 'tail', LAB = null;
+/* locked rules: flattened table, keepers cap-counted, keepers round-slot on the board */
+let TABLE = CFG.table, KCAP = 'on', BMODE = 'budget', SLOT = 'round', LAB = null;
 try{
-  const L = JSON.parse(localStorage.getItem('ggg-lab-v4'));
+  const L = JSON.parse(localStorage.getItem('ggg-lab-v5'));
   if(L && L.apply === 'on'){
     LAB = L;
-    if(L.preset === 'old') TABLE = DATA.steep;
-    else if(L.preset === 'custom'){
-      const t = (L.flat ?? 30)/100, tb = {};
-      for(let r=1;r<=16;r++) tb[r] = Math.max(1, Math.round(DATA.steep[r]*(1-t)+11*t));
-      TABLE = tb;
-    }
-    CFG.table = TABLE;
     if(typeof L.cap === 'number') CFG.cap = (L.cap >= 180 ? L.cap : Infinity);
-    if(typeof L.budget === 'number') CFG.budget = L.budget;
     if(typeof L.floor === 'number') CFG.floor = L.floor;
-    if(L.maxk) CFG.maxKeep = L.maxk;
-    CFG.franchise = L.fr === 'on';
-    KCAP = L.kcap || 'on';
-    BMODE = L.bmode || 'budget';
-    SLOT = L.slot || 'tail';
+    if(L.plan === 'five'){
+      CFG.maxKeep = 5;
+      CFG.budget = (typeof L.budget === 'number' && L.budget > 0) ? L.budget : CFG.budget5;
+    }else{
+      CFG.maxKeep = 3;
+      CFG.budget = 0;
+    }
   }
 }catch(e){}
 const CAPTXT = isFinite(CFG.cap) ? ('$' + CFG.cap) : 'no cap';
@@ -109,11 +103,8 @@ if(LAB){
   const wrap=$('div','labbanner');
   wrap.appendChild($('span',null,'⚗️ Lab rules active on this device: cap '+CAPTXT
     +' · floor '+(CFG.floor>0?('$'+CFG.floor):'off')
-    +' · budget '+(BUDGETON?('$'+CFG.budget):'off')
-    +' · '+(LAB.preset==='old'?'old steep table':(LAB.preset==='custom'?'custom table':'flattened table'))
-    +' · '+(SLOT==='round'?'keepers take their round’s pick':'keepers off the board')
-    +' · keepers '+(KCAP==='off'?'cap-exempt':'cap-counted')
-    +(BMODE==='guaranteed3'?' · 3 keeps guaranteed':'')+(CFG.franchise?' · franchise keep':'')+' — '));
+    +' · '+(LAB.plan==='five'?('Plan B — up to 5 keepers, $'+CFG.budget+' budget'):'Plan A — 3 keepers, no budget')
+    +' — '));
   const a=document.createElement('a');a.href='lab.html';a.textContent='adjust or turn off in the Lab';
   wrap.appendChild(a);
   b.appendChild(wrap);

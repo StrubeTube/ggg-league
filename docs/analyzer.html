@@ -1,15 +1,7 @@
 <meta charset="utf-8">
 <title>GGG League — Trade Tester</title>
-<link rel="stylesheet" href="ggg.css?v=421e395a">
-<nav class="ggg"><div class="in"><span class="logo">GGG</span><a href="index.html" class="">Home</a><a href="history.html" class="">History</a><a href="records.html" class="">Records</a><a href="drafts.html" class="">Drafts</a><a href="trades.html" class="">Trades</a><a href="analyzer.html" class="on">Trade Test</a><a href="lab.html" class="labtab">🧪 Lab</a></div></nav><div class="newpop" id="newpop" hidden>
-<button class="npx" id="npx" type="button" aria-label="dismiss">×</button>
-<a href="pitch.html"><span class="npeyebrow">🧨 New for 2026</span>
-<span class="npmain">The Cap Keeper format — read the pitch →</span>
-<span class="npsub">Three numbers. Zero fire sales. Same league.</span></a></div>
-<script>(function(){var k='ggg-pitch-pop-v1';try{if(!localStorage.getItem(k)){
-var n=document.getElementById('newpop');n.hidden=false;
-document.getElementById('npx').addEventListener('click',function(){n.hidden=true;
-try{localStorage.setItem(k,'1')}catch(_){}});}}catch(e){}})();</script>
+<script>try{if(!localStorage.getItem('ggg-pitch-v2'))location.replace('pitch.html');}catch(e){}</script><link rel="stylesheet" href="ggg.css?v=2efab8ea">
+<nav class="ggg"><div class="in"><span class="logo">GGG</span><div class="navgrp newg"><span class="navcap">New · your team</span><a href="index.html" class="">Home</a><a href="analyzer.html" class="on">Trade Tester</a></div><div class="navgrp histg"><span class="navcap">League history</span><a href="history.html" class="">History</a><a href="records.html" class="">Records</a><a href="drafts.html" class="">Drafts</a><a href="trades.html" class="">Trades</a></div><a href="pitch.html" class="pitchtab">🧨 The Pitch</a><a href="lab.html" class="labtab">🧪 Lab</a></div></nav>
 <div class="wrap">
   <header class="hero">
     <div class="eyebrow">GGG League &middot; under the proposed rules</div>
@@ -47,16 +39,12 @@ const DATA = {"teams": [{"name": "Strubes", "picks": [{"r": 1}, {"r": 2}, {"r": 
 const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
 
 /* rules — mirror the Lab when Apply-to-Home is on, same as the homepage */
-let TABLE={...DATA.cfg.table}, CAP=DATA.cfg.cap, FLOOR=DATA.cfg.floor, labOn=false;
+const TABLE={...DATA.cfg.table};
+let CAP=DATA.cfg.cap, FLOOR=DATA.cfg.floor, labOn=false;
 try{
-  const L=JSON.parse(localStorage.getItem('ggg-lab-v4'));
+  const L=JSON.parse(localStorage.getItem('ggg-lab-v5'));
   if(L&&L.apply==='on'){
     labOn=true;
-    if(L.preset==='old')TABLE={...DATA.steep};
-    else if(L.preset==='custom'&&typeof L.flat==='number'){
-      const t=L.flat/100;TABLE={};
-      for(let r=1;r<=16;r++)TABLE[r]=Math.max(1,Math.round(DATA.steep[r]*(1-t)+11*t));
-    }
     if(typeof L.cap==='number')CAP=L.cap>=180?L.cap:Infinity;
     if(typeof L.floor==='number')FLOOR=L.floor;
   }
