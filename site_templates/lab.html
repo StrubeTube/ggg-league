@@ -36,7 +36,7 @@ __NAV__
 
       <div class="ctl"><div class="ctlrow"><span class="ctlname">4+‑keeper budget</span>
         <input type="range" id="budget" min="40" max="90" step="5"><span class="ctlval" id="budgetV"></span></div>
-        <div class="ctlnote">Only binds a team keeping 4 or 5 — their whole keeper class must fit under it. A kept R1 star costs $36; two normal-ish mids run ~$14–16 each, so $70 fits a star + two mids with room for a flier.</div></div>
+        <div class="ctlnote">Only binds a team keeping 4 or 5 — their whole keeper class must fit under it. A kept R1 star costs $36, so at $50 a star leaves room for bargains only ($36+$10+$3); skipping the star buys a fistful of mids ($14+$12+$10+$8+$6).</div></div>
 
       <div class="ctl"><div class="mlabel">Apply these rules to the Home page</div>
         <div class="filterrow tight" id="applyMode"></div>
@@ -98,8 +98,8 @@ async function syncSleeper(){
 const DEFAULTS={cap:DATA.defaults.cap,floor:DATA.defaults.floor,
   budget:DATA.defaults.budget5,apply:'on',season:'2026',view:'all'};
 let S={...DEFAULTS};
-try{const s=JSON.parse(localStorage.getItem('ggg-lab-v6'));if(s)S={...DEFAULTS,...s};}catch(e){}
-const saveS=()=>{try{localStorage.setItem('ggg-lab-v6',JSON.stringify(S));}catch(e){}};
+try{const s=JSON.parse(localStorage.getItem('ggg-lab-v7'));if(s)S={...DEFAULTS,...s};}catch(e){}
+const saveS=()=>{try{localStorage.setItem('ggg-lab-v7',JSON.stringify(S));}catch(e){}};
 const TABLE=DATA.adopted;
 const capOn=()=>S.cap>=180;
 const capVal=()=>capOn()?S.cap:Infinity;

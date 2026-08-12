@@ -42,7 +42,7 @@ const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==
 const TABLE={...DATA.cfg.table};
 let CAP=DATA.cfg.cap, FLOOR=DATA.cfg.floor, labOn=false;
 try{
-  const L=JSON.parse(localStorage.getItem('ggg-lab-v6'));
+  const L=JSON.parse(localStorage.getItem('ggg-lab-v7'));
   if(L&&L.apply==='on'){
     labOn=true;
     if(typeof L.cap==='number')CAP=L.cap>=180?L.cap:Infinity;

@@ -25,7 +25,7 @@ const CFG = DATA.cfg;
    previews Plan B, where the whole keeper class must fit the $budget5 budget. */
 let TABLE = CFG.table, KCAP = 'on', SLOT = 'round', LAB = null;
 try{
-  const L = JSON.parse(localStorage.getItem('ggg-lab-v6'));
+  const L = JSON.parse(localStorage.getItem('ggg-lab-v7'));
   if(L && L.apply === 'on'){
     LAB = L;
     if(typeof L.cap === 'number') CFG.cap = (L.cap >= 180 ? L.cap : Infinity);
