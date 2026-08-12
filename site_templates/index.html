@@ -503,7 +503,10 @@ function capBoardCard(span){
     row.appendChild(nm);
     const track=$('div','cbtrack');
     let x=0;
-    const segs=cbFilter==='all'?[['k',KCAP==='off'?0:r.ev.keepSpend],['d',r.ev.draftSpend],['f',r.ev.fills*CFG.waiver]]
+    /* round-slot: keeper salaries live INSIDE the pick total — carve them out
+       of the draft segment instead of stacking on top (no double counting) */
+    const kseg=Math.min(r.ev.keepSpend,r.ev.draftSpend);
+    const segs=cbFilter==='all'?[['k',kseg],['d',r.ev.draftSpend-kseg],['f',r.ev.fills*CFG.waiver]]
       :(cbFilter==='k'?[['k',r.ev.keepSpend]]:[['d',r.ev.draftSpend]]);
     segs.forEach(([cls,v])=>{
       if(v<=0)return;

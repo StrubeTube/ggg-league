@@ -1,12 +1,12 @@
 <meta charset="utf-8">
-<title>GGG League — The Cap Keeper Pitch</title>
+<title>GGG League — The 2026 Proposal</title>
 <link rel="stylesheet" href="ggg.css">
 __NAV__
 <div class="wrap">
   <header class="hero">
-    <div class="eyebrow">GGG League &middot; 2026 format proposal &middot; read this first</div>
+    <div class="eyebrow">GGG League &middot; 2026 rules proposal &middot; the league votes before the draft</div>
     <h1>Same league. Real stakes.<br>All season long.</h1>
-    <p class="lede">Before you dive into the new site, here&rsquo;s the one thing we&rsquo;re proposing for 2026. It&rsquo;s not contracts, it&rsquo;s not auctions, and it&rsquo;s not homework. It&rsquo;s <b>three numbers</b> that fix the one thing that keeps breaking our seasons &mdash; and the site you&rsquo;re about to enter does all the math for you.</p>
+    <p class="lede">Before you dive into the new site, here&rsquo;s what&rsquo;s on the table for 2026. It&rsquo;s not contracts, it&rsquo;s not auctions, and it&rsquo;s not homework. It&rsquo;s <b>three numbers</b> that end the fire sale for good &mdash; and a keeper format with a little more game in it. The site you&rsquo;re about to enter does all the math for you.</p>
     <div class="filterrow" style="margin-top:16px">
       <span class="chip mini">✓ same draft</span>
       <span class="chip mini">✓ same keeper spirit</span>
@@ -17,12 +17,12 @@ __NAV__
   </header>
 
   <section>
-    <div class="sec-head"><div class="eyebrow">The problem</div><h2>Picks are free. That&rsquo;s the bug.</h2>
-    <p class="sec-note">No names, no callouts &mdash; we&rsquo;ve all seen the pattern, and under the current rules it&rsquo;s the <i>smart</i> play. That&rsquo;s exactly why it needs a rule, not a lecture:</p></div>
+    <div class="sec-head"><div class="eyebrow">The problem</div><h2>Selling out is free. That&rsquo;s the bug.</h2>
+    <p class="sec-note">Under the current rules, a team that falls out of the race is <i>supposed</i> to sell &mdash; it&rsquo;s the rational play. The rulebook makes it free:</p></div>
     <div class="probgrid">
-      <div class="probcard"><div class="pemoji">📉</div><h3>A season goes sideways&hellip;</h3><p>&hellip;and the best move is to stop playing. Ship the stars out for future picks. Picks cost nothing today, so selling is painless &mdash; the roster gets worse and nothing on the rulebook even blinks.</p></div>
-      <div class="probcard"><div class="pemoji">🚀</div><h3>One team gets a super-team</h3><p>Whoever's closest to the seller lands a playoff roster nobody else got a fair shot at. The title race stops being about drafting and managing — it's about who's nearby when someone quits.</p></div>
-      <div class="probcard"><div class="pemoji">🥱</div><h3>Everyone else gets bye weeks</h3><p>The rest of us spend November playing husks. Matchups stop mattering, the standings warp, and the league feels decided by a transaction instead of by football.</p></div>
+      <div class="probcard"><div class="pemoji">📉</div><h3>Quitting costs nothing</h3><p>A season goes sideways and the smart move is to sell. Future picks cost nothing this year &mdash; and giving up your stars costs nothing next year either, because the roster resets at the draft anyway. There is no downside to nuking your team.</p></div>
+      <div class="probcard"><div class="pemoji">🚀</div><h3>One trade flips the race</h3><p>A contender absorbs a playoff-caliber roster for futures. Months of drafting and managing get outweighed by a single transaction, and the standings warp for every team on the schedule.</p></div>
+      <div class="probcard"><div class="pemoji">📅</div><h3>The earlier deadline didn&rsquo;t fix it</h3><p>We already tried the obvious fix: moving the trade deadline up. It just moved the sell-off up with it &mdash; same disparity, arriving sooner, plus a shorter trading season. Less fun, not more.</p></div>
     </div>
   </section>
 
@@ -31,7 +31,7 @@ __NAV__
     <div class="tiles">
       <div class="tile"><div class="num good" id="tRound">$30 → $2</div><div class="lbl"><b>Every player&rsquo;s salary = his draft round.</b> Round 1 costs $30, round 16 costs $2. No negotiating, no math &mdash; the board sets the price automatically.</div></div>
       <div class="tile"><div class="num" id="tCap"></div><div class="lbl"><b>The cap.</b> No trade may leave your roster above it. Stack stars if you can fit them &mdash; the arms race finally has a ceiling.</div></div>
-      <div class="tile"><div class="num" id="tFloor"></div><div class="lbl"><b>The floor.</b> No trade may leave your roster below it. Sell whoever you want &mdash; but you must get a real team back. Quitting-for-picks is over.</div></div>
+      <div class="tile"><div class="num" id="tFloor"></div><div class="lbl"><b>The floor.</b> No trade may leave your roster below it. Rebuilding and selling are still allowed &mdash; you just can&rsquo;t nuke your roster to nothing. Every team stays a real team all season.</div></div>
     </div>
     <div class="card" style="margin-top:12px">
       <div class="mlabel" style="margin-bottom:8px">The price board</div>
@@ -45,7 +45,7 @@ __NAV__
     <p class="sec-note">A made-up example with the usual shape: a struggling team ships two studs to a contender for future picks and a bench body. Here&rsquo;s how the band judges it:</p></div>
     <div class="card">
       <div id="bandDemo"></div>
-      <p class="cardnote" style="margin-top:10px">Red line = the $<span class="capN"></span> cap &middot; gold line = the $<span class="floorN"></span> floor. The buyer fits &mdash; but the seller&rsquo;s roster crashes through the floor, so <b>the trade never happens</b>. Nobody&rsquo;s banned from rebuilding: the seller just has to take real players back, not only picks. The deal gets renegotiated with actual value both ways &mdash; which is what a trade is supposed to be.</p>
+      <p class="cardnote" style="margin-top:10px">Red line = the $<span class="capN"></span> cap &middot; gold line = the $<span class="floorN"></span> floor. The buyer fits &mdash; but the seller&rsquo;s roster crashes through the floor, so <b>the trade never happens as-is</b>. Rebuilding is still on the table: the seller can move a star, they just have to take real players back alongside the picks. The deal gets renegotiated with value both ways.</p>
     </div>
   </section>
 
@@ -55,7 +55,7 @@ __NAV__
     <ol class="bigsteps">
       <li><b>Draft night is identical.</b> Same board, same snake, same picks. Salaries are assigned by round automatically &mdash; you never set a price.</li>
       <li><b>Keeping is identical in spirit.</b> You still keep your guys; the price just climbs a round a year like it always effectively did.</li>
-      <li><b>Trading is MORE alive, not less.</b> Trade any week, any player, any pick. In six replayed seasons most everyday trades pass untouched &mdash; the band only bites deals where one side stops being a football team.</li>
+      <li><b>Trading gets MORE room, not less.</b> With the band doing the policing, we can push the trade deadline <b>back</b> instead of up &mdash; more weeks of live trading, because fire sales become structurally impossible instead of just early. In six replayed seasons most everyday trades pass untouched; the band only bites deals where one side stops being a football team.</li>
       <li><b>You do zero math.</b> This site prices every roster live, and the <a href="analyzer.html"><b>Trade Tester</b></a> gives any deal a verdict before you even propose it &mdash; and tells you exactly how to fix an illegal one.</li>
     </ol>
   </section>
@@ -72,14 +72,14 @@ __NAV__
 
   <section>
     <div class="sec-head"><div class="eyebrow">The vote</div><h2>One question is still open: how many keepers?</h2>
-    <p class="sec-note">Everything above is the proposal. This is the only piece we haven&rsquo;t settled &mdash; and either way, <b>keeper salaries count toward your team salary</b>. Pick your side:</p></div>
+    <p class="sec-note">Everything above is the proposal. This is the piece the league decides &mdash; and either way, <b>keeper salaries count toward your team salary</b>:</p></div>
     <div class="duo-cards">
       <div class="optcard a"><div class="opttag">Plan A</div><h3>Exactly 3 keepers, no budget</h3>
         <p>The classic. The price board is the only limiter: keeping a star means carrying a big salary and burning an early pick.</p>
         <ul><li>Simplest possible version</li><li>More stars return to the draft</li><li>Zero extra rules beyond the three numbers</li></ul></div>
       <div class="optcard b"><div class="opttag">Plan B</div><h3>Up to 5 keepers, $<span id="bud5"></span> keeper budget</h3>
-        <p>Two extra keeper slots for lottery tickets and late-round gems &mdash; but all your keeps together must fit the budget.</p>
-        <ul><li>Fits one star + two solid keeps, with room for a flier</li><li>Rewards late-round scouting</li><li>One extra number to respect on keeper day</li></ul></div>
+        <p>The new-dynamic option: two extra slots for late-round gems and lottery tickets, with one budget to manage. Every offseason becomes a little GM game &mdash; who did the most with $<span class="bud5b"></span>?</p>
+        <ul><li>Fits one star + two solid keeps, with room for a flier</li><li>Rewards late-round scouting all season long</li><li>Whole new offseason debate: value per dollar</li></ul></div>
     </div>
   </section>
 
@@ -99,6 +99,7 @@ document.getElementById('tCap').textContent='$'+C.cap;
 document.getElementById('tFloor').textContent='$'+C.floor;
 document.getElementById('tRound').textContent='$'+C.table[1]+' → $'+C.table[16];
 document.getElementById('bud5').textContent=C.budget5;
+document.querySelectorAll('.bud5b').forEach(e=>e.textContent=C.budget5);
 document.querySelectorAll('.capN').forEach(e=>e.textContent=C.cap);
 document.querySelectorAll('.floorN').forEach(e=>e.textContent=C.floor);
 

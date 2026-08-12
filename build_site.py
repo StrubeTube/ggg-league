@@ -248,8 +248,6 @@ input[type=range]:disabled{opacity:.35}
 .ctlnote{font-size:11px;color:var(--ink3);line-height:1.5;margin-top:6px}
 .labbanner{margin-top:14px;background:var(--card);border:1px dashed var(--gold);border-radius:10px;padding:9px 14px;font-size:12.5px;color:var(--ink2);line-height:1.5}
 .labbanner a{color:var(--gold);font-weight:600}
-nav.ggg a.labtab{margin-left:auto;border:1px dashed var(--gold);color:var(--gold);border-radius:999px;padding:5px 13px}
-nav.ggg a.labtab.on{background:var(--card);color:var(--gold)}
 .tbl td{white-space:nowrap}
 .tbl td.wrapok{white-space:normal}
 .tbl th.sortable{cursor:pointer;user-select:none;white-space:nowrap}
@@ -263,16 +261,20 @@ nav.ggg a.labtab.on{background:var(--card);color:var(--gold)}
 .cbrange{position:absolute;top:6px;height:4px;background:var(--gold);opacity:.6;border-radius:2px;pointer-events:none}
 .cbtick{position:absolute;top:1px;bottom:1px;width:3px;background:var(--mint);border-radius:2px}
 .cbtick.bad{background:var(--coral)}
-.navgrp{display:flex;align-items:center;gap:2px;border:1px solid var(--line);border-radius:12px;padding:3px 5px;margin-right:8px}
-.navgrp .navcap{font-size:9px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--ink3);padding:0 7px;white-space:nowrap}
-.navgrp.newg{border-color:var(--mint)}
+.navgrp{display:flex;flex-direction:column;gap:0;margin-right:14px}
+.navgrp .navcap{font-size:8.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);padding:2px 11px 0;white-space:nowrap;user-select:none;opacity:.85}
+.navgrp .navlinks{display:flex;gap:2px}
 .navgrp.newg .navcap{color:var(--mint)}
+.navgrp.histg{border-left:1px solid var(--line);padding-left:10px}
 .navgrp.histg a{color:var(--ink3)}
 .navgrp.histg a:hover{color:var(--ink)}
 nav.ggg a.pitchtab{margin-left:auto;background:var(--gold);color:#1B1403;border-radius:999px;padding:5px 13px;font-weight:800}
 nav.ggg a.pitchtab:hover{color:#000}
 nav.ggg a.pitchtab.on{outline:2px solid var(--gold);outline-offset:2px}
 @media(max-width:680px){nav.ggg a.pitchtab{margin-left:0}}
+nav.ggg a.labtab{margin-left:0;border:none;color:var(--ink3);font-size:12px;border-radius:8px;padding:6px 10px}
+nav.ggg a.labtab:hover{color:var(--ink2)}
+nav.ggg a.labtab.on{background:var(--card);color:var(--ink)}
 .lockwrap{max-width:380px;margin:80px auto;text-align:center}
 .lockwrap .lockemoji{font-size:44px}
 .lockcode{display:flex;gap:10px;justify-content:center;margin-top:18px}
@@ -282,9 +284,13 @@ background:var(--card);border:1px solid var(--line2);border-radius:12px;color:va
 .lockbtn{background:var(--mint);color:var(--mint-ink);border:none;border-radius:12px;padding:10px 20px;
 font-family:inherit;font-weight:800;font-size:15px;cursor:pointer}
 .lockerr{color:var(--coral);font-size:13px;font-weight:600;margin-top:12px;min-height:18px}
-.enterbtn{display:inline-block;background:var(--mint);color:var(--mint-ink);border-radius:14px;padding:15px 30px;
-font-weight:800;font-size:17px;text-decoration:none;transition:transform .1s}
-.enterbtn:hover{transform:translateY(-2px)}
+.enterbtn{display:inline-block;background:linear-gradient(135deg,var(--gold),#EFC85F 55%,var(--gold));background-size:200% 200%;
+color:#1B1403;border-radius:18px;padding:20px 46px;font-weight:800;font-size:21px;text-decoration:none;
+animation:goldpulse 2.4s ease-out infinite,goldsheen 5s ease infinite;transition:transform .12s}
+.enterbtn:hover{transform:translateY(-3px) scale(1.03)}
+@keyframes goldpulse{0%{box-shadow:0 0 0 0 rgba(217,169,60,.55)}70%{box-shadow:0 0 0 20px rgba(217,169,60,0)}100%{box-shadow:0 0 0 0 rgba(217,169,60,0)}}
+@keyframes goldsheen{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@media(prefers-reduced-motion:reduce){.enterbtn{animation:none}}
 .probgrid{display:grid;gap:12px}
 @media(min-width:760px){.probgrid{grid-template-columns:1fr 1fr 1fr}}
 .probcard{background:var(--card);border:1px solid var(--coral);border-radius:14px;padding:16px 18px}
@@ -355,11 +361,11 @@ def nav(active):
         return "".join(f'<a href="{h}" class="{"on" if h == active else ""}">{t}</a>'
                        for h, t in pairs)
     new_g = ('<div class="navgrp newg"><span class="navcap">New · your team</span>'
-             + links(NAV_NEW) + '</div>')
+             '<div class="navlinks">' + links(NAV_NEW) + '</div></div>')
     hist_g = ('<div class="navgrp histg"><span class="navcap">League history</span>'
-              + links(NAV_HIST) + '</div>')
-    pitch = f'<a href="pitch.html" class="pitchtab{" on" if active == "pitch.html" else ""}">🧨 The Pitch</a>'
-    lab = f'<a href="lab.html" class="labtab{" on" if active == "lab.html" else ""}">🧪 Lab</a>'
+              '<div class="navlinks">' + links(NAV_HIST) + '</div></div>')
+    pitch = f'<a href="pitch.html" class="pitchtab{" on" if active == "pitch.html" else ""}">🗳️ The Proposal</a>'
+    lab = f'<a href="lab.html" class="labtab{" on" if active == "lab.html" else ""}">⚙️ Commish tools</a>'
     return f'<nav class="ggg"><div class="in"><span class="logo">GGG</span>{new_g}{hist_g}{pitch}{lab}</div></nav>'
 
 
