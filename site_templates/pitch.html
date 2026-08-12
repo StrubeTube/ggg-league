@@ -113,7 +113,7 @@ for(let r=1;r<=16;r++){
 const scale=280;
 const demo=[{name:'The buyer',from:150,to:204,note:'fits under the cap — legal'},
  {name:'The seller',from:180,to:126,note:'through the floor — DEAL DEAD'}];
-demo.forEach((d,di)=>{
+demo.forEach(d=>{
   const row=$('div','cbrow');
   const nm=$('div','cbname');nm.appendChild($('span','cbteam',d.name));row.appendChild(nm);
   const tr=$('div','cbtrack');
@@ -136,14 +136,5 @@ demo.forEach((d,di)=>{
   val.appendChild($('span','mut small',d.note));
   row.appendChild(val);
   document.getElementById('bandDemo').appendChild(row);
-  /* between the two rosters: what actually changes hands */
-  if(di===0){
-    const flow=$('div','tradeflow');
-    const fin=$('div','flowin');
-    fin.appendChild($('span','flowup','⬆ two studs ($30 + $26) go up'));
-    fin.appendChild($('span','flowdn','a $2 bench body comes down ⬇'));
-    flow.appendChild(fin);
-    document.getElementById('bandDemo').appendChild(flow);
-  }
 });
 </script>
