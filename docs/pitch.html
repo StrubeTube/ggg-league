@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <title>GGG League — The 2026 Proposal</title>
-<link rel="stylesheet" href="ggg.css?v=d46e77d3">
+<link rel="stylesheet" href="ggg.css?v=3fcb69c8">
 <nav class="ggg"><div class="in"><span class="logo">GGG</span><div class="navgrp newg"><span class="navcap">New · your team</span><div class="navlinks"><a href="index.html" class="">Home</a><a href="analyzer.html" class="">Trade Tester</a></div></div><div class="navgrp histg"><span class="navcap">League history</span><div class="navlinks"><a href="history.html" class="">History</a><a href="records.html" class="">Records</a><a href="drafts.html" class="">Drafts</a><a href="trades.html" class="">Trades</a></div></div><a href="pitch.html" class="pitchtab on">🗳️ The Proposal</a><a href="lab.html" class="labtab">⚙️ Commish tools</a></div></nav>
 <div class="wrap">
   <header class="hero">
@@ -22,7 +22,7 @@
     <div class="probgrid">
       <div class="probcard"><div class="pemoji">📉</div><h3>Quitting costs nothing</h3><p>A season goes sideways and the smart move is to sell. Future picks cost nothing this year &mdash; and giving up your stars costs nothing next year either, because the roster resets at the draft anyway. There is no downside to nuking your team.</p></div>
       <div class="probcard"><div class="pemoji">🚀</div><h3>One trade flips the race</h3><p>A contender absorbs a playoff-caliber roster for futures. Months of drafting and managing get outweighed by a single transaction, and the standings warp for every team on the schedule.</p></div>
-      <div class="probcard"><div class="pemoji">📅</div><h3>The earlier deadline didn&rsquo;t fix it</h3><p>We already tried the obvious fix: moving the trade deadline up. It just moved the sell-off up with it &mdash; same disparity, arriving sooner, plus a shorter trading season. Less fun, not more.</p></div>
+      <div class="probcard"><div class="pemoji">🛡️</div><h3>League integrity takes the hit</h3><p>Moving the deadline up was our attempt to protect the race. The sell-off just happens earlier now &mdash; the standings still get warped by one-sided deals, and we gave up trading weeks to get there. The integrity of the season needs real protection, not a shorter calendar.</p></div>
     </div>
   </section>
 
@@ -111,9 +111,9 @@ for(let r=1;r<=16;r++){
 
 /* hypothetical fire-sale demo: seller ships 2 studs ($30+$26) for a $2 body + picks */
 const scale=280;
-[{name:'The buyer',from:150,to:204,note:'fits under the cap — legal'},
- {name:'The seller',from:180,to:126,note:'through the floor — DEAL DEAD'}]
-.forEach(d=>{
+const demo=[{name:'The buyer',from:150,to:204,note:'fits under the cap — legal'},
+ {name:'The seller',from:180,to:126,note:'through the floor — DEAL DEAD'}];
+demo.forEach((d,di)=>{
   const row=$('div','cbrow');
   const nm=$('div','cbname');nm.appendChild($('span','cbteam',d.name));row.appendChild(nm);
   const tr=$('div','cbtrack');
@@ -123,6 +123,11 @@ const scale=280;
   tr.appendChild(seg);
   const band=$('div','cbrange');band.style.left=(Math.min(d.from,d.to)/scale*100)+'%';
   band.style.width=(Math.abs(d.from-d.to)/scale*100)+'%';tr.appendChild(band);
+  /* direction arrow: where this roster's salary moves and by how much */
+  const gain=d.to>d.from,delta=Math.abs(d.to-d.from);
+  const ar=$('div','cbarrow '+(bad?'bad2':'good2'),gain?('+$'+delta+' ⟶'):('⟵ −$'+delta));
+  ar.style.left=(((d.from+d.to)/2)/scale*100)+'%';
+  tr.appendChild(ar);
   const cl=$('div','cbcap');cl.style.left=(C.cap/scale*100)+'%';tr.appendChild(cl);
   const fl=$('div','cbfloor');fl.style.left=(C.floor/scale*100)+'%';tr.appendChild(fl);
   row.appendChild(tr);
@@ -131,5 +136,14 @@ const scale=280;
   val.appendChild($('span','mut small',d.note));
   row.appendChild(val);
   document.getElementById('bandDemo').appendChild(row);
+  /* between the two rosters: what actually changes hands */
+  if(di===0){
+    const flow=$('div','tradeflow');
+    const fin=$('div','flowin');
+    fin.appendChild($('span','flowup','⬆ two studs ($30 + $26) go up'));
+    fin.appendChild($('span','flowdn','a $2 bench body comes down ⬇'));
+    flow.appendChild(fin);
+    document.getElementById('bandDemo').appendChild(flow);
+  }
 });
 </script>

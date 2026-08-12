@@ -291,6 +291,14 @@ animation:goldpulse 2.4s ease-out infinite,goldsheen 5s ease infinite;transition
 @keyframes goldpulse{0%{box-shadow:0 0 0 0 rgba(217,169,60,.55)}70%{box-shadow:0 0 0 20px rgba(217,169,60,0)}100%{box-shadow:0 0 0 0 rgba(217,169,60,0)}}
 @keyframes goldsheen{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 @media(prefers-reduced-motion:reduce){.enterbtn{animation:none}}
+.cbarrow{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:11px;font-weight:800;
+white-space:nowrap;z-index:3;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.cbarrow.good2{color:#fff}
+.cbarrow.bad2{color:#fff}
+.tradeflow{display:grid;grid-template-columns:minmax(120px,150px) 1fr 92px;gap:10px;margin:2px 0}
+.tradeflow .flowin{grid-column:2;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:11.5px;font-weight:700}
+.tradeflow .flowup{color:var(--mint)}
+.tradeflow .flowdn{color:var(--gold)}
 .probgrid{display:grid;gap:12px}
 @media(min-width:760px){.probgrid{grid-template-columns:1fr 1fr 1fr}}
 .probcard{background:var(--card);border:1px solid var(--coral);border-radius:14px;padding:16px 18px}
