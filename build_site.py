@@ -359,6 +359,38 @@ with open(os.path.join(OUT, "ggg.css"), "w", encoding="utf-8") as f:
 import hashlib
 css_v = hashlib.md5(CSS.encode()).hexdigest()[:8]
 
+# ---------------- favicon: the mint GGG square from the nav ----------------
+FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<rect width="64" height="64" rx="14" fill="#2FE6A6"/>
+<text x="32" y="43" text-anchor="middle" font-family="Arial,Helvetica,sans-serif"
+ font-size="26" font-weight="900" fill="#062019" letter-spacing="-1.5">GGG</text>
+</svg>"""
+with open(os.path.join(OUT, "favicon.svg"), "w", encoding="utf-8") as f:
+    f.write(FAVICON_SVG)
+
+try:
+    from PIL import Image, ImageDraw, ImageFont
+    for size, fname in ((32, "favicon-32.png"), (180, "apple-touch-icon.png")):
+        img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+        d = ImageDraw.Draw(img)
+        r = round(size * 14 / 64)
+        d.rounded_rectangle([0, 0, size - 1, size - 1], radius=r, fill=(47, 230, 166, 255))
+        try:
+            fnt = ImageFont.truetype("arialbd.ttf", round(size * 0.40))
+        except OSError:
+            fnt = ImageFont.load_default()
+        bb = d.textbbox((0, 0), "GGG", font=fnt)
+        d.text(((size - (bb[2] - bb[0])) / 2 - bb[0], (size - (bb[3] - bb[1])) / 2 - bb[1]),
+               "GGG", font=fnt, fill=(6, 32, 25, 255))
+        img.save(os.path.join(OUT, fname))
+    print("favicons written (svg + png)")
+except ImportError:
+    print("favicons written (svg only — Pillow not installed)")
+
+ICONS = ('<link rel="icon" type="image/svg+xml" href="favicon.svg">'
+         '<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">'
+         '<link rel="apple-touch-icon" href="apple-touch-icon.png">')
+
 NAV_NEW = [("index.html", "Home"), ("analyzer.html", "Trade Tester")]
 NAV_HIST = [("history.html", "History"), ("records.html", "Records"),
             ("drafts.html", "Drafts"), ("trades.html", "Trades")]
@@ -611,9 +643,9 @@ for page, data in slices.items():
     with open(os.path.join(TPL, page), encoding="utf-8") as f:
         html = f.read()
     html = html.replace("__NAV__", nav(page)).replace("__FOOT__", FOOT)
-    if page != "pitch.html":
-        html = html.replace('<link rel="stylesheet" href="ggg.css">',
-                            GATE + '<link rel="stylesheet" href="ggg.css">', 1)
+    gate = GATE if page != "pitch.html" else ""
+    html = html.replace('<link rel="stylesheet" href="ggg.css">',
+                        gate + ICONS + '<link rel="stylesheet" href="ggg.css">', 1)
     html = html.replace('href="ggg.css"', f'href="ggg.css?v={css_v}"')
     html = html.replace("/*__DATA__*/{}", json.dumps(data, ensure_ascii=False))
     with open(os.path.join(OUT, page), "w", encoding="utf-8") as f:
