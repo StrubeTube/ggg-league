@@ -386,7 +386,10 @@ FOOT = ('<footer class="ggg"><div class="in">GGG League · data from the Sleeper
 GATE = """<script>try{if(!localStorage.getItem('ggg-pitch-v2'))location.replace('pitch.html');}catch(e){}</script>"""
 
 # ---------------- keeper-planner team data (same order/sort as cap-planner) ----------------
-CFG = {"cap": 230, "floor": 160, "budget": 0, "maxKeep": 3, "budget5": 70, "waiver": 0,
+# maxKeep 5: everyone may select up to 5 keeps — with 3 or fewer no budget
+# applies (Plan A); a 4th/5th keep requires the whole class to fit budget5
+# (Plan B preview). The Home page shows both worlds on one screen.
+CFG = {"cap": 230, "floor": 160, "budget": 0, "maxKeep": 5, "budget5": 70, "waiver": 0,
        "franchise": False, "kcap": "on",
        "table": {1: 30, 2: 26, 3: 22, 4: 19, 5: 16, 6: 14, 7: 12, 8: 10,
                  9: 8, 10: 7, 11: 6, 12: 5, 13: 4, 14: 3, 15: 2, 16: 2}}
@@ -596,11 +599,6 @@ slices = {
                  # budget) vs Plan B (up to 5 under a $70 budget: a kept R1 star is
                  # $36, two normal-ish mids ~$14-16 each -> $66, room for a flier).
                  "defaults": {"cap": 230, "floor": 160, "budget5": 70},
-                 "plans": [
-                     {"key": "three", "label": "Plan A — exactly 3 keepers, no budget",
-                      "tip": "The classic. Round pricing is the budget: keeping a star occupies (and costs) an early-round pick."},
-                     {"key": "five", "label": "Plan B — up to 5 keepers, $70 budget",
-                      "tip": "Two extra keeper slots, but every keep must fit the budget. $70 fits one star ($36 max) plus two normal-ish keeps with room for a flier."}],
                  "replay": build_replay()},
     "pitch.html": {"cfg": {"cap": CFG["cap"], "floor": CFG["floor"], "table": CFG["table"],
                            "budget5": CFG["budget5"]}},

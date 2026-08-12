@@ -18,15 +18,13 @@ __NAV__
   <header class="hero">
     <div class="eyebrow">GGG League &middot; Commissioner's Lab &middot; not league policy</div>
     <h1>The rule simulator</h1>
-    <p class="lede">The 2026 rule set is locked except for one question: <b>how many keepers?</b> Locked: the flattened salary table, keepers count against team salary, keepers slot on the board at their escalated round, and the cap band — <b>$230 cap / $160 floor</b>, fitted to six seasons of replayed history (blocks 15 of the 16 tagged fire sales at the least damage to normal trading; the 16th sold a $10 keeper star for a pile of bodies, which no salary rule can see). Pick a plan, drag the sliders, and watch every season re-judge itself. Settings save on this device.</p>
+    <p class="lede">The 2026 rule set is locked except for one question: <b>how many keepers?</b> Locked: the flattened salary table, keepers count against team salary, keepers slot on the board at their escalated round, and the cap band — <b>$230 cap / $160 floor</b>, fitted to six seasons of replayed history (blocks 15 of the 16 tagged fire sales at the least damage to normal trading; the 16th sold a $10 keeper star for a pile of bodies, which no salary rule can see). Drag the sliders and watch every season re-judge itself; keeper count needs no toggle — 3-or-fewer keeps run budget-free, a 4th or 5th puts the class under the budget. Settings save on this device.</p>
   </header>
 
   <div class="dash" style="margin-top:22px">
     <div class="dcard c5">
-      <div class="dcard-head"><h3 class="cardh">The open question</h3></div>
-      <div class="mlabel">Keeper plan — the one rule still up for a vote</div>
-      <div class="filterrow tight" id="planRow"></div>
-      <p class="ctlnote" id="planTip"></p>
+      <div class="dcard-head"><h3 class="cardh">The sliders</h3></div>
+      <div class="ctlnote">Keeper count is the open vote, and the site shows both worlds at once: with <b>3 or fewer keeps no budget applies</b> (the 3-keeper rules); a <b>4th or 5th keep puts the whole keeper class under the budget</b> below (the 5-keeper rules). Players preview both from their own Keeper corner.</div>
 
       <div class="ctl"><div class="ctlrow"><span class="ctlname">Team cap</span>
         <input type="range" id="cap" min="175" max="260" step="5"><span class="ctlval" id="capV"></span></div>
@@ -36,9 +34,9 @@ __NAV__
         <input type="range" id="floor" min="0" max="170" step="5"><span class="ctlval" id="floorV"></span></div>
         <div class="ctlnote"><b>Higher → fire sales die:</b> sellers must take real salary back. <b>Lower/off → liquidations return.</b> Fitted value: $160. Waivers never trip it.</div></div>
 
-      <div class="ctl"><div class="ctlrow"><span class="ctlname">Keeper budget</span>
+      <div class="ctl"><div class="ctlrow"><span class="ctlname">4+‑keeper budget</span>
         <input type="range" id="budget" min="40" max="90" step="5"><span class="ctlval" id="budgetV"></span></div>
-        <div class="ctlnote" id="budgetNote"></div></div>
+        <div class="ctlnote">Only binds a team keeping 4 or 5 — their whole keeper class must fit under it. A kept R1 star costs $36; two normal-ish mids run ~$14–16 each, so $70 fits a star + two mids with room for a flier.</div></div>
 
       <div class="ctl"><div class="mlabel">Apply these rules to the Home page</div>
         <div class="filterrow tight" id="applyMode"></div>
@@ -95,17 +93,16 @@ async function syncSleeper(){
   return map;
 }
 
-/* lab settings */
-const DEFAULTS={plan:'three',cap:DATA.defaults.cap,floor:DATA.defaults.floor,
+/* lab settings — keeper rules are count-adaptive: <=3 keeps no budget,
+   4-5 keeps put the whole class under the budget slider */
+const DEFAULTS={cap:DATA.defaults.cap,floor:DATA.defaults.floor,
   budget:DATA.defaults.budget5,apply:'on',season:'2026',view:'all'};
 let S={...DEFAULTS};
-try{const s=JSON.parse(localStorage.getItem('ggg-lab-v5'));if(s)S={...DEFAULTS,...s};}catch(e){}
-const saveS=()=>{try{localStorage.setItem('ggg-lab-v5',JSON.stringify(S));}catch(e){}};
+try{const s=JSON.parse(localStorage.getItem('ggg-lab-v6'));if(s)S={...DEFAULTS,...s};}catch(e){}
+const saveS=()=>{try{localStorage.setItem('ggg-lab-v6',JSON.stringify(S));}catch(e){}};
 const TABLE=DATA.adopted;
 const capOn=()=>S.cap>=180;
 const capVal=()=>capOn()?S.cap:Infinity;
-const maxk=()=>S.plan==='five'?5:3;
-const budgetOn=()=>S.plan==='five';
 
 function escal(r,steps){
   const n=r-steps;
@@ -120,7 +117,7 @@ function evalLab(ti){
   let capDraft=0;
   tm.picks.slice(0,16).forEach(p=>capDraft+=TABLE[p.r]);   // keepers occupy their round's pick
   return {k,keepSpend,capDraft,opening:capDraft,
-          overBudget:budgetOn()&&keepSpend>S.budget,overCount:k>maxk()};
+          overBudget:k>3&&keepSpend>S.budget,overCount:k>5};
 }
 
 /* ---- controls ---- */
@@ -140,27 +137,16 @@ sliders.forEach(([id])=>{
   });
 });
 function render(){
-  const pr=document.getElementById('planRow');pr.textContent='';
-  DATA.plans.forEach(p=>{
-    const b=$('button','tpill sm'+(S.plan===p.key?' active':''),p.label);b.type='button';b.title=p.tip;
-    b.addEventListener('click',()=>{S.plan=p.key;saveS();render();});
-    pr.appendChild(b);
-  });
-  document.getElementById('planTip').textContent=(DATA.plans.find(p=>p.key===S.plan)||{}).tip||'';
   pillGroup('applyMode',[['on','On — Home mirrors the Lab'],['off','Off — Home uses the shipped defaults']],()=>S.apply,k=>S.apply=k);
 
   sliders.forEach(([id,fmt])=>{
     const el=document.getElementById(id);
     el.value=S[id];
-    el.disabled=(id==='budget'&&!budgetOn());
-    document.getElementById(id+'V').textContent=(id==='budget'&&!budgetOn())?'—':fmt(S[id]);
+    document.getElementById(id+'V').textContent=fmt(S[id]);
   });
-  document.getElementById('budgetNote').innerHTML=budgetOn()
-    ?'<b>Plan B only.</b> Every keep must fit under it. A kept R1 star costs $36; two normal-ish mids run ~$14–16 each — $70 fits a star + two mids with room for a flier.'
-    :'Only used under Plan B — with exactly 3 keepers, round pricing is the budget.';
 
   /* gold boxes: what's net new vs the old base Sleeper rules */
-  [['cap',capOn()],['floor',S.floor>0],['budget',budgetOn()],['planRow',S.plan==='five']]
+  [['cap',capOn()],['floor',S.floor>0],['budget',true]]
     .forEach(([id,mod])=>{
       const c=document.getElementById(id)?.closest('.ctl');
       if(c)c.classList.toggle('modded',mod);
@@ -198,16 +184,16 @@ function render(){
   if(S.season==='2026'){
     const rows=DATA.teams.map((tm,ti)=>({name:tm.name,ev:evalLab(ti)}));
     if(S.view==='k'){
-      note.textContent='Keeper salaries per team from the keeps selected on this device.'+(budgetOn()?' Gold line = the keeper budget.':'');
+      note.textContent='Keeper salaries per team from the keeps selected on this device. Gold line = the 4+‑keeper budget — it only binds teams keeping 4 or 5.';
       rows.sort((a,b)=>b.ev.keepSpend-a.ev.keepSpend);
       const overB=rows.filter(r=>r.ev.overBudget).length;
-      [[overB?'fire':'even',budgetOn()?(overB+' over budget'):'no budget (Plan A)'],
+      [[overB?'fire':'even',overB+' over the 4+ budget'],
        ['even',rows.reduce((a,r)=>a+r.ev.k,0)+' keepers selected league-wide']]
         .forEach(([c2,t2])=>sum.appendChild($('span','chip '+c2,t2)));
-      const scale=Math.max(60,(budgetOn()?S.budget:45)+20,...rows.map(r=>r.ev.keepSpend+5));
+      const scale=Math.max(60,S.budget+20,...rows.map(r=>r.ev.keepSpend+5));
       rows.forEach(r=>board.appendChild(brow(r.name,r.ev.k+' K',[['k',r.ev.keepSpend]],scale,
-        [['cbfloor',budgetOn()?S.budget:null]],'$'+r.ev.keepSpend,r.ev.overBudget,
-        budgetOn()&&r.ev.keepSpend?(Math.round(r.ev.keepSpend/S.budget*100)+'% of budget'):'')));
+        [['cbfloor',S.budget]],'$'+r.ev.keepSpend,r.ev.overBudget,
+        r.ev.k>3?(Math.round(r.ev.keepSpend/S.budget*100)+'% of budget'):'≤3 keeps — no budget')));
     }else if(S.view==='d'){
       note.textContent='Draft-pick salary each team carries into 2026 from the picks they hold.';
       rows.sort((a,b)=>b.ev.capDraft-a.ev.capDraft);
@@ -221,7 +207,7 @@ function render(){
       const overCap=rows.filter(r=>r.ev.opening>capVal()).length;
       const overB=rows.filter(r=>r.ev.overBudget).length;
       [[overCap?'fire':'even',overCap+' team'+(overCap===1?'':'s')+' in cap jail'],
-       [overB?'fire':'even',budgetOn()?(overB+' over budget'):'no budget (Plan A)'],
+       [overB?'fire':'even',overB+' over the 4+ budget'],
        ['even','avg opening $'+Math.round(rows.reduce((a,r)=>a+r.ev.opening,0)/rows.length)]]
         .forEach(([c2,t2])=>sum.appendChild($('span','chip '+c2,t2)));
       const scale=Math.max(280,capOn()?S.cap+40:0);
@@ -229,25 +215,25 @@ function render(){
         [['d',r.ev.opening]],scale,
         [['cbcap',capOn()?S.cap:null],['cbfloor',S.floor>0?S.floor:null]],
         '$'+r.ev.opening,r.ev.opening>capVal(),
-        budgetOn()?('keepers $'+r.ev.keepSpend+'/$'+S.budget):('keepers $'+r.ev.keepSpend))));
+        'keepers $'+r.ev.keepSpend+(r.ev.k>3?('/$'+S.budget):''))));
     }
   }else{
     const sn=DATA.replay.find(r=>r.s===S.season);
     if(S.view==='k'){
-      note.textContent='That season’s actual keeper classes priced by the locked table.'+(budgetOn()?' Gold line = keeper budget — who would have been over it back then.':'');
+      note.textContent='That season’s actual keeper classes priced by the locked table. Gold line = the 4+‑keeper budget — it would only have bound a team keeping 4 or 5.';
       const teams=sn.teams.map(t=>{
         let ksum=0,n=0;
         sn.draft.forEach(d2=>{if(d2.rid===t.rid&&d2.k){ksum+=TABLE[d2.r];n++;}});
         return {name:t.name,ksum,n};
       }).sort((a,b)=>b.ksum-a.ksum);
-      const overB=budgetOn()?teams.filter(t=>t.ksum>S.budget).length:0;
-      [[overB?'fire':'even',budgetOn()?(overB+' would have been over budget'):'no budget (Plan A)'],
+      const overB=teams.filter(t=>t.n>3&&t.ksum>S.budget).length;
+      [[overB?'fire':'even',overB+' would have been over the 4+ budget'],
        ['even',teams.reduce((a,t)=>a+t.n,0)+' keepers that year']]
         .forEach(([c2,t2])=>sum.appendChild($('span','chip '+c2,t2)));
-      const scale=Math.max(60,(budgetOn()?S.budget:45)+20,...teams.map(t=>t.ksum+5));
+      const scale=Math.max(60,S.budget+20,...teams.map(t=>t.ksum+5));
       teams.forEach(t=>board.appendChild(brow(t.name,t.n+' K',[['k',t.ksum]],scale,
-        [['cbfloor',budgetOn()?S.budget:null]],'$'+t.ksum,budgetOn()&&t.ksum>S.budget,
-        budgetOn()?(Math.round(t.ksum/S.budget*100)+'% of budget'):'')));
+        [['cbfloor',S.budget]],'$'+t.ksum,t.n>3&&t.ksum>S.budget,
+        t.n>3?(Math.round(t.ksum/S.budget*100)+'% of budget'):'≤3 keeps — no budget')));
     }else if(S.view==='d'){
       note.textContent='Non-keeper draft salary per team that season, priced by the locked table.';
       const teams=sn.teams.map(t=>{

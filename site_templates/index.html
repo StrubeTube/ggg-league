@@ -20,25 +20,21 @@ __FOOT__
 <script>
 const DATA = /*__DATA__*/{};
 const CFG = DATA.cfg;
-/* locked rules: flattened table, keepers cap-counted, keepers round-slot on the board */
-let TABLE = CFG.table, KCAP = 'on', BMODE = 'budget', SLOT = 'round', LAB = null;
+/* locked rules: flattened table, keepers cap-counted, keepers round-slot on the board.
+   Keeper count is the open vote: <=3 keeps = Plan A (no budget); a 4th/5th keep
+   previews Plan B, where the whole keeper class must fit the $budget5 budget. */
+let TABLE = CFG.table, KCAP = 'on', SLOT = 'round', LAB = null;
 try{
-  const L = JSON.parse(localStorage.getItem('ggg-lab-v5'));
+  const L = JSON.parse(localStorage.getItem('ggg-lab-v6'));
   if(L && L.apply === 'on'){
     LAB = L;
     if(typeof L.cap === 'number') CFG.cap = (L.cap >= 180 ? L.cap : Infinity);
     if(typeof L.floor === 'number') CFG.floor = L.floor;
-    if(L.plan === 'five'){
-      CFG.maxKeep = 5;
-      CFG.budget = (typeof L.budget === 'number' && L.budget > 0) ? L.budget : CFG.budget5;
-    }else{
-      CFG.maxKeep = 3;
-      CFG.budget = 0;
-    }
+    if(typeof L.budget === 'number' && L.budget > 0) CFG.budget5 = L.budget;
   }
 }catch(e){}
 const CAPTXT = isFinite(CFG.cap) ? ('$' + CFG.cap) : 'no cap';
-const BUDGETON = CFG.budget > 0;
+const BUD5 = CFG.budget5;
 const escal = (r,s)=>{const n=r-s;return n>=1?TABLE[n]:TABLE[1]+6*(1-n);};
 DATA.teams.forEach(tm=>tm.players.forEach(p=>{if(p.el){p.k26=escal(p.r,1);p.k27=escal(p.r,2);}}));
 const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
@@ -103,7 +99,7 @@ function evalTeam(ti){
     opening=(KCAP==='off'?0:keepSpend)+draftSpend+fills*CFG.waiver;
   }
   return {keepSpend,budgetSpend,franchiseName,next27,k,draftSpend,fills,usedPicks,opening,
-          overBudget:BUDGETON&&(BMODE==='guaranteed3'?(k>3&&budgetSpend>CFG.budget):budgetSpend>CFG.budget),
+          overBudget:k>3&&keepSpend>BUD5,   // budget only exists in the 4-5 keep world
           overCount:k>CFG.maxKeep};
 }
 const capital=ti=>DATA.teams[ti].picks.reduce((a,p)=>a+TABLE[p.r],0);
@@ -127,8 +123,7 @@ if(LAB){
   const wrap=$('div','labbanner');
   wrap.appendChild($('span',null,'⚗️ Lab rules active on this device: cap '+CAPTXT
     +' · floor '+(CFG.floor>0?('$'+CFG.floor):'off')
-    +' · '+(LAB.plan==='five'?('Plan B — up to 5 keepers, $'+CFG.budget+' budget'):'Plan A — 3 keepers, no budget')
-    +' — '));
+    +' · 4+‑keeper budget $'+BUD5+' — '));
   const a=document.createElement('a');a.href='lab.html';a.textContent='adjust or turn off in the Lab';
   wrap.appendChild(a);
   b.appendChild(wrap);
@@ -287,12 +282,18 @@ function renderDash(){
   const meters=$('div','kmeters');
   const m1=$('div');
   const locked=isOfficial(myTeam);
-  m1.appendChild($('div','mlabel',(BUDGETON?('Budget $'+ev.budgetSpend+' / $'+CFG.budget):('No keeper budget · keeper salaries $'+ev.keepSpend))
-    +' · '+ev.k+'/'+CFG.maxKeep+' slots'
-    +(CFG.franchise&&ev.franchiseName?' · franchise: '+ev.franchiseName:'')
-    +(locked?' — 🔒 official, set in Sleeper':(ev.overCount?' — TOO MANY':(ev.k>=CFG.maxKeep?' — full, untick to swap':'')))));
-  const met=$('div','meter');const fb=$('div','fillbar'+(ev.overBudget?' over':''));
-  fb.style.width=(BUDGETON?Math.min(100,ev.budgetSpend/CFG.budget*100):0)+'%';met.appendChild(fb);m1.appendChild(met);
+  const fiveMode=ev.k>3;   // a 4th/5th keep flips the view into the 5-keeper-rule preview
+  m1.appendChild($('div','mlabel',(fiveMode
+      ?('5-KEEPER RULE PREVIEW · budget $'+ev.keepSpend+' / $'+BUD5)
+      :('3-keeper rules · keeper salaries $'+ev.keepSpend+' · no budget'))
+    +' · '+ev.k+'/'+(fiveMode?5:3)+' slots'
+    +(locked?' — 🔒 official, set in Sleeper'
+      :(fiveMode?(ev.overBudget?' — OVER BUDGET':'')
+        :(ev.k===3?' — tap a 4th to preview the 5-keeper rule':'')))));
+  if(fiveMode){
+    const met=$('div','meter');const fb=$('div','fillbar'+(ev.overBudget?' over':''));
+    fb.style.width=Math.min(100,ev.keepSpend/BUD5*100)+'%';met.appendChild(fb);m1.appendChild(met);
+  }
   meters.appendChild(m1);
   const m2=$('div');
   const d=CFG.cap-ev.opening;
@@ -526,12 +527,11 @@ function capBoardCard(span){
     allNote+='.';
   }
   const notes={all:allNote,
-               k:BUDGETON?('Keeper salary only. Dashed line = $'+CFG.budget+' keeper budget.')
-                 :'Keeper salary only — no keeper budget is set.',
+               k:'Keeper salary only. Gold line = the $'+BUD5+' budget — it only applies to a team keeping 4 or 5.',
                d:'Draft-round salary only, from the picks each team holds for 2026.'};
   cb.appendChild($('p','cardnote2',notes[cbFilter]));
-  const scale=cbFilter==='k'?Math.max(60,(BUDGETON?CFG.budget:45)+15):250;
-  const capLine=cbFilter==='k'?(BUDGETON?CFG.budget:null):(cbFilter==='d'?null:(isFinite(CFG.cap)?CFG.cap:null));
+  const scale=cbFilter==='k'?Math.max(60,BUD5+15):250;
+  const capLine=cbFilter==='k'?BUD5:(cbFilter==='d'?null:(isFinite(CFG.cap)?CFG.cap:null));
   const floorLine=(cbFilter==='all'&&CFG.floor>0)?CFG.floor:null;
   const rows=DATA.teams.map((tm,ti)=>{
     const ev=evalTeam(ti);
@@ -557,15 +557,15 @@ function capBoardCard(span){
       seg.style.left=(x/scale*100)+'%';seg.style.width=(Math.min(v,scale-x)/scale*100)+'%';
       track.appendChild(seg);x+=v;
     });
-    if(capLine!==null){const cap=$('div','cbcap');cap.style.left=(capLine/scale*100)+'%';track.appendChild(cap);}
+    if(capLine!==null){const cap=$('div',cbFilter==='k'?'cbfloor':'cbcap');cap.style.left=(capLine/scale*100)+'%';track.appendChild(cap);}
     if(floorLine!==null){const fl=$('div','cbfloor');fl.style.left=(floorLine/scale*100)+'%';track.appendChild(fl);}
     row.appendChild(track);
     const val=$('div','cbval');
-    const over=(cbFilter==='k'&&BUDGETON&&r.val>CFG.budget)||(cbFilter==='all'&&r.val>CFG.cap);
+    const over=(cbFilter==='k'&&r.ev.overBudget)||(cbFilter==='all'&&r.val>CFG.cap);
     val.appendChild($('b',over?'bad':'','$'+r.val));
     const sub=cbFilter==='all'
       ?(KCAP==='off'?('keepers $'+r.ev.keepSpend+' exempt'):((r.val?Math.round(r.ev.keepSpend/r.val*100):0)+'% keepers'))
-      :(cbFilter==='k'?r.ev.k+' of '+CFG.maxKeep+' slots':r.ev.usedPicks+' picks');
+      :(cbFilter==='k'?(r.ev.k+' keep'+(r.ev.k===1?'':'s')+(r.ev.k>3?' · budget applies':'')):r.ev.usedPicks+' picks');
     val.appendChild($('span','mut small',sub));
     row.appendChild(val);
     cb.appendChild(row);
