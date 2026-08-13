@@ -6,7 +6,7 @@ __NAV__
   <header class="hero">
     <div class="eyebrow">GGG League &middot; under the proposed rules</div>
     <h1>The Trade Tester</h1>
-    <p class="lede">Pick two teams, click the players changing sides, and get the verdict before you embarrass yourself in the group chat. Salaries come from 2025 draft rounds under the current price table; waiver pickups are <b>$0</b>. Future picks are $0 against this season&rsquo;s band — they hit the buyer&rsquo;s opening cap next year instead.</p>
+    <p class="lede">Pick two teams, click the players changing sides, and get the verdict before you embarrass yourself in the group chat. Every number matches the Home page: players carry their <b>2026 price</b> (one round up from where they were drafted), each team starts from its <b>projected 2026 opening</b> — the same figure as the cap board — and waiver pickups are <b>$0</b>. Future picks are $0 against this season&rsquo;s band; they hit the buyer&rsquo;s opening cap next year instead.</p>
     <div class="chiprow" id="ruleNote" style="margin-top:12px"></div>
   </header>
 
@@ -53,8 +53,12 @@ const rn=document.getElementById('ruleNote');
 rn.appendChild($('span','chip '+(labOn?'gold':'even'),(labOn?'⚗️ Lab rules active: ':'Default rules: ')+
   (isFinite(CAP)?('cap $'+CAP):'no cap')+' · '+(FLOOR>0?('floor $'+FLOOR):'no floor')));
 
-const price=p=>p.el?TABLE[p.r]:0;
-const rosterTotal=ti=>DATA.teams[ti].players.reduce((a,p)=>a+price(p),0);
+/* 2026 keeper price — one round up from the drafted round, same as the Home
+   keeper corner (baked as k26 by the build); waiver adds are $0 */
+const price=p=>p.el?p.k26:0;
+/* team baseline = projected 2026 opening from the 16 held picks — the exact
+   number the Home cap board shows */
+const openOf=ti=>DATA.teams[ti].picks.slice(0,16).reduce((a,p)=>a+TABLE[p.r],0);
 
 let ta=0,tb=1,outA=new Set(),outB=new Set();
 
@@ -71,7 +75,7 @@ function pills(hostId,get,other,set){
 function sideBox(ti,out,boxId,headId,salId){
   const tm=DATA.teams[ti];
   document.getElementById(headId).textContent=tm.name;
-  document.getElementById(salId).textContent='roster $'+Math.round(rosterTotal(ti));
+  document.getElementById(salId).textContent='opens $'+Math.round(openOf(ti));
   const box=document.getElementById(boxId);box.textContent='';
   const players=tm.players.map((p,i)=>({p,i})).sort((a,b)=>price(b.p)-price(a.p)||a.p.n.localeCompare(b.p.n));
   players.forEach(({p,i})=>{
@@ -120,7 +124,7 @@ function render(){
   if(!outA.size&&!outB.size){title.textContent='Build a trade';
     hints.appendChild($('p','mut small','Click players above to move them across.'));return;}
 
-  const bA=rosterTotal(ta), bB=rosterTotal(tb);
+  const bA=openOf(ta), bB=openOf(tb);
   const outSalA=sum(ta,outA), outSalB=sum(tb,outB);
   const aA=bA-outSalA+outSalB, aB=bB-outSalB+outSalA;
   const vA=(aA>CAP&&aA>bA)||(FLOOR>0&&aA<FLOOR&&aA<bA);
