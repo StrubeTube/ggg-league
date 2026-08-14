@@ -181,6 +181,24 @@ function renderIdentity(){
   host.appendChild(band);
 }
 
+/* assign the chosen keepers to the team's held picks — the shared rule:
+   priciest keep first, exact keep round if that pick is free, otherwise the
+   next earlier free pick (covers traded-away rounds AND two keeps colliding
+   on the same round). Returns {picks16, asg: playerIndex -> pick item}. */
+function assignKeeps(tm,chosen){
+  const picks16=tm.picks.slice(0,16).map(p=>({type:'pick',r:p.r,from:p.from,cost:TABLE[p.r],name:null,pi:null}));
+  const asg={};
+  [...chosen].map(pi=>({pi,p:tm.players[pi]})).filter(x=>x.p.el)
+    .sort((a,b)=>b.p.k26-a.p.k26)
+    .forEach(({pi,p})=>{
+      const it=picks16.find(x=>x.pi===null&&x.r===p.kr26)
+        ||[...picks16].reverse().find(x=>x.pi===null&&x.r<=p.kr26)
+        ||picks16.find(x=>x.pi===null);
+      if(it){it.pi=pi;asg[pi]=it;}
+    });
+  return {picks16,asg};
+}
+
 function anatomyCard(tm,ev){
   const c=card(12,'Cap anatomy — where every dollar sits');
   const chosen=sel(myTeam);
@@ -199,14 +217,10 @@ function anatomyCard(tm,ev){
   /* build the cap items: every keeper and every 2026 pick, priced */
   const items=[];
   if(SLOT==='round'){
-    const picks16=tm.picks.slice(0,16).map(p=>({type:'pick',r:p.r,from:p.from,cost:TABLE[p.r],name:null}));
-    const ks=[...chosen].map(pi=>tm.players[pi]).filter(p=>p.el).sort((a,b)=>b.k26-a.k26);
-    ks.forEach(p=>{
-      const kr=p.kr26;   // keep round = the pick the keeper occupies
-      const it=picks16.find(x=>!x.name&&x.r===kr)
-        ||[...picks16].reverse().find(x=>!x.name&&x.r<=kr)
-        ||picks16.find(x=>!x.name);
-      if(it){it.type='keeper';it.name=p.n;if(KCAP==='off'){it.cost=0;it.exempt=true;}}
+    const {picks16,asg}=assignKeeps(tm,chosen);
+    Object.entries(asg).forEach(([pi,it])=>{
+      it.type='keeper';it.name=tm.players[pi].n;
+      if(KCAP==='off'){it.cost=0;it.exempt=true;}
     });
     items.push(...picks16);
   }else{
@@ -273,7 +287,7 @@ function anatomyCard(tm,ev){
     leg.appendChild($('span',cls,lab));
   });
   c.appendChild(leg);
-  c.appendChild($('p','cardnote','Every 2026 cap dollar for '+tm.name+', largest hit first. Solid = keepers, faded = draft picks — each keeper sits in his keep round: the round he was drafted, or one earlier if he was already a keeper in 2025. If that round’s pick was traded away he takes the team’s next earlier pick. Hover (or tap) any slice for its label.'));
+  c.appendChild($('p','cardnote','Every 2026 cap dollar for '+tm.name+', largest hit first. Solid = keepers, faded = draft picks — each keeper sits in his keep round: the round he was drafted, or one earlier if he was already a keeper in 2025. If that round’s pick was traded away — or two keeps want the same round — the cheaper keep moves up to the next earlier pick. Hover (or tap) any slice for its label.'));
   return c;
 }
 
@@ -316,6 +330,8 @@ function renderDash(){
   meters.appendChild(m2);
   kc.appendChild(meters);
   const list=$('div','roster tallroster');
+  /* where each selected keep actually lands (traded rounds + collisions) */
+  const KA=assignKeeps(tm,sel(myTeam)).asg;
   tm.players.map((p,pi)=>({p,pi}))
     .filter(x=>x.p.el && x.p.pos!=='DEF')
     .sort((a,b)=>b.p.k26-a.p.k26)
@@ -324,6 +340,23 @@ function renderDash(){
     const on=sel(myTeam).has(pi);
     const atLimit=!on&&sel(myTeam).size>=CFG.maxKeep;
     const noPick=!tm.picks.some(x=>x.r===p.kr26);   // keep-round pick traded away
+    const a=on?KA[pi]:null;
+    const moved=!!(a&&a.r!==p.kr26);
+    let warn='',badge='R'+p.kr26,bad=false;
+    if(moved){
+      bad=true;badge='⚠ R'+a.r;
+      const dir=(a.r<p.kr26?'moves up to R':'moves to R')+a.r;
+      if(noPick){warn=' · ⚠ R'+p.kr26+' pick traded away — '+dir;}
+      else{
+        const occ=Object.entries(KA).find(([qi,it])=>+qi!==pi&&it.r===p.kr26);
+        warn=' · ⚠ R'+p.kr26+' taken by '+(occ?tm.players[+occ[0]].n:'another keep')+' — '+dir;
+      }
+    }else if(on&&!a){
+      bad=true;badge='⚠ —';warn=' · ⚠ no open pick left for this keep';
+    }else if(!on&&noPick){
+      bad=true;badge='⚠ R'+p.kr26;
+      warn=' · ⚠ R'+p.kr26+' pick traded away — would use your next earlier pick';
+    }
     const row=$('div','prow'+(on?' on':'')+(atLimit?' inel':''));
     row.appendChild($('span','tick',on?(isOff?'🔒':'✓'):''));
     const im=document.createElement('img');im.className='pshot';im.alt='';im.loading='lazy';
@@ -333,10 +366,9 @@ function renderDash(){
     const nm=$('span','pname',p.n);nm.appendChild($('span','meta',p.pos+(p.t?' · '+p.t:'')
       +(p.kp?' · kept ’25':'')
       +(isOff?' · 🔒 set in Sleeper':'')
-      +(noPick?' · ⚠ R'+p.kr26+' pick traded away — uses your next earlier pick':'')));
+      +warn));
     row.appendChild(nm);
-    const rd=$('span','rnd'+(noPick?' bad':''),(noPick?'⚠ ':'')+'R'+p.kr26);
-    row.appendChild(rd);
+    row.appendChild($('span','rnd'+(bad?' bad':''),badge));
     row.appendChild($('span','cost','$'+p.k26));
     row.appendChild($('span','next','→ $'+p.k27));
     row.tabIndex=0;
