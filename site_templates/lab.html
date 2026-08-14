@@ -117,7 +117,7 @@ function escal(r,steps){
 function evalLab(ti){
   const tm=DATA.teams[ti],chosen=sel(ti);
   let keepSpend=0;
-  chosen.forEach(pi=>{const p=tm.players[pi];if(p.el)keepSpend+=escal(p.r,1);});
+  chosen.forEach(pi=>{const p=tm.players[pi];if(p.el)keepSpend+=escal(p.r,p.kp?1:0);});
   const k=chosen.size;
   let capDraft=0;
   tm.picks.slice(0,16).forEach(p=>capDraft+=TABLE[p.r]);   // keepers occupy their round's pick

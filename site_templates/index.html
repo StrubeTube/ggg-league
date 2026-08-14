@@ -36,7 +36,13 @@ try{
 const CAPTXT = isFinite(CFG.cap) ? ('$' + CFG.cap) : 'no cap';
 const BUD5 = CFG.budget5;
 const escal = (r,s)=>{const n=r-s;return n>=1?TABLE[n]:TABLE[1]+6*(1-n);};
-DATA.teams.forEach(tm=>tm.players.forEach(p=>{if(p.el){p.k26=escal(p.r,1);p.k27=escal(p.r,2);}}));
+/* keep round: fresh 2025 draftees keep at their drafted round for one year
+   (kp=0, no escalation yet); players who were already keepers in 2025 (kp=1)
+   escalate one round now. kr26 = the round the keep actually occupies. */
+DATA.teams.forEach(tm=>tm.players.forEach(p=>{if(p.el){
+  p.k26=escal(p.r,p.kp?1:0);p.k27=escal(p.r,p.kp?2:1);
+  p.kr26=Math.max(1,p.r-(p.kp?1:0));
+}}));
 const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
 
 /* ---------- state (keeper selections shared with the planner) ---------- */
@@ -196,7 +202,7 @@ function anatomyCard(tm,ev){
     const picks16=tm.picks.slice(0,16).map(p=>({type:'pick',r:p.r,from:p.from,cost:TABLE[p.r],name:null}));
     const ks=[...chosen].map(pi=>tm.players[pi]).filter(p=>p.el).sort((a,b)=>b.k26-a.k26);
     ks.forEach(p=>{
-      const kr=Math.max(1,p.r-1);   // escalated round = the pick the keeper occupies
+      const kr=p.kr26;   // keep round = the pick the keeper occupies
       const it=picks16.find(x=>!x.name&&x.r===kr)
         ||[...picks16].reverse().find(x=>!x.name&&x.r<=kr)
         ||picks16.find(x=>!x.name);
@@ -267,7 +273,7 @@ function anatomyCard(tm,ev){
     leg.appendChild($('span',cls,lab));
   });
   c.appendChild(leg);
-  c.appendChild($('p','cardnote','Every 2026 cap dollar for '+tm.name+', largest hit first. Solid = keepers, faded = draft picks — each keeper sits in the round his escalated price occupies. Hover (or tap) any slice for its label.'));
+  c.appendChild($('p','cardnote','Every 2026 cap dollar for '+tm.name+', largest hit first. Solid = keepers, faded = draft picks — each keeper sits in his keep round: the round he was drafted, or one earlier if he was already a keeper in 2025. If that round’s pick was traded away he takes the team’s next earlier pick. Hover (or tap) any slice for its label.'));
   return c;
 }
 
@@ -317,6 +323,7 @@ function renderDash(){
     const isOff=off.includes(pi);
     const on=sel(myTeam).has(pi);
     const atLimit=!on&&sel(myTeam).size>=CFG.maxKeep;
+    const noPick=!tm.picks.some(x=>x.r===p.kr26);   // keep-round pick traded away
     const row=$('div','prow'+(on?' on':'')+(atLimit?' inel':''));
     row.appendChild($('span','tick',on?(isOff?'🔒':'✓'):''));
     const im=document.createElement('img');im.className='pshot';im.alt='';im.loading='lazy';
@@ -324,9 +331,12 @@ function renderDash(){
     im.onerror=function(){this.style.visibility='hidden';};
     row.appendChild(im);
     const nm=$('span','pname',p.n);nm.appendChild($('span','meta',p.pos+(p.t?' · '+p.t:'')
-      +(isOff?' · 🔒 set in Sleeper':'')));
+      +(p.kp?' · kept ’25':'')
+      +(isOff?' · 🔒 set in Sleeper':'')
+      +(noPick?' · ⚠ R'+p.kr26+' pick traded away — uses your next earlier pick':'')));
     row.appendChild(nm);
-    row.appendChild($('span','rnd','R'+p.r));
+    const rd=$('span','rnd'+(noPick?' bad':''),(noPick?'⚠ ':'')+'R'+p.kr26);
+    row.appendChild(rd);
     row.appendChild($('span','cost','$'+p.k26));
     row.appendChild($('span','next','→ $'+p.k27));
     row.tabIndex=0;

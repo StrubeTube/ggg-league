@@ -467,8 +467,10 @@ GATE = """<script>try{if(!localStorage.getItem('ggg-pitch-v2'))location.replace(
 # maxKeep 5: everyone may select up to 5 keeps — with 3 or fewer no budget
 # applies (Plan A); a 4th/5th keep requires the whole class to fit budget5
 # (Plan B preview). The Home page shows both worlds on one screen.
-# budget5 $50: a kept R1 star is $36, so 4-5 keeps means star + bargains
-# ($36+$10+$3) or a mid-round fistful ($14+$12+$10+$8+$6) — not star + mids.
+# budget5 $50: a fresh R1 keep is $30 and a star re-kept past R1 is $36+, so
+# 4-5 keeps means star + bargains or a mid-round fistful — not star + mids.
+# Keep rounds: fresh 2025 draftees keep at their drafted round for one year;
+# players who were already keepers in 2025 (kp=1) escalate one round now.
 CFG = {"cap": 230, "floor": 160, "budget": 0, "maxKeep": 5, "budget5": 50, "waiver": 0,
        "franchise": False, "kcap": "on",
        "table": {1: 30, 2: 26, 3: 22, 4: 19, 5: 16, 6: 14, 7: 12, 8: 10,
@@ -486,8 +488,12 @@ def planner_teams():
     players_db = load("players_nfl.json")
     users = {u["user_id"]: u for u in load("users_2025.json")}
     rosters = load("rosters_2025.json")
-    draft_round = {str(p["player_id"]): p["round"]
-                   for p in load("draftpicks_2025_1256797701333319680.json")}
+    draft25 = load("draftpicks_2025_1256797701333319680.json")
+    draft_round = {str(p["player_id"]): p["round"] for p in draft25}
+    # players who were already keepers in 2025: their keep round escalates NOW
+    # (one earlier than the round they were kept at); fresh 2025 draftees keep
+    # at their drafted round for one year before the climb starts
+    kept25 = {str(p["player_id"]) for p in draft25 if p.get("is_keeper")}
     name_of = {r["roster_id"]: (users.get(r["owner_id"]) or {}).get("display_name", "Former manager")
                for r in rosters}
 
@@ -528,7 +534,9 @@ def planner_teams():
             e = {"pid": str(pid), "n": pdb.get("name") or f"?{pid}",
                  "pos": pdb.get("pos") or "?", "t": pdb.get("team") or ""}
             if rnd is not None:
-                e.update({"el": True, "r": rnd, "k26": escalate(rnd, 1), "k27": escalate(rnd, 2)})
+                kp = 1 if str(pid) in kept25 else 0
+                e.update({"el": True, "r": rnd, "kp": kp,
+                          "k26": escalate(rnd, kp), "k27": escalate(rnd, kp + 1)})
             else:
                 e["el"] = False
             plist.append(e)
