@@ -143,7 +143,8 @@ footer.ggg .in{max-width:1360px;margin:0 auto;padding:18px 20px;font-size:12px;c
 .meter .fillbar.over{background:var(--coral)}
 .rostercard{margin-top:12px}
 .roster{display:grid;gap:6px}
-.prow{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:10px;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 13px;cursor:pointer}
+.prow{display:grid;grid-template-columns:auto auto 1fr auto auto auto;gap:10px;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 13px;cursor:pointer}
+.pshot{width:30px;height:30px;border-radius:50%;object-fit:cover;background:var(--surface);border:1px solid var(--line2);flex:none}
 .prow.on{border-color:var(--mint)}
 .prow.inel{cursor:default;opacity:.55}
 .prow:focus-visible{outline:2px solid var(--mint);outline-offset:2px}

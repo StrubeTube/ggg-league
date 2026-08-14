@@ -319,6 +319,10 @@ function renderDash(){
     const atLimit=!on&&sel(myTeam).size>=CFG.maxKeep;
     const row=$('div','prow'+(on?' on':'')+(atLimit?' inel':''));
     row.appendChild($('span','tick',on?(isOff?'🔒':'✓'):''));
+    const im=document.createElement('img');im.className='pshot';im.alt='';im.loading='lazy';
+    im.src='https://sleepercdn.com/content/nfl/players/'+p.pid+'.jpg';
+    im.onerror=function(){this.style.visibility='hidden';};
+    row.appendChild(im);
     const nm=$('span','pname',p.n);nm.appendChild($('span','meta',p.pos+(p.t?' · '+p.t:'')
       +(isOff?' · 🔒 set in Sleeper':'')));
     row.appendChild(nm);
