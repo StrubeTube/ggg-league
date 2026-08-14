@@ -330,3 +330,47 @@ box-shadow:0 6px 18px rgba(0,0,0,.35);pointer-events:none}
 .rline{display:flex;justify-content:space-between;gap:12px;padding:2px 0;flex-wrap:wrap;font-variant-numeric:tabular-nums}
 .ctl.modded{border:1px dashed var(--gold);border-radius:10px;padding:10px 12px;margin:8px 0;background:color-mix(in srgb,var(--gold) 14%,transparent)}
 .ctl.modded::before{content:'🆕 NET NEW vs the old league rules';display:block;font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--gold);margin-bottom:6px}
+/* ---------- mobile (single breakpoint, all pages) ---------- */
+@media(max-width:680px){
+html{-webkit-text-size-adjust:100%}
+.wrap{padding:18px 12px 56px}
+section{margin-top:36px}
+h1{font-size:clamp(24px,7.6vw,32px)}
+.lede{font-size:14px}
+h2{font-size:19px}
+.card,.dcard{padding:13px 13px}
+.card:has(> .tbl){overflow-x:auto}
+/* nav collapses to one horizontally-scrollable row; captions hide */
+nav.ggg .in{flex-wrap:nowrap;overflow-x:auto;gap:2px;padding:8px 12px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+nav.ggg .in::-webkit-scrollbar{display:none}
+nav.ggg .logo{width:28px;height:28px;font-size:11px;margin-right:6px;flex:none}
+.navgrp{margin-right:6px;flex:none}
+.navgrp .navcap{display:none}
+.navgrp.histg{padding-left:6px}
+nav.ggg a{font-size:12.5px;padding:6px 9px;white-space:nowrap}
+nav.ggg a.pitchtab,nav.ggg a.labtab{flex:none}
+.idband{padding:13px;gap:10px}
+.archbadge{width:100%;padding:10px 12px}
+.idname{font-size:16px;max-width:none}
+.teambar .tpill{padding:5px 11px;font-size:12px}
+/* keeper rows: the next-year column goes; everything tightens */
+.prow{grid-template-columns:auto auto 1fr auto auto;gap:8px;padding:7px 10px}
+.prow .next{display:none}
+.pshot{width:26px;height:26px}
+.pname{font-size:12.5px}
+/* salary bar rows (cap board / Trade Tester / proposal demo):
+   name and value share the top line, the track gets the full width below */
+.cbrow{grid-template-columns:minmax(0,1fr) auto;row-gap:5px;column-gap:8px;min-height:0;padding:2px 0}
+.cbtrack{grid-column:1 / -1;grid-row:2;height:20px}
+.cbval{max-width:60%}
+.cbval .small{font-size:10.5px}
+.luckrow{grid-template-columns:92px 1fr 46px}
+.mcrow{flex-direction:column;align-items:center}
+.enterbtn{display:block;text-align:center;padding:17px 20px;font-size:18px}
+.anatbar{height:64px}
+.anatseg span{max-height:58px}
+.anattip{top:74px}
+.lockwrap{margin:48px auto}
+.ctlrow{grid-template-columns:90px 1fr 64px}
+footer.ggg .in{padding:14px 12px}
+}
