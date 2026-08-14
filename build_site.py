@@ -685,7 +685,7 @@ slices = {
                  # binds above $230; the floor does the blocking. Only open question:
                  # keeper count — Plan A (exactly 3, no budget: round pricing is the
                  # budget) vs Plan B (up to 5 under the budget5 keeper budget).
-                 "defaults": {"cap": 230, "floor": 160, "budget5": 70},
+                 "defaults": {"cap": 230, "floor": 160, "budget5": 50},
                  "replay": build_replay()},
     "pitch.html": {"cfg": {"cap": CFG["cap"], "floor": CFG["floor"], "table": CFG["table"],
                            "budget5": CFG["budget5"]}},
