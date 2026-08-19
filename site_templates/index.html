@@ -10,7 +10,6 @@ __NAV__
       <p class="lede" id="heroSub">Pick your team — this becomes your franchise dashboard.</p>
     </div>
     <div class="teambar" id="teambar"></div>
-    <div id="labbanner"></div>
   </header>
 
   <div id="identity"></div>
@@ -20,21 +19,11 @@ __FOOT__
 <script>
 const DATA = /*__DATA__*/{};
 const CFG = DATA.cfg;
-/* locked rules: flattened table, keepers cap-counted, keepers round-slot on the board.
-   Keeper count is the open vote: <=3 keeps = Plan A (no budget); a 4th/5th keep
-   previews Plan B, where the whole keeper class must fit the $budget5 budget. */
-let TABLE = CFG.table, KCAP = 'on', SLOT = 'round', LAB = null;
-try{
-  const L = JSON.parse(localStorage.getItem('ggg-lab-v7'));
-  if(L && L.apply === 'on'){
-    LAB = L;
-    if(typeof L.cap === 'number') CFG.cap = (L.cap >= 180 ? L.cap : Infinity);
-    if(typeof L.floor === 'number') CFG.floor = L.floor;
-    if(typeof L.budget === 'number' && L.budget > 0) CFG.budget5 = L.budget;
-  }
-}catch(e){}
+/* THE 2026 RULES (adopted): flattened salary table, exactly 3 keepers (no
+   budget), keeper salaries count against team salary, keepers slot on the
+   board at their keep round, $230 cap / $160 floor band checked on trades. */
+let TABLE = CFG.table, KCAP = 'on', SLOT = 'round';
 const CAPTXT = isFinite(CFG.cap) ? ('$' + CFG.cap) : 'no cap';
-const BUD5 = CFG.budget5;
 const escal = (r,s)=>{const n=r-s;return n>=1?TABLE[n]:TABLE[1]+6*(1-n);};
 /* keep round: fresh 2025 draftees keep at their drafted round for one year
    (kp=0, no escalation yet); players who were already keepers in 2025 (kp=1)
@@ -52,7 +41,7 @@ try{const s=JSON.parse(localStorage.getItem(LSKEY));if(s&&s.picks)kstate=s;}catc
 const saveK=()=>{try{localStorage.setItem(LSKEY,JSON.stringify(kstate));}catch(e){}};
 let myTeam=parseInt(localStorage.getItem(MYKEY) ?? '-1');
 /* official Sleeper keepers are LOCKED IN for that team (can't be unticked),
-   but extra picks on top are allowed up to the 5-keep cap so anyone can
+   but extra picks on top are allowed up to the 3-keep limit so anyone can
    preview a fuller class; teams without official keepers are fully free */
 let OFFICIAL={};
 DATA.teams.forEach((tm,ti)=>{if(tm.ok&&tm.ok.length)OFFICIAL[ti]=tm.ok;});
@@ -109,9 +98,7 @@ function evalTeam(ti){
     usedPicks=used.length;
     opening=(KCAP==='off'?0:keepSpend)+draftSpend+fills*CFG.waiver;
   }
-  return {keepSpend,budgetSpend,franchiseName,next27,k,draftSpend,fills,usedPicks,opening,
-          overBudget:k>3&&keepSpend>BUD5,   // budget only exists in the 4-5 keep world
-          overCount:k>CFG.maxKeep};
+  return {keepSpend,budgetSpend,franchiseName,next27,k,draftSpend,fills,usedPicks,opening};
 }
 const capital=ti=>DATA.teams[ti].picks.reduce((a,p)=>a+TABLE[p.r],0);
 
@@ -126,18 +113,6 @@ function card(span,title,chipTxt){
 }
 function skel(card,lines){
   for(let i=0;i<lines;i++){const s=$('div','skel');s.style.width=(88-i*14)+'%';card.appendChild(s);}
-}
-
-/* ---------- lab banner ---------- */
-if(LAB){
-  const b=document.getElementById('labbanner');
-  const wrap=$('div','labbanner');
-  wrap.appendChild($('span',null,'⚗️ Lab rules active on this device: cap '+CAPTXT
-    +' · floor '+(CFG.floor>0?('$'+CFG.floor):'off')
-    +' · 4+‑keeper budget $'+BUD5+' — '));
-  const a=document.createElement('a');a.href='lab.html';a.textContent='adjust or turn off in the Lab';
-  wrap.appendChild(a);
-  b.appendChild(wrap);
 }
 
 /* ---------- team picker ---------- */
@@ -291,6 +266,21 @@ function anatomyCard(tm,ev){
   return c;
 }
 
+/* the adopted 2026 rules, in one glance */
+function rulesCard(){
+  const c=card(12,'The 2026 rules — adopted');
+  const t=$('div','tiles');
+  [['$30 → $2','Salary = draft round. R1 costs $'+TABLE[1]+', R16 costs $'+TABLE[16]+'. The board sets every price automatically.'],
+   ['3 keepers','Keep up to 3. A keeper costs his keep round — the round he was drafted, one earlier per year already kept — and burns that pick.'],
+   [CAPTXT+' / $'+CFG.floor,'The cap band. No trade may move a roster the wrong way outside it: further over the cap, or further under the floor.'],
+   ['$0 waivers','Waiver and free-agent adds are free, so every team can always field a lineup — even in cap jail.']]
+    .forEach(([num,lbl])=>{const tile=$('div','tile');
+      tile.appendChild($('div','num',num));tile.appendChild($('div','lbl',lbl));t.appendChild(tile);});
+  c.appendChild(t);
+  c.appendChild($('p','cardnote','Check any deal against the band in the Trade Tester before you propose it.'));
+  return c;
+}
+
 function renderDash(){
   const dash=document.getElementById('dash');dash.textContent='';
   if(myTeam<0){
@@ -298,6 +288,7 @@ function renderDash(){
     c.appendChild($('p','mut','The dashboard builds itself around your franchise — keepers, cap, grudges, draft capital, and your whole history.'));
     dash.appendChild(c);
     dash.appendChild(capBoardCard(12));
+    dash.appendChild(rulesCard());
     return;
   }
   const tm=DATA.teams[myTeam],c=DATA.career.find(x=>x.name===tm.name),ev=evalTeam(myTeam);
@@ -308,18 +299,9 @@ function renderDash(){
   const m1=$('div');
   const off=OFFICIAL[myTeam]||[];
   const locked=off.length>0;
-  const fiveMode=ev.k>3;   // a 4th/5th keep flips the view into the 5-keeper-rule preview
-  m1.appendChild($('div','mlabel',(fiveMode
-      ?('5-KEEPER RULE PREVIEW · budget $'+ev.keepSpend+' / $'+BUD5)
-      :('3-keeper rules · keeper salaries $'+ev.keepSpend+' · no budget'))
-    +' · '+ev.k+'/'+(fiveMode?5:3)+' slots'
-    +(locked?(' — 🔒 '+off.length+' official from Sleeper'):'')
-    +(fiveMode?(ev.overBudget?' — OVER BUDGET':'')
-      :(ev.k===3?' — tap a 4th to preview the 5-keeper rule':''))));
-  if(fiveMode){
-    const met=$('div','meter');const fb=$('div','fillbar'+(ev.overBudget?' over':''));
-    fb.style.width=Math.min(100,ev.keepSpend/BUD5*100)+'%';met.appendChild(fb);m1.appendChild(met);
-  }
+  m1.appendChild($('div','mlabel','Keeper salaries $'+ev.keepSpend
+    +' · '+ev.k+'/3 slots'
+    +(locked?(' — 🔒 '+off.length+' official from Sleeper'):'')));
   meters.appendChild(m1);
   const m2=$('div');
   const d=CFG.cap-ev.opening;
@@ -392,6 +374,9 @@ function renderDash(){
   /* --- cap anatomy (span 12): every keeper and pick as its own segment --- */
   dash.appendChild(anatomyCard(tm,ev));
 
+  /* --- the adopted 2026 rules (span 12) --- */
+  dash.appendChild(rulesCard());
+
   /* --- countdown + vitals (span 3) --- */
   const cd=card(3,'Season countdown');
   /* kickoff Sep 10 · draft 3 days before · keeper deadline 1 week before the draft */
@@ -416,7 +401,8 @@ function renderDash(){
   cd.appendChild(rows);
   cd.appendChild($('div','vitals'));
   const rr=$('div','vrow');rr.appendChild($('span','mut','Sleeper status'));
-  rr.appendChild($('span',null,DATA.leagueId2026?'renewed ✓ · draft not set':'waiting on renewal'));
+  const rs=$('span',null,liveStatus||(DATA.leagueId2026?'renewed ✓ · draft not set':'waiting on renewal'));
+  rr.appendChild(rs);
   cd.lastChild.appendChild(rr);
   dash.appendChild(cd);
 
@@ -581,11 +567,11 @@ function capBoardCard(span){
     allNote+='.';
   }
   const notes={all:allNote,
-               k:'Keeper salary only. Gold line = the $'+BUD5+' budget — it only applies to a team keeping 4 or 5.',
+               k:'Keeper salary only — each team’s 3 keeps priced at their keep round.',
                d:'Draft-round salary only, from the picks each team holds for 2026.'};
   cb.appendChild($('p','cardnote2',notes[cbFilter]));
-  const scale=cbFilter==='k'?Math.max(60,BUD5+15):250;
-  const capLine=cbFilter==='k'?BUD5:(cbFilter==='d'?null:(isFinite(CFG.cap)?CFG.cap:null));
+  const scale=cbFilter==='k'?120:250;
+  const capLine=cbFilter==='d'||cbFilter==='k'?null:(isFinite(CFG.cap)?CFG.cap:null);
   const floorLine=(cbFilter==='all'&&CFG.floor>0)?CFG.floor:null;
   const rows=DATA.teams.map((tm,ti)=>{
     const ev=evalTeam(ti);
@@ -611,15 +597,15 @@ function capBoardCard(span){
       seg.style.left=(x/scale*100)+'%';seg.style.width=(Math.min(v,scale-x)/scale*100)+'%';
       track.appendChild(seg);x+=v;
     });
-    if(capLine!==null){const cap=$('div',cbFilter==='k'?'cbfloor':'cbcap');cap.style.left=(capLine/scale*100)+'%';track.appendChild(cap);}
+    if(capLine!==null){const cap=$('div','cbcap');cap.style.left=(capLine/scale*100)+'%';track.appendChild(cap);}
     if(floorLine!==null){const fl=$('div','cbfloor');fl.style.left=(floorLine/scale*100)+'%';track.appendChild(fl);}
     row.appendChild(track);
     const val=$('div','cbval');
-    const over=(cbFilter==='k'&&r.ev.overBudget)||(cbFilter==='all'&&r.val>CFG.cap);
+    const over=cbFilter==='all'&&r.val>CFG.cap;
     val.appendChild($('b',over?'bad':'','$'+r.val));
     const sub=cbFilter==='all'
       ?(KCAP==='off'?('keepers $'+r.ev.keepSpend+' exempt'):((r.val?Math.round(r.ev.keepSpend/r.val*100):0)+'% keepers'))
-      :(cbFilter==='k'?(r.ev.k+' keep'+(r.ev.k===1?'':'s')+(r.ev.k>3?' · budget applies':'')):r.ev.usedPicks+' picks');
+      :(cbFilter==='k'?(r.ev.k+' keep'+(r.ev.k===1?'':'s')):r.ev.usedPicks+' picks');
     val.appendChild($('span','mut small',sub));
     row.appendChild(val);
     cb.appendChild(row);
@@ -629,7 +615,7 @@ function capBoardCard(span){
 }
 
 
-let liveSub=null;
+let liveSub=null,liveStatus=null;
 render();
 
 /* live keeper sync — official Sleeper keepers refresh on every visit */
@@ -648,7 +634,9 @@ syncSleeper().then(m=>{if(m)render();}).catch(()=>{});
     liveSub=lg.name+' is renewed on Sleeper ('+lg.status.replace('_',' ')+') — '
       +(when?('draft scheduled for '+when):'draft not scheduled yet')
       +'. Official keepers sync here as teams set them.';
+    liveStatus='renewed ✓ · '+(when?('draft '+when):'draft not set');
     document.getElementById('heroSub').textContent=liveSub;
+    render();
   }catch(e){}
 })();
 </script>

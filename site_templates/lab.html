@@ -16,15 +16,15 @@ __NAV__
 </div>
 <div class="wrap wide" id="labMain" hidden>
   <header class="hero">
-    <div class="eyebrow">GGG League &middot; Commissioner's Lab &middot; not league policy</div>
+    <div class="eyebrow">GGG League &middot; Commissioner's Lab &middot; sandbox only</div>
     <h1>The rule simulator</h1>
-    <p class="lede">The 2026 rule set is locked except for one question: <b>how many keepers?</b> Locked: the flattened salary table, keepers count against team salary, keepers slot on the board at their escalated round, and the cap band — <b>$230 cap / $160 floor</b>, fitted to six seasons of replayed history (blocks 15 of the 16 tagged fire sales at the least damage to normal trading; the 16th sold a $10 keeper star for a pile of bodies, which no salary rule can see). Drag the sliders and watch every season re-judge itself; keeper count needs no toggle — 3-or-fewer keeps run budget-free, a 4th or 5th puts the class under the budget. Settings save on this device.</p>
+    <p class="lede">The 2026 rules are <b>adopted</b>: flattened salary table, exactly 3 keepers, keeper salaries count against team salary, keepers slot on the board at their keep round, and the <b>$230 cap / $160 floor</b> band. This page is a what-if sandbox — drag the sliders and watch every season re-judge itself under a different band. Nothing here touches the pages the league sees. Settings save on this device.</p>
   </header>
 
   <div class="dash" style="margin-top:22px">
     <div class="dcard c5">
       <div class="dcard-head"><h3 class="cardh">The sliders</h3></div>
-      <div class="ctlnote">Keeper count is the open vote, and the site shows both worlds at once: with <b>3 or fewer keeps no budget applies</b> (the 3-keeper rules); a <b>4th or 5th keep puts the whole keeper class under the budget</b> below (the 5-keeper rules). Players preview both from their own Keeper corner.</div>
+      <div class="ctlnote">What-if only: re-judge history under a different cap band. The live site always runs the adopted rules ($230 / $160).</div>
 
       <div class="ctl"><div class="ctlrow"><span class="ctlname">Team cap</span>
         <input type="range" id="cap" min="175" max="260" step="5"><span class="ctlval" id="capV"></span></div>
@@ -34,20 +34,12 @@ __NAV__
         <input type="range" id="floor" min="0" max="170" step="5"><span class="ctlval" id="floorV"></span></div>
         <div class="ctlnote"><b>Higher → fire sales die:</b> sellers must take real salary back. <b>Lower/off → liquidations return.</b> Fitted value: $160. Waivers never trip it.</div></div>
 
-      <div class="ctl"><div class="ctlrow"><span class="ctlname">4+‑keeper budget</span>
-        <input type="range" id="budget" min="40" max="90" step="5"><span class="ctlval" id="budgetV"></span></div>
-        <div class="ctlnote">Only binds a team keeping 4 or 5 — their whole keeper class must fit under it. A kept R1 star costs $36, so at $50 a star leaves room for bargains only ($36+$10+$3); skipping the star buys a fistful of mids ($14+$12+$10+$8+$6).</div></div>
-
-      <div class="ctl"><div class="mlabel">Apply these rules to the Home page</div>
-        <div class="filterrow tight" id="applyMode"></div>
-        <div class="ctlnote">While on, the Home page keeper corner and cap board use these Lab settings instead of the shipped defaults, with a banner so nobody mistakes the sandbox for policy. Per device.</div></div>
-
       <div class="ctl"><div class="mlabel">Sleeper sync</div>
         <div class="filterrow tight"><button class="tpill sm" id="syncBtn" type="button">⟳ Refresh from Sleeper now</button></div>
         <div class="ctlnote" id="syncNote">Pulls league status, draft schedule, and every team's official keepers straight from Sleeper — official keepers override local picks everywhere on the site. This also runs automatically on every page visit; for a full data rebuild (trades, rosters, picks) use <a href="https://github.com/StrubeTube/ggg-league/actions/workflows/refresh.yml" target="_blank" rel="noopener">Run workflow on GitHub</a> — it also runs itself daily.</div></div>
 
-      <div class="ctl"><div class="mlabel">Locked rules (no longer options)</div>
-        <div class="ctlnote">Flattened 2026 salary table · keeper salaries <b>count</b> against team salary · keepers <b>slot on the board</b> at their escalated round · $0 waivers · cap band checked on trades only, and only in the worsening direction.</div></div>
+      <div class="ctl"><div class="mlabel">The adopted 2026 rules</div>
+        <div class="ctlnote">Flattened salary table · <b>exactly 3 keepers, no budget</b> · keeper salaries <b>count</b> against team salary · keepers <b>slot on the board</b> at their keep round · $0 waivers · $230 cap / $160 floor checked on trades only, and only in the worsening direction.</div></div>
     </div>
 
     <div class="dcard c7">
@@ -73,11 +65,11 @@ let OFFICIAL={};
 DATA.teams.forEach((tm,ti)=>{if(tm.ok&&tm.ok.length)OFFICIAL[ti]=tm.ok;});
 try{const c=JSON.parse(localStorage.getItem('ggg-okeep-v1'));if(c&&c.map)OFFICIAL=c.map;}catch(e){}
 const isOfficial=ti=>Array.isArray(OFFICIAL[ti])&&OFFICIAL[ti].length>0;
-/* official keeps are locked in; local extras stack on top up to the 5-keep cap */
+/* official keeps are locked in; local extras stack on top up to the 3-keep limit */
 const sel=ti=>{
   const o=OFFICIAL[ti]||[];
   const extra=(kstate.picks[ti]||[]).filter(i=>!o.includes(i));
-  return new Set([...o,...extra].slice(0,5));
+  return new Set([...o,...extra].slice(0,3));
 };
 async function syncSleeper(){
   if(!DATA.leagueId2026)return null;
@@ -98,13 +90,11 @@ async function syncSleeper(){
   return map;
 }
 
-/* lab settings — keeper rules are count-adaptive: <=3 keeps no budget,
-   4-5 keeps put the whole class under the budget slider */
-const DEFAULTS={cap:DATA.defaults.cap,floor:DATA.defaults.floor,
-  budget:DATA.defaults.budget5,apply:'on',season:'2026',view:'all'};
+/* lab settings — sandbox cap band only; the live site never reads these */
+const DEFAULTS={cap:DATA.defaults.cap,floor:DATA.defaults.floor,season:'2026',view:'all'};
 let S={...DEFAULTS};
-try{const s=JSON.parse(localStorage.getItem('ggg-lab-v7'));if(s)S={...DEFAULTS,...s};}catch(e){}
-const saveS=()=>{try{localStorage.setItem('ggg-lab-v7',JSON.stringify(S));}catch(e){}};
+try{const s=JSON.parse(localStorage.getItem('ggg-lab-v8'));if(s)S={...DEFAULTS,...s};}catch(e){}
+const saveS=()=>{try{localStorage.setItem('ggg-lab-v8',JSON.stringify(S));}catch(e){}};
 const TABLE=DATA.adopted;
 const capOn=()=>S.cap>=180;
 const capVal=()=>capOn()?S.cap:Infinity;
@@ -121,8 +111,7 @@ function evalLab(ti){
   const k=chosen.size;
   let capDraft=0;
   tm.picks.slice(0,16).forEach(p=>capDraft+=TABLE[p.r]);   // keepers occupy their round's pick
-  return {k,keepSpend,capDraft,opening:capDraft,
-          overBudget:k>3&&keepSpend>S.budget,overCount:k>5};
+  return {k,keepSpend,capDraft,opening:capDraft};
 }
 
 /* ---- controls ---- */
@@ -134,7 +123,7 @@ function pillGroup(hostId,options,get,set){
     host.appendChild(b);
   });
 }
-const sliders=[['cap',v=>v>=180?('$'+v):'off'],['floor',v=>v?('$'+v):'off'],['budget',v=>'$'+v]];
+const sliders=[['cap',v=>v>=180?('$'+v):'off'],['floor',v=>v?('$'+v):'off']];
 sliders.forEach(([id])=>{
   document.getElementById(id).addEventListener('input',e=>{
     S[id]=parseInt(e.target.value);
@@ -142,16 +131,14 @@ sliders.forEach(([id])=>{
   });
 });
 function render(){
-  pillGroup('applyMode',[['on','On — Home mirrors the Lab'],['off','Off — Home uses the shipped defaults']],()=>S.apply,k=>S.apply=k);
-
   sliders.forEach(([id,fmt])=>{
     const el=document.getElementById(id);
     el.value=S[id];
     document.getElementById(id+'V').textContent=fmt(S[id]);
   });
 
-  /* gold boxes: what's net new vs the old base Sleeper rules */
-  [['cap',capOn()],['floor',S.floor>0],['budget',true]]
+  /* gold boxes: sliders currently off the adopted values */
+  [['cap',S.cap!==DATA.defaults.cap],['floor',S.floor!==DATA.defaults.floor]]
     .forEach(([id,mod])=>{
       const c=document.getElementById(id)?.closest('.ctl');
       if(c)c.classList.toggle('modded',mod);
@@ -189,16 +176,12 @@ function render(){
   if(S.season==='2026'){
     const rows=DATA.teams.map((tm,ti)=>({name:tm.name,ev:evalLab(ti)}));
     if(S.view==='k'){
-      note.textContent='Keeper salaries per team from the keeps selected on this device. Gold line = the 4+‑keeper budget — it only binds teams keeping 4 or 5.';
+      note.textContent='Keeper salaries per team from the keeps selected on this device (official Sleeper keepers included).';
       rows.sort((a,b)=>b.ev.keepSpend-a.ev.keepSpend);
-      const overB=rows.filter(r=>r.ev.overBudget).length;
-      [[overB?'fire':'even',overB+' over the 4+ budget'],
-       ['even',rows.reduce((a,r)=>a+r.ev.k,0)+' keepers selected league-wide']]
-        .forEach(([c2,t2])=>sum.appendChild($('span','chip '+c2,t2)));
-      const scale=Math.max(60,S.budget+20,...rows.map(r=>r.ev.keepSpend+5));
+      sum.appendChild($('span','chip even',rows.reduce((a,r)=>a+r.ev.k,0)+' keepers selected league-wide'));
+      const scale=Math.max(80,...rows.map(r=>r.ev.keepSpend+5));
       rows.forEach(r=>board.appendChild(brow(r.name,r.ev.k+' K',[['k',r.ev.keepSpend]],scale,
-        [['cbfloor',S.budget]],'$'+r.ev.keepSpend,r.ev.overBudget,
-        r.ev.k>3?(Math.round(r.ev.keepSpend/S.budget*100)+'% of budget'):'≤3 keeps — no budget')));
+        [],'$'+r.ev.keepSpend,false,'')));
     }else if(S.view==='d'){
       note.textContent='Draft-pick salary each team carries into 2026 from the picks they hold.';
       rows.sort((a,b)=>b.ev.capDraft-a.ev.capDraft);
@@ -210,9 +193,7 @@ function render(){
       note.textContent='Opening salary from the picks each team holds (keepers occupy their round’s pick). Red line = cap, gold = floor. Keeper picks come from this device — set them on the Home page.';
       rows.sort((a,b)=>b.ev.opening-a.ev.opening);
       const overCap=rows.filter(r=>r.ev.opening>capVal()).length;
-      const overB=rows.filter(r=>r.ev.overBudget).length;
       [[overCap?'fire':'even',overCap+' team'+(overCap===1?'':'s')+' in cap jail'],
-       [overB?'fire':'even',overB+' over the 4+ budget'],
        ['even','avg opening $'+Math.round(rows.reduce((a,r)=>a+r.ev.opening,0)/rows.length)]]
         .forEach(([c2,t2])=>sum.appendChild($('span','chip '+c2,t2)));
       const scale=Math.max(280,capOn()?S.cap+40:0);
@@ -220,27 +201,23 @@ function render(){
         [['d',r.ev.opening]],scale,
         [['cbcap',capOn()?S.cap:null],['cbfloor',S.floor>0?S.floor:null]],
         '$'+r.ev.opening,r.ev.opening>capVal(),
-        'keepers $'+r.ev.keepSpend+(r.ev.k>3?('/$'+S.budget):''))));
+        'keepers $'+r.ev.keepSpend)));
     }
   }else{
     const sn=DATA.replay.find(r=>r.s===S.season);
     if(S.view==='k'){
-      note.textContent='That season’s actual keeper classes priced by the locked table. Gold line = the 4+‑keeper budget — it would only have bound a team keeping 4 or 5.';
+      note.textContent='That season’s actual keeper classes priced by the adopted table.';
       const teams=sn.teams.map(t=>{
         let ksum=0,n=0;
         sn.draft.forEach(d2=>{if(d2.rid===t.rid&&d2.k){ksum+=TABLE[d2.r];n++;}});
         return {name:t.name,ksum,n};
       }).sort((a,b)=>b.ksum-a.ksum);
-      const overB=teams.filter(t=>t.n>3&&t.ksum>S.budget).length;
-      [[overB?'fire':'even',overB+' would have been over the 4+ budget'],
-       ['even',teams.reduce((a,t)=>a+t.n,0)+' keepers that year']]
-        .forEach(([c2,t2])=>sum.appendChild($('span','chip '+c2,t2)));
-      const scale=Math.max(60,S.budget+20,...teams.map(t=>t.ksum+5));
+      sum.appendChild($('span','chip even',teams.reduce((a,t)=>a+t.n,0)+' keepers that year'));
+      const scale=Math.max(80,...teams.map(t=>t.ksum+5));
       teams.forEach(t=>board.appendChild(brow(t.name,t.n+' K',[['k',t.ksum]],scale,
-        [['cbfloor',S.budget]],'$'+t.ksum,t.n>3&&t.ksum>S.budget,
-        t.n>3?(Math.round(t.ksum/S.budget*100)+'% of budget'):'≤3 keeps — no budget')));
+        [],'$'+t.ksum,false,'')));
     }else if(S.view==='d'){
-      note.textContent='Non-keeper draft salary per team that season, priced by the locked table.';
+      note.textContent='Non-keeper draft salary per team that season, priced by the adopted table.';
       const teams=sn.teams.map(t=>{
         let dsum=0;
         sn.draft.forEach(d2=>{if(d2.rid===t.rid&&!d2.k)dsum+=TABLE[d2.r];});
@@ -251,7 +228,7 @@ function render(){
       teams.forEach(t=>board.appendChild(brow(t.name,null,[['d',t.dsum]],scale,
         [['cbcap',capOn()?S.cap:null]],'$'+t.dsum,false,'')));
     }else{
-      note.textContent='Historical replay: that season’s real draft priced by the locked table, every real transaction re-run under your cap band. Bar = draft-day salary; gold band = the team’s trading range that season (low → peak); tick = where their last trade landed them, red when outside the lines.';
+      note.textContent='Historical replay: that season’s real draft priced by the adopted table, every real transaction re-run under your cap band. Bar = draft-day salary; gold band = the team’s trading range that season (low → peak); tick = where their last trade landed them, red when outside the lines.';
       const sim=simSeason(sn,capVal(),S.floor);
       renderRetro(sim,capVal(),sum,board);
     }

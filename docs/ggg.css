@@ -246,11 +246,8 @@ input[type=range]:disabled{opacity:.35}
 .navgrp.histg{border-left:1px solid var(--line);padding-left:10px}
 .navgrp.histg a{color:var(--ink3)}
 .navgrp.histg a:hover{color:var(--ink)}
-nav.ggg a.pitchtab{margin-left:auto;background:var(--gold);color:#1B1403;border-radius:999px;padding:5px 13px;font-weight:800}
-nav.ggg a.pitchtab:hover{color:#000}
-nav.ggg a.pitchtab.on{outline:2px solid var(--gold);outline-offset:2px}
-@media(max-width:680px){nav.ggg a.pitchtab{margin-left:0}}
-nav.ggg a.labtab{margin-left:0;border:none;color:var(--ink3);font-size:12px;border-radius:8px;padding:6px 10px}
+nav.ggg a.labtab{margin-left:auto;border:none;color:var(--ink3);font-size:12px;border-radius:8px;padding:6px 10px}
+@media(max-width:680px){nav.ggg a.labtab{margin-left:0}}
 nav.ggg a.labtab:hover{color:var(--ink2)}
 nav.ggg a.labtab.on{background:var(--card);color:var(--ink)}
 .lockwrap{max-width:380px;margin:80px auto;text-align:center}
@@ -262,36 +259,6 @@ background:var(--card);border:1px solid var(--line2);border-radius:12px;color:va
 .lockbtn{background:var(--mint);color:var(--mint-ink);border:none;border-radius:12px;padding:10px 20px;
 font-family:inherit;font-weight:800;font-size:15px;cursor:pointer}
 .lockerr{color:var(--coral);font-size:13px;font-weight:600;margin-top:12px;min-height:18px}
-.enterbtn{display:inline-block;background:linear-gradient(135deg,var(--gold),#EFC85F 55%,var(--gold));background-size:200% 200%;
-color:#1B1403;border-radius:18px;padding:20px 46px;font-weight:800;font-size:21px;text-decoration:none;
-animation:goldpulse 2.4s ease-out infinite,goldsheen 5s ease infinite;transition:transform .12s}
-.enterbtn:hover{transform:translateY(-3px) scale(1.03)}
-@keyframes goldpulse{0%{box-shadow:0 0 0 0 rgba(217,169,60,.55)}70%{box-shadow:0 0 0 20px rgba(217,169,60,0)}100%{box-shadow:0 0 0 0 rgba(217,169,60,0)}}
-@keyframes goldsheen{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-@media(prefers-reduced-motion:reduce){.enterbtn{animation:none}}
-.cbarrow{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:11px;font-weight:800;
-white-space:nowrap;z-index:3;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.6)}
-.cbarrow.good2{color:#fff}
-.cbarrow.bad2{color:#fff}
-.probgrid{display:grid;gap:12px}
-@media(min-width:760px){.probgrid{grid-template-columns:1fr 1fr 1fr}}
-.probcard{background:var(--card);border:1px solid var(--coral);border-radius:14px;padding:16px 18px}
-.probcard .pemoji{font-size:26px}
-.probcard h3{font-size:15px;font-weight:800;margin:8px 0 6px}
-.probcard p{font-size:13px;color:var(--ink2)}
-.optcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
-.optcard.a{border-color:var(--mint)}
-.optcard.b{border-color:var(--gold)}
-.optcard .opttag{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
-.optcard.a .opttag{color:var(--mint)}
-.optcard.b .opttag{color:var(--gold)}
-.optcard h3{font-size:18px;font-weight:800;margin:6px 0 8px}
-.optcard p{font-size:13.5px;color:var(--ink2)}
-.optcard ul{margin:10px 0 0;padding-left:20px;font-size:13px;color:var(--ink2);display:grid;gap:5px}
-.bigsteps{counter-reset:s;list-style:none;margin:0;padding:0;display:grid;gap:10px}
-.bigsteps li{counter-increment:s;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px 14px 56px;position:relative;font-size:14px}
-.bigsteps li::before{content:counter(s);position:absolute;left:16px;top:13px;width:26px;height:26px;border-radius:50%;
-background:var(--mint);color:var(--mint-ink);font-weight:800;display:grid;place-items:center;font-size:14px}
 .tradebox{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
 .tradep{background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600;color:var(--ink2);cursor:pointer;font-family:inherit;transition:border-color .1s}
 .tradep b{color:var(--ink);font-weight:700}
@@ -348,7 +315,7 @@ nav.ggg .logo{width:28px;height:28px;font-size:11px;margin-right:6px;flex:none}
 .navgrp .navcap{display:none}
 .navgrp.histg{padding-left:6px}
 nav.ggg a{font-size:12.5px;padding:6px 9px;white-space:nowrap}
-nav.ggg a.pitchtab,nav.ggg a.labtab{flex:none}
+nav.ggg a.labtab{flex:none}
 .idband{padding:13px;gap:10px}
 .archbadge{width:100%;padding:10px 12px}
 .idname{font-size:16px;max-width:none}
@@ -366,7 +333,6 @@ nav.ggg a.pitchtab,nav.ggg a.labtab{flex:none}
 .cbval .small{font-size:10.5px}
 .luckrow{grid-template-columns:92px 1fr 46px}
 .mcrow{flex-direction:column;align-items:center}
-.enterbtn{display:block;text-align:center;padding:17px 20px;font-size:18px}
 .anatbar{height:64px}
 .anatseg span{max-height:58px}
 .anattip{top:74px}

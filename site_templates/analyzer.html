@@ -4,7 +4,7 @@
 __NAV__
 <div class="wrap">
   <header class="hero">
-    <div class="eyebrow">GGG League &middot; under the proposed rules</div>
+    <div class="eyebrow">GGG League &middot; the 2026 rules</div>
     <h1>The Trade Tester</h1>
     <p class="lede">Pick two teams, click the players changing sides, and get the verdict before you embarrass yourself in the group chat. Every number matches the Home page: players carry their <b>2026 keep price</b> (the round they were drafted — one round earlier if they were already a keeper in 2025), each team starts from its <b>projected 2026 opening</b> — the same figure as the cap board — and waiver pickups are <b>$0</b>. Future picks are $0 against this season&rsquo;s band; they hit the buyer&rsquo;s opening cap next year instead.</p>
     <div class="chiprow" id="ruleNote" style="margin-top:12px"></div>
@@ -38,20 +38,11 @@ __FOOT__
 const DATA = /*__DATA__*/{};
 const $ = (t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
 
-/* rules — mirror the Lab when Apply-to-Home is on, same as the homepage */
+/* the adopted 2026 rules — always the shipped values */
 const TABLE={...DATA.cfg.table};
-let CAP=DATA.cfg.cap, FLOOR=DATA.cfg.floor, labOn=false;
-try{
-  const L=JSON.parse(localStorage.getItem('ggg-lab-v7'));
-  if(L&&L.apply==='on'){
-    labOn=true;
-    if(typeof L.cap==='number')CAP=L.cap>=180?L.cap:Infinity;
-    if(typeof L.floor==='number')FLOOR=L.floor;
-  }
-}catch(e){}
+const CAP=DATA.cfg.cap, FLOOR=DATA.cfg.floor;
 const rn=document.getElementById('ruleNote');
-rn.appendChild($('span','chip '+(labOn?'gold':'even'),(labOn?'⚗️ Lab rules active: ':'Default rules: ')+
-  (isFinite(CAP)?('cap $'+CAP):'no cap')+' · '+(FLOOR>0?('floor $'+FLOOR):'no floor')));
+rn.appendChild($('span','chip even','League rules: cap $'+CAP+' · floor $'+FLOOR));
 
 /* 2026 keeper price — one round up from the drafted round, same as the Home
    keeper corner (baked as k26 by the build); waiver adds are $0 */

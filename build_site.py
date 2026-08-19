@@ -269,11 +269,8 @@ input[type=range]:disabled{opacity:.35}
 .navgrp.histg{border-left:1px solid var(--line);padding-left:10px}
 .navgrp.histg a{color:var(--ink3)}
 .navgrp.histg a:hover{color:var(--ink)}
-nav.ggg a.pitchtab{margin-left:auto;background:var(--gold);color:#1B1403;border-radius:999px;padding:5px 13px;font-weight:800}
-nav.ggg a.pitchtab:hover{color:#000}
-nav.ggg a.pitchtab.on{outline:2px solid var(--gold);outline-offset:2px}
-@media(max-width:680px){nav.ggg a.pitchtab{margin-left:0}}
-nav.ggg a.labtab{margin-left:0;border:none;color:var(--ink3);font-size:12px;border-radius:8px;padding:6px 10px}
+nav.ggg a.labtab{margin-left:auto;border:none;color:var(--ink3);font-size:12px;border-radius:8px;padding:6px 10px}
+@media(max-width:680px){nav.ggg a.labtab{margin-left:0}}
 nav.ggg a.labtab:hover{color:var(--ink2)}
 nav.ggg a.labtab.on{background:var(--card);color:var(--ink)}
 .lockwrap{max-width:380px;margin:80px auto;text-align:center}
@@ -285,36 +282,6 @@ background:var(--card);border:1px solid var(--line2);border-radius:12px;color:va
 .lockbtn{background:var(--mint);color:var(--mint-ink);border:none;border-radius:12px;padding:10px 20px;
 font-family:inherit;font-weight:800;font-size:15px;cursor:pointer}
 .lockerr{color:var(--coral);font-size:13px;font-weight:600;margin-top:12px;min-height:18px}
-.enterbtn{display:inline-block;background:linear-gradient(135deg,var(--gold),#EFC85F 55%,var(--gold));background-size:200% 200%;
-color:#1B1403;border-radius:18px;padding:20px 46px;font-weight:800;font-size:21px;text-decoration:none;
-animation:goldpulse 2.4s ease-out infinite,goldsheen 5s ease infinite;transition:transform .12s}
-.enterbtn:hover{transform:translateY(-3px) scale(1.03)}
-@keyframes goldpulse{0%{box-shadow:0 0 0 0 rgba(217,169,60,.55)}70%{box-shadow:0 0 0 20px rgba(217,169,60,0)}100%{box-shadow:0 0 0 0 rgba(217,169,60,0)}}
-@keyframes goldsheen{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-@media(prefers-reduced-motion:reduce){.enterbtn{animation:none}}
-.cbarrow{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:11px;font-weight:800;
-white-space:nowrap;z-index:3;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.6)}
-.cbarrow.good2{color:#fff}
-.cbarrow.bad2{color:#fff}
-.probgrid{display:grid;gap:12px}
-@media(min-width:760px){.probgrid{grid-template-columns:1fr 1fr 1fr}}
-.probcard{background:var(--card);border:1px solid var(--coral);border-radius:14px;padding:16px 18px}
-.probcard .pemoji{font-size:26px}
-.probcard h3{font-size:15px;font-weight:800;margin:8px 0 6px}
-.probcard p{font-size:13px;color:var(--ink2)}
-.optcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
-.optcard.a{border-color:var(--mint)}
-.optcard.b{border-color:var(--gold)}
-.optcard .opttag{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
-.optcard.a .opttag{color:var(--mint)}
-.optcard.b .opttag{color:var(--gold)}
-.optcard h3{font-size:18px;font-weight:800;margin:6px 0 8px}
-.optcard p{font-size:13.5px;color:var(--ink2)}
-.optcard ul{margin:10px 0 0;padding-left:20px;font-size:13px;color:var(--ink2);display:grid;gap:5px}
-.bigsteps{counter-reset:s;list-style:none;margin:0;padding:0;display:grid;gap:10px}
-.bigsteps li{counter-increment:s;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px 14px 56px;position:relative;font-size:14px}
-.bigsteps li::before{content:counter(s);position:absolute;left:16px;top:13px;width:26px;height:26px;border-radius:50%;
-background:var(--mint);color:var(--mint-ink);font-weight:800;display:grid;place-items:center;font-size:14px}
 .tradebox{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
 .tradep{background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600;color:var(--ink2);cursor:pointer;font-family:inherit;transition:border-color .1s}
 .tradep b{color:var(--ink);font-weight:700}
@@ -371,7 +338,7 @@ nav.ggg .logo{width:28px;height:28px;font-size:11px;margin-right:6px;flex:none}
 .navgrp .navcap{display:none}
 .navgrp.histg{padding-left:6px}
 nav.ggg a{font-size:12.5px;padding:6px 9px;white-space:nowrap}
-nav.ggg a.pitchtab,nav.ggg a.labtab{flex:none}
+nav.ggg a.labtab{flex:none}
 .idband{padding:13px;gap:10px}
 .archbadge{width:100%;padding:10px 12px}
 .idname{font-size:16px;max-width:none}
@@ -389,7 +356,6 @@ nav.ggg a.pitchtab,nav.ggg a.labtab{flex:none}
 .cbval .small{font-size:10.5px}
 .luckrow{grid-template-columns:92px 1fr 46px}
 .mcrow{flex-direction:column;align-items:center}
-.enterbtn{display:block;text-align:center;padding:17px 20px;font-size:18px}
 .anatbar{height:64px}
 .anatseg span{max-height:58px}
 .anattip{top:74px}
@@ -446,32 +412,27 @@ def nav(active):
     def links(pairs):
         return "".join(f'<a href="{h}" class="{"on" if h == active else ""}">{t}</a>'
                        for h, t in pairs)
-    new_g = ('<div class="navgrp newg"><span class="navcap">New · your team</span>'
+    new_g = ('<div class="navgrp newg"><span class="navcap">Your team</span>'
              '<div class="navlinks">' + links(NAV_NEW) + '</div></div>')
     hist_g = ('<div class="navgrp histg"><span class="navcap">League history</span>'
               '<div class="navlinks">' + links(NAV_HIST) + '</div></div>')
-    pitch = f'<a href="pitch.html" class="pitchtab{" on" if active == "pitch.html" else ""}">🗳️ The Proposal</a>'
     lab = f'<a href="lab.html" class="labtab{" on" if active == "lab.html" else ""}">⚙️ Commish tools</a>'
-    return f'<nav class="ggg"><div class="in"><span class="logo">GGG</span>{new_g}{hist_g}{pitch}{lab}</div></nav>'
+    return f'<nav class="ggg"><div class="in"><span class="logo">GGG</span>{new_g}{hist_g}{lab}</div></nav>'
 
 
 FOOT = ('<footer class="ggg"><div class="in">GGG League · data from the Sleeper API · '
         f'stats computed {site["generated"]} · regular-season records unless noted · '
         'grudges update automatically</div></footer>')
 
-# front-door gate: first visit on any page redirects to the pitch. The pitch
-# page sets the flag on load, so one read-through unlocks the whole site.
-GATE = """<script>try{if(!localStorage.getItem('ggg-pitch-v2'))location.replace('pitch.html');}catch(e){}</script>"""
+# (the pitch front-door gate is retired — the 2026 rules are adopted)
 
 # ---------------- keeper-planner team data (same order/sort as cap-planner) ----------------
-# maxKeep 5: everyone may select up to 5 keeps — with 3 or fewer no budget
-# applies (Plan A); a 4th/5th keep requires the whole class to fit budget5
-# (Plan B preview). The Home page shows both worlds on one screen.
-# budget5 $50: a fresh R1 keep is $30 and a star re-kept past R1 is $36+, so
-# 4-5 keeps means star + bargains or a mid-round fistful — not star + mids.
+# THE ADOPTED 2026 RULES (league vote, 2026-08): flattened table, exactly 3
+# keepers (no budget), keeper salaries count against team salary, keepers slot
+# on the board at their keep round, $230 cap / $160 floor band on trades.
 # Keep rounds: fresh 2025 draftees keep at their drafted round for one year;
 # players who were already keepers in 2025 (kp=1) escalate one round now.
-CFG = {"cap": 230, "floor": 160, "budget": 0, "maxKeep": 5, "budget5": 50, "waiver": 0,
+CFG = {"cap": 230, "floor": 160, "maxKeep": 3, "waiver": 0,
        "franchise": False, "kcap": "on",
        "table": {1: 30, 2: 26, 3: 22, 4: 19, 5: 16, 6: 14, 7: 12, 8: 10,
                  9: 8, 10: 7, 11: 6, 12: 5, 13: 4, 14: 3, 15: 2, 16: 2}}
@@ -676,19 +637,13 @@ slices = {
     "lab.html": {"teams": planner_teams(), "adopted": CFG["table"],
                  "leagueId2026": lg26.get("league_id"),
                  "repo": "https://github.com/StrubeTube/ggg-league",
-                 # Rules locked 2026-08-12: flattened table, keepers count against
-                 # team salary, keepers slot on the board at their escalated round.
-                 # cap/floor fitted over the 2020-25 replays (with Alex's corrected
-                 # fire tags): $230/$160 blocks 15 of 16 fire sales at 15/40
-                 # normal-trade collateral. The 16th (2024 Josh Allen, a $10 keeper
-                 # sold for bodies) is invisible to salary accounting. The cap never
-                 # binds above $230; the floor does the blocking. Only open question:
-                 # keeper count — Plan A (exactly 3, no budget: round pricing is the
-                 # budget) vs Plan B (up to 5 under the budget5 keeper budget).
-                 "defaults": {"cap": 230, "floor": 160, "budget5": 50},
+                 # ADOPTED 2026-08 (league vote): flattened table, exactly 3
+                 # keepers (no budget), keepers count against team salary and
+                 # slot at their keep round, $230/$160 band (fitted over the
+                 # 2020-25 replays: blocks 15 of 16 tagged fire sales at 15/40
+                 # normal-trade collateral; the floor does the blocking).
+                 "defaults": {"cap": 230, "floor": 160},
                  "replay": build_replay()},
-    "pitch.html": {"cfg": {"cap": CFG["cap"], "floor": CFG["floor"], "table": CFG["table"],
-                           "budget5": CFG["budget5"]}},
     "analyzer.html": {"teams": planner_teams(), "steep": STEEP_TABLE,
                       "cfg": {"cap": CFG["cap"], "floor": CFG["floor"], "table": CFG["table"]}},
 }
@@ -697,9 +652,8 @@ for page, data in slices.items():
     with open(os.path.join(TPL, page), encoding="utf-8") as f:
         html = f.read()
     html = html.replace("__NAV__", nav(page)).replace("__FOOT__", FOOT)
-    gate = GATE if page != "pitch.html" else ""
     html = html.replace('<link rel="stylesheet" href="ggg.css">',
-                        gate + VIEWPORT + ICONS + '<link rel="stylesheet" href="ggg.css">', 1)
+                        VIEWPORT + ICONS + '<link rel="stylesheet" href="ggg.css">', 1)
     html = html.replace('href="ggg.css"', f'href="ggg.css?v={css_v}"')
     html = html.replace("/*__DATA__*/{}", json.dumps(data, ensure_ascii=False))
     with open(os.path.join(OUT, page), "w", encoding="utf-8") as f:
@@ -713,6 +667,12 @@ for stale in ("cap-planner.html", "cap-report.html"):
     if os.path.exists(p):
         os.remove(p)
         print(f"removed {stale}")
+
+# the proposal page is retired (rules adopted) — old links land on Home
+with open(os.path.join(OUT, "pitch.html"), "w", encoding="utf-8") as f:
+    f.write('<meta charset="utf-8"><meta http-equiv="refresh" content="0;url=index.html">'
+            '<title>GGG League</title><a href="index.html">GGG League</a>')
+print("pitch.html -> redirect to Home")
 
 open(os.path.join(OUT, ".nojekyll"), "w").close()
 print("site assembled ->", OUT)
