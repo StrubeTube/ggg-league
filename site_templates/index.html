@@ -582,7 +582,6 @@ function capBoardCard(span){
     const row=$('div','cbrow');
     const nm=$('div','cbname'+(r.ti===myTeam?' good':''));
     nm.appendChild($('span','cbteam',r.name));
-    nm.appendChild($('span','chip mini',r.ev.k+' K'));
     row.appendChild(nm);
     const track=$('div','cbtrack');
     let x=0;
