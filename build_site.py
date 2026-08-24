@@ -554,6 +554,13 @@ _PSLOT = lambda rd, out: max(0.0, (16.5 - min(16, rd)) * 10) * (0.85 ** out)
 MARKET_SEASONS = ["2021", "2022", "2023", "2024", "2025"]
 
 
+# Commissioner-confirmed 2026 keeps that aren't locked in Sleeper yet
+# (Alex, 2026-08-24): pid -> roster_id. The keeper market and the trade-card
+# reads count these as kept; each entry is redundant (and removable) once the
+# manager locks the keeper officially.
+KEEP_FIXES = {"7543": 6}   # Travis Etienne -> HartManStan
+
+
 def keeper_market():
     """The league's own keeper price history: every preseason (week-1) trade
     where the acquired player was KEPT that season — keep round, FFC ADP at
@@ -645,7 +652,8 @@ def keeper_market():
                         ks = []
                         for pid, to in (t.get("adds") or {}).items():
                             pid = str(pid)
-                            if to != rid or pid not in ok26.get(rid, set()) or dr26.get(pid) is None:
+                            if to != rid or dr26.get(pid) is None or not (
+                                    pid in ok26.get(rid, set()) or KEEP_FIXES.get(pid) == rid):
                                 continue
                             kr = max(1, dr26[pid] - (1 if pid in kp26 else 0))
                             nm = (players_db.get(pid) or {}).get("name") or pid
@@ -755,7 +763,7 @@ def trades_2026():
                 a = adp26.get(_norm_name(nm))
                 ks.append({"n": nm, "kr": kr, "adp": round(a) if a else None,
                            "surp": round(_SLOT(kr) - a) if a else None,
-                           "kept": pid in ok_of.get(rid, set()),
+                           "kept": pid in ok_of.get(rid, set()) or KEEP_FIXES.get(pid) == rid,
                            "kset": bool(ok_of.get(rid))})
             if not ks:
                 continue
