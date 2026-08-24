@@ -601,6 +601,8 @@ def keeper_market():
                     other = rids[1 - i]
                     paid = [(dp["round"], max(0, int(dp["season"]) - int(s)))
                             for dp in dps if dp["owner_id"] == other]
+                    got = [(dp["round"], max(0, int(dp["season"]) - int(s)))
+                           for dp in dps if dp["owner_id"] == rid]
                     ks = []
                     for pid, to in adds.items():
                         if to != rid:
@@ -618,7 +620,9 @@ def keeper_market():
                             if all(k["surp"] is not None for k in ks) else None)
                     events.append({"s": s, "team": rmap.get(rid, "?"), "ks": ks,
                                    "paid": sorted(r for r, _ in paid),
-                                   "pslots": round(sum(_PSLOT(r, o) for r, o in paid)),
+                                   "got": sorted(r for r, _ in got),
+                                   "pslots": round(sum(_PSLOT(r, o) for r, o in paid)
+                                                   - sum(_PSLOT(r, o) for r, o in got)),
                                    "surp": surp})
     # 2026, pre-draft: provisional events — "kept" = among the acquirer's
     # OFFICIAL Sleeper keepers (locks at the draft); excluded from the fit so
@@ -649,6 +653,8 @@ def keeper_market():
                         other = rids[1 - i]
                         paid = [(dp["round"], max(0, int(dp["season"]) - 2026))
                                 for dp in t.get("draft_picks") or [] if dp["owner_id"] == other]
+                        got = [(dp["round"], max(0, int(dp["season"]) - 2026))
+                               for dp in t.get("draft_picks") or [] if dp["owner_id"] == rid]
                         ks = []
                         for pid, to in (t.get("adds") or {}).items():
                             pid = str(pid)
@@ -666,7 +672,9 @@ def keeper_market():
                                 if all(k["surp"] is not None for k in ks) else None)
                         events.append({"s": "2026", "team": rmap26.get(rid, "?"), "ks": ks,
                                        "paid": sorted(r for r, _ in paid),
-                                       "pslots": round(sum(_PSLOT(r, o) for r, o in paid)),
+                                       "got": sorted(r for r, _ in got),
+                                       "pslots": round(sum(_PSLOT(r, o) for r, o in paid)
+                                                       - sum(_PSLOT(r, o) for r, o in got)),
                                        "surp": surp, "prov": True})
     pts = [(e["surp"], e["pslots"]) for e in events
            if e["surp"] is not None and e["pslots"] > 0 and not e.get("prov")]
@@ -753,6 +761,8 @@ def trades_2026():
             other = rids[1 - i]
             paid = [(dp["round"], max(0, int(dp["season"]) - 2026))
                     for dp in t.get("draft_picks") or [] if dp["owner_id"] == other]
+            got = [(dp["round"], max(0, int(dp["season"]) - 2026))
+                   for dp in t.get("draft_picks") or [] if dp["owner_id"] == rid]
             ks = []
             for pid, to in (t.get("adds") or {}).items():
                 pid = str(pid)
@@ -771,7 +781,9 @@ def trades_2026():
                     if all(k["surp"] is not None for k in ks) else None)
             mk = {"team": name_of.get(rid, "?"), "ks": ks,
                   "paid": sorted(r for r, _ in paid),
-                  "pslots": round(sum(_PSLOT(r, o) for r, o in paid)), "surp": surp}
+                  "got": sorted(r for r, _ in got),
+                  "pslots": round(sum(_PSLOT(r, o) for r, o in paid)
+                                  - sum(_PSLOT(r, o) for r, o in got)), "surp": surp}
             if fit and surp is not None and mk["pslots"] > 0:
                 mk["fair"] = round(fit["a"] + fit["b"] * surp)
                 mk["delta"] = mk["pslots"] - mk["fair"]
