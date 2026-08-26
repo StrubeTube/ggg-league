@@ -560,6 +560,11 @@ MARKET_SEASONS = ["2021", "2022", "2023", "2024", "2025"]
 # manager locks the keeper officially.
 KEEP_FIXES = {"7543": 6}   # Travis Etienne -> HartManStan
 
+# Trades the commissioner reverted on Sleeper (Alex): the transaction record
+# survives in the log, but the deal never really happened — keep it off the
+# ledger and out of the market.
+REVERTED_TX = {"1398027002488848384"}   # 2026-08-25 EvanDeFilippis<->BJohnson5 pick swap
+
 
 def keeper_market():
     """The league's own keeper price history: every preseason (week-1) trade
@@ -644,7 +649,8 @@ def keeper_market():
             kp26 = {str(p["player_id"]) for p in draft25 if p.get("is_keeper")}
             for items in tx26.values():
                 for t in items or []:
-                    if t.get("type") != "trade" or t.get("status") != "complete":
+                    if (t.get("type") != "trade" or t.get("status") != "complete"
+                            or str(t.get("transaction_id")) in REVERTED_TX):
                         continue
                     rids = t.get("roster_ids") or []
                     if len(rids) != 2:
@@ -729,7 +735,8 @@ def trades_2026():
     for items in tx.values():
         for t in items or []:
             if (t.get("type") == "trade" and t.get("status") == "complete"
-                    and len(t.get("roster_ids") or []) == 2):
+                    and len(t.get("roster_ids") or []) == 2
+                    and str(t.get("transaction_id")) not in REVERTED_TX):
                 deals.append(t)
     deals.sort(key=lambda t: t["status_updated"], reverse=True)
     out = []
