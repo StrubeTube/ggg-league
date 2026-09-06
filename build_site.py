@@ -558,7 +558,8 @@ MARKET_SEASONS = ["2021", "2022", "2023", "2024", "2025"]
 # (Alex, 2026-08-24): pid -> roster_id. The keeper market and the trade-card
 # reads count these as kept; each entry is redundant (and removable) once the
 # manager locks the keeper officially.
-KEEP_FIXES = {"7543": 6}   # Travis Etienne -> HartManStan
+KEEP_FIXES = {"7543": 6,   # Travis Etienne -> HartManStan
+              "6786": 9}   # CeeDee Lamb -> VEROVILLIANZ (Sep 6 trade)
 
 # Trades the commissioner reverted on Sleeper (Alex): the transaction record
 # survives in the log, but the deal never really happened — keep it off the
