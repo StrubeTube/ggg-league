@@ -530,18 +530,6 @@ def planner_teams():
             sal26[str(p["player_id"])] = CFG["table"][p["round"]]
     except (FileNotFoundError, IndexError, KeyError):
         pass
-    # 2026 salaries: the executed draft is the price sheet (salary = round,
-    # keepers included); waiver pickups carry $0
-    sal26, dr26 = {}, {}
-    try:
-        _did = load("drafts_2026.json")[0]["draft_id"]
-        for p in load(f"draftpicks_2026_{_did}.json"):
-            if p.get("player_id") is None:
-                continue
-            dr26[str(p["player_id"])] = p["round"]
-            sal26[str(p["player_id"])] = CFG["table"][p["round"]]
-    except (FileNotFoundError, IndexError, KeyError):
-        pass
     # official keepers from the renewed 2026 league (rosters carry a `keepers` field)
     official = {}
     try:
@@ -569,9 +557,8 @@ def planner_teams():
             e["sal"] = sal26.get(str(pid), 0)
             if str(pid) in dr26:
                 e["dr"] = dr26[str(pid)]
-            e["sal"] = sal26.get(str(pid), 0)
-            if str(pid) in dr26:
-                e["dr"] = dr26[str(pid)]
+            if pdb.get("inj"):
+                e["inj"] = pdb["inj"]
             if rnd is not None:
                 kp = 1 if str(pid) in kept25 else 0
                 e.update({"el": True, "r": rnd, "kp": kp,
@@ -1010,6 +997,8 @@ slices = {
                  "defaults": {"cap": 230, "floor": 160},
                  "replay": build_replay()},
     "analyzer.html": {"teams": planner_teams(), "steep": STEEP_TABLE,
+                      "injAsOf": (load("players_meta.json").get("asof")
+                                  if os.path.exists(os.path.join(DATA, "players_meta.json")) else None),
                       "cfg": {"cap": CFG["cap"], "floor": CFG["floor"], "table": CFG["table"]}},
 }
 

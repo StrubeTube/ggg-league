@@ -74,6 +74,23 @@ for d in drafts or []:
     if d.get("status") == "complete":
         save(f"draftpicks_2026_{d['draft_id']}.json", get(f"/draft/{d['draft_id']}/picks"))
 
+# daily player-DB refresh: names/teams move, and the IR trade rule needs
+# CURRENT injury designations
+try:
+    _players = get("/players/nfl")
+    _slim = {}
+    for pid, p in _players.items():
+        e = {"name": p.get("full_name") or f"{p.get('first_name','')} {p.get('last_name','')}".strip(),
+             "pos": p.get("position"), "team": p.get("team")}
+        if p.get("injury_status"):
+            e["inj"] = p["injury_status"]
+        _slim[pid] = e
+    save("players_nfl.json", _slim)
+    import datetime
+    save("players_meta.json", {"asof": datetime.date.today().strftime("%b %d, %Y")})
+except Exception as e:
+    print(f"player DB refresh skipped ({e})")
+
 ks = sum(1 for r in json.load(open(os.path.join(DATA, "rosters_2026.json"), encoding="utf-8"))
          if r.get("keepers"))
 print(f"done — league {lid}, {ks}/10 teams have official keepers set")

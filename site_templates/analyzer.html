@@ -6,7 +6,7 @@ __NAV__
   <header class="hero">
     <div class="eyebrow">GGG League &middot; the 2026 rules</div>
     <h1>The Trade Tester</h1>
-    <p class="lede">Pick two teams, click the players changing sides, and get the verdict before you embarrass yourself in the group chat. Every number matches the Home page: each player carries the <b>salary he was drafted at</b> in the 2026 draft (keepers included), waiver pickups are <b>$0</b>, and each team starts from its <b>current roster salary</b> — the same figure as the cap board. Future picks are $0 against this season&rsquo;s band; they hit the buyer&rsquo;s opening cap next year instead.</p>
+    <p class="lede">Pick two teams, click the players changing sides, and get the verdict before you embarrass yourself in the group chat. Every number matches the Home page: each player carries the <b>salary he was drafted at</b> in the 2026 draft (keepers included), waiver pickups are <b>$0</b>, and each team starts from its <b>current roster salary</b> — the same figure as the cap board. Future picks are $0 against this season&rsquo;s band; they hit the buyer&rsquo;s opening cap next year instead. <b>New (week 8):</b> a player listed <b>IR counts $0</b> in a trade&rsquo;s cap-and-floor check &mdash; traded salary has to be real &mdash; and a player you receive in a trade <b>can&rsquo;t be cut for 3 weeks</b> unless he lands on IR.</p>
     <div class="chiprow" id="ruleNote" style="margin-top:12px"></div>
   </header>
 
@@ -29,7 +29,7 @@ __NAV__
       <div class="chiprow" id="verdictChips"></div>
       <div id="verdictBars" style="margin-top:12px"></div>
       <div id="fixHints" style="margin-top:12px"></div>
-      <p class="cardnote" style="margin-top:10px">Rule: after the swap, both rosters must sit inside the band — and a trade is only illegal for a team if it moves that team the <i>wrong way</i> (further over the cap, or further under the floor).</p>
+      <p class="cardnote" style="margin-top:10px">Rule: after the swap, both rosters must sit inside the band &mdash; and a trade is only illegal for a team if it moves that team the <i>wrong way</i> (further over the cap, or further under the floor). <b>IR salary doesn&rsquo;t count:</b> a player listed IR is $0 in this check, so the salary you take back has to be real. <b>No quick cuts:</b> a player received in a trade can&rsquo;t be dropped for 3 weeks after it processes, unless he goes on IR &mdash; cuts that break this get reversed.</p>
     </div>
   </section>
 </div>
@@ -43,9 +43,16 @@ const TABLE={...DATA.cfg.table};
 const CAP=DATA.cfg.cap, FLOOR=DATA.cfg.floor;
 const rn=document.getElementById('ruleNote');
 rn.appendChild($('span','chip even','League rules: cap $'+CAP+' · floor $'+FLOOR));
+rn.appendChild($('span','chip flag','IR = $0 IN TRADE CHECKS'));
+rn.appendChild($('span','chip even','trade pickups locked 3 weeks'));
+if(DATA.injAsOf)rn.appendChild($('span','mut small','injury designations as of '+DATA.injAsOf));
 
-/* in-season salary — the round he went at in the 2026 draft; waiver adds $0 */
-const price=p=>p.sal||0;
+/* in-season salary — the round he went at in the 2026 draft; waiver adds $0.
+   THE IR RULE (commish, Oct 2026): a player listed IR counts $0 in a trade's
+   cap/floor check — designations baked at the daily refresh; Sleeper's status
+   when the trade processes is final */
+const price=p=>p.inj==='IR'?0:(p.sal||0);
+const INJ={'Out':'OUT','Doubtful':'D','Questionable':'Q','Sus':'SUS','PUP':'PUP','COV':'COV','NA':'NA','DNR':'DNR'};
 /* team baseline = current roster salary — the exact number the Home cap
    board shows */
 const openOf=ti=>DATA.teams[ti].players.reduce((a,p)=>a+(p.sal||0),0);
@@ -71,7 +78,9 @@ function sideBox(ti,out,boxId,headId,salId){
   players.forEach(({p,i})=>{
     const b=$('button','tradep'+(out.has(i)?' out':''));b.type='button';
     b.appendChild($('b',null,p.n));
-    b.appendChild($('span','pp',' '+p.pos+' · $'+price(p)));
+    const tag=p.inj==='IR'?(' · IR — $0 in trades'+(p.sal?' (salary $'+p.sal+')':''))
+      :(p.inj?(' · $'+price(p)+' · '+(INJ[p.inj]||p.inj)):(' · $'+price(p)));
+    b.appendChild($('span','pp',' '+p.pos+tag));
     b.addEventListener('click',()=>{out.has(i)?out.delete(i):out.add(i);render();});
     box.appendChild(b);
   });

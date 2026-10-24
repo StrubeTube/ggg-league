@@ -215,7 +215,8 @@ function rulesCard(){
   [['$30 → $2','Salary = draft round. R1 costs $'+TABLE[1]+', R16 costs $'+TABLE[16]+'. The board sets every price automatically.'],
    ['3 keepers','Keep up to 3. A keeper costs his keep round — the round he was drafted, one earlier per year already kept — and burns that pick.'],
    [CAPTXT+' / $'+CFG.floor,'The cap band. No trade may move a roster the wrong way outside it: further over the cap, or further under the floor.'],
-   ['$0 waivers','Waiver and free-agent adds are free, so every team can always field a lineup — even in cap jail.']]
+   ['$0 waivers','Waiver and free-agent adds are free, so every team can always field a lineup — even in cap jail.'],
+   ['IR = $0','New (wk 8): a player listed IR counts $0 in trade cap checks — traded salary must be real — and trade pickups can\u2019t be cut for 3 weeks unless they hit IR.']]
     .forEach(([num,lbl])=>{const tile=$('div','tile');
       tile.appendChild($('div','num',num));tile.appendChild($('div','lbl',lbl));t.appendChild(tile);});
   c.appendChild(t);
